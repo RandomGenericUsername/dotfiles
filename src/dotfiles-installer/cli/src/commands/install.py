@@ -4,7 +4,7 @@ from typing import Annotated
 from typer import Option
 
 from src.config.enums import InstallType
-from src.config.settings import Settings
+from src.config.settings import get_settings, update_settings, Settings
 from src.modules.logging import (
     ConsoleHandlers,
     Log,
@@ -107,20 +107,32 @@ def install(
         )
     )
 
-    context: PipelineContext = PipelineContext(
-        logger_instance=logger,
+    updated_config = update_settings(
+        get_settings(),
+        log_level_str=log_level_str,
         install_directory=install_directory,
         backup_directory=backup_directory,
         install_type=install_type,
+        hide=hide,
+        log_to_file=log_to_file,
+        log_directory=log_directory,
+    )
+
+    context: PipelineContext = PipelineContext(
+        logger_instance=logger,
+        app_config=updated_config,
+        #install_directory=install_directory,
+        #backup_directory=backup_directory,
+        #install_type=install_type,
         dependencies_directory=install_directory / ".dependencies",
         scripts_directory=install_directory / ".scripts",
         config_directory=install_directory / "config",
     )
 
-    steps: list[TaskStep] = [
-        PrintInstallationMessageStep(),
-        CheckPreviousInstallStep(),
-        HandlePreviousInstallStep(),
-    ]
-    pipeline: Pipeline = Pipeline.create(steps)
-    pipeline.run(context)
+    # steps: list[TaskStep] = [
+    #    PrintInstallationMessageStep(),
+    #    CheckPreviousInstallStep(),
+    #    HandlePreviousInstallStep(),
+    # ]
+    # pipeline: Pipeline = Pipeline.create(steps)
+    # pipeline.run(context)

@@ -8,17 +8,15 @@ from typing import Any
 
 from src.config.enums import InstallType
 from src.modules.logging.rich.rich_logger import RichLogger
+from src.config.config import AppConfig
 
 
 @dataclass
 class PipelineContext:
     """Centralized pipeline context for dotfiles installer."""
 
+    app_config: AppConfig
     logger_instance: RichLogger
-    install_directory: Path
-    backup_directory: Path
-    install_type: InstallType
-
     dependencies_directory: Path
     scripts_directory: Path
     config_directory: Path

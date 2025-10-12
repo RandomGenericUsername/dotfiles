@@ -6,6 +6,7 @@ from dynaconf import Dynaconf
 from pydantic import ValidationError
 
 from src.config.config import AppConfig as PydanticAppConfig
+from src.config.enums import InstallType
 
 # Get the project root directory
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent.parent
@@ -168,9 +169,57 @@ class SettingsModel:
         return defaults.get(field_name, '"value"')
 
 
-Settings = SettingsModel(settings_files=settings_files).settings
+Settings: PydanticAppConfig = SettingsModel(settings_files=settings_files).settings
 
 
 def get_settings() -> PydanticAppConfig:
     """Get the application settings."""
     return Settings
+
+
+def update_settings(
+    config: PydanticAppConfig,
+    log_level_str: str | None = None,
+    install_directory: Path | None = None,
+    backup_directory: Path | None = None,
+    install_type: InstallType | None = None,
+    hide: bool | None = None,
+    log_to_file: bool | None = None,
+    log_directory: Path | None = None,
+) -> PydanticAppConfig:
+    debug_updates = {}
+    if log_level_str is not None:
+        debug_updates["log_level"] = log_level_str
+    if log_to_file is not None:
+        debug_updates["output_to_file"] = log_to_file
+    if log_directory is not None:
+        debug_updates["log_directory"] = log_directory
+
+    # Build update dictionary for install settings
+    install_updates = {}
+    if install_directory is not None:
+        install_updates["directory"] = install_directory
+    if backup_directory is not None:
+        install_updates["backup_directory"] = backup_directory
+    if install_type is not None:
+        install_updates["type"] = install_type
+    if hide is not None:
+        install_updates["hidden"] = hide
+
+    # Add debug updates if any exist
+    if debug_updates:
+        install_updates["debug"] = config.install.debug.model_copy(
+            update=debug_updates
+        )
+
+    # Build the main update dictionary
+    main_updates = {}
+    if install_updates:
+        main_updates["install"] = config.install.model_copy(
+            update=install_updates
+        )
+
+    # Create updated settings
+    updated = config.model_copy(update=main_updates)
+
+    return updated
