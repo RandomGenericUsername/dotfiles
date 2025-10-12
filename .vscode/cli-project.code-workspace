@@ -1,0 +1,40 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "python.defaultInterpreterPath": "./src/dotfiles-installer/cli/.venv/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "python.formatting.provider": "black",
+        "python.formatting.blackArgs": ["--config", "pyproject.toml"],
+        "python.linting.enabled": true,
+        "python.linting.ruffEnabled": true,
+        "python.linting.ruffArgs": ["--config", "pyproject.toml"],
+        "python.linting.mypyEnabled": true,
+        "python.linting.mypyArgs": ["--config-file", "pyproject.toml"],
+        "python.sortImports.args": ["--settings-path", "pyproject.toml"],
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        },
+        "editor.rulers": [79],
+        "[python]": {
+            "editor.defaultFormatter": "ms-python.black-formatter",
+            "editor.formatOnSave": true,
+            "editor.codeActionsOnSave": {
+                "source.organizeImports": true
+            }
+        }
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-python.python",
+            "ms-python.black-formatter",
+            "ms-python.isort",
+            "charliermarsh.ruff",
+            "ms-python.mypy-type-checker"
+        ]
+    }
+}

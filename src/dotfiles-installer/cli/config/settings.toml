@@ -1,0 +1,54 @@
+[safety]
+[safety.directory_deletion]
+# Protected system directories that should never be deleted
+protected_directories = [
+    # System root and core directories
+    "/",
+    "/root",
+    "/usr",
+    "/etc",
+    "/var",
+    "/bin",
+    "/sbin",
+    "/lib",
+    "/boot",
+    "/sys",
+    "/proc",
+    "/dev",
+    # User and home directories
+    "/home",
+    "/Users",
+    # Mount points and external storage
+    "/mnt",
+    "/media",
+    "/run/media",
+    # Package managers and applications
+    "/opt",
+    "/usr/local",
+    "/snap",
+    "/opt/homebrew",
+    "/flatpak",
+    # Service and application data
+    "/var/www",
+    "/srv",
+    "/var/lib",
+    "/var/log",
+    "/var/spool",
+    # Common backup and temp locations
+    "/backup",
+    "/backups",
+    "/tmp",
+    "/var/tmp",
+]
+
+# Keywords that make a path dangerous to delete
+dangerous_keywords = ["system", "root", "backup", "config"]
+
+# Minimum path depth required (number of path segments)
+minimum_path_depth = 3
+
+# Whether to protect direct user home directories (/home/username)
+protect_user_homes = true
+
+# Minimum depth for keyword checking (keywords only checked for shallow paths)
+keyword_check_depth_threshold = 4

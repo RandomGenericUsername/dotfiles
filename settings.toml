@@ -1,0 +1,18 @@
+[install]
+directory = "$HOME/.tmp/install"
+backup_directory = "$HOME/.tmp/backup"
+type = "update"
+hidden = true
+
+[install.debug]
+log_level = "info"
+output_to_file = true
+log_directory = "/tmp/logs"
+
+[project_paths]
+wallpapers_directory = "$HOME/wallpapers"
+screenshots_directory = "$HOME/Pictures/Screenshots"
+
+[features]
+python = "3.10.4"
+nodejs = "20.9.0"
