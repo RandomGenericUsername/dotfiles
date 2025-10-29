@@ -1,0 +1,39 @@
+{
+  "recommendations": [
+    // Python Development
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+
+    // Code Formatting
+    "ms-python.black-formatter",
+    "ms-python.isort",
+
+    // Linting
+    "charliermarsh.ruff",
+
+    // Type Checking
+    "ms-python.mypy-type-checker",
+
+    // Testing
+    "ms-python.debugpy",
+
+    // General Development
+    "ms-vscode.makefile-tools",
+    "eamodio.gitlens",
+    "GitHub.copilot",
+
+    // Documentation
+    "yzhang.markdown-all-in-one",
+    "DavidAnson.vscode-markdownlint",
+
+    // Code Quality
+    "sonarsource.sonarlint-vscode",
+
+    // Shell/Bash
+    "mads-hartmann.bash-ide-vscode",
+
+    // TOML Support
+    "tamasfe.even-better-toml"
+  ]
+}
+

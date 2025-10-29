@@ -1,0 +1,23 @@
+# Debian/Ubuntu system packages
+# Package names specific to Debian-based distributions
+# Package configs and features inherit from settings.toml unless overridden here
+
+[project.settings.system.packages]
+packages = [
+    "git",
+    "vim",
+    "neovim",
+    "htop",
+    "zsh",
+    "tmux",
+    "build-essential",  # Debian-specific: development tools
+    "curl",
+    "wget",
+]
+
+# Override default package configs or features here if needed for Debian
+# Example:
+# [project.settings.system.packages.config.zsh]
+# type = "template"
+# path = "src/dotfiles/config-files/zsh/.zshrc-debian.j2"  # Debian-specific template
+

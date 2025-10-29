@@ -1,0 +1,30 @@
+# RedHat/Fedora system packages
+# Package names specific to RedHat-based distributions
+# Package configs and features inherit from settings.toml unless overridden here
+
+[project.settings.system.packages]
+packages = [
+    "git",
+    "vim",
+    "neovim",
+    "htop",
+    "zsh",
+    "tmux",
+    "gcc",              # RedHat-specific: C compiler
+    "gcc-c++",          # RedHat-specific: C++ compiler
+    "make",
+    "curl",
+    "wget",
+]
+
+# Override default package configs or features here if needed for RedHat
+# Example:
+# [project.settings.system.packages.config.zsh]
+# type = "template"
+# path = "src/dotfiles/config-files/zsh/.zshrc-redhat.j2"  # RedHat-specific template
+
+# Example: Override features for RedHat
+#[project.settings.system.packages.features]
+#python = { version = "3.11.5" }  # RedHat-specific Python version
+#go = { version = "1.20.0" }  # Add Go for RedHat
+

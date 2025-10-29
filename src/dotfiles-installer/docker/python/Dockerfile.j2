@@ -1,0 +1,93 @@
+# Dockerfile template for Python applications
+# This template uses Jinja2 syntax for dynamic configuration
+
+# Base image configuration
+FROM {{ base_image | default('python:3.12-slim') }}
+
+# Metadata
+LABEL maintainer="{{ maintainer | default('dotfiles-installer') }}"
+LABEL version="{{ version | default('1.0.0') }}"
+LABEL description="{{ description | default('Python application container') }}"
+
+# Environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+{% if env_vars %}
+{% for key, value in env_vars.items() %}
+ENV {{ key }}={{ value }}
+{% endfor %}
+{% endif %}
+
+# System dependencies
+{% if system_packages %}
+RUN apt-get update && apt-get install -y \
+{% for package in system_packages %}
+    {{ package }}{% if not loop.last %} \{% endif %}
+{% endfor %}
+    && rm -rf /var/lib/apt/lists/*
+{% endif %}
+
+# Create application user (security best practice)
+{% if create_user | default(true) %}
+RUN groupadd -r {{ app_user | default('appuser') }} && \
+    useradd -r -g {{ app_user | default('appuser') }} {{ app_user | default('appuser') }}
+{% endif %}
+
+# Set working directory
+WORKDIR {{ workdir | default('/app') }}
+
+# Copy requirements first for better caching
+{% if requirements_file %}
+COPY {{ requirements_file }} .
+{% else %}
+COPY requirements.pip .
+{% endif %}
+
+# Install Python dependencies
+{% if use_uv | default(false) %}
+# Install uv for faster dependency management
+RUN pip install uv
+RUN uv pip install --system -r {{ requirements_file | default('requirements.pip') }}
+{% else %}
+RUN pip install --no-cache-dir -r {{ requirements_file | default('requirements.pip') }}
+{% endif %}
+
+# Copy application code
+{% if copy_patterns %}
+{% for pattern in copy_patterns %}
+COPY {{ pattern.src }} {{ pattern.dest }}
+{% endfor %}
+{% else %}
+COPY . .
+{% endif %}
+
+# Set ownership if user was created
+{% if create_user | default(true) %}
+RUN chown -R {{ app_user | default('appuser') }}:{{ app_user | default('appuser') }} {{ workdir | default('/app') }}
+USER {{ app_user | default('appuser') }}
+{% endif %}
+
+# Expose port
+{% if port %}
+EXPOSE {{ port }}
+{% endif %}
+
+# Health check
+{% if healthcheck %}
+HEALTHCHECK --interval={{ healthcheck.interval | default('30s') }} \
+            --timeout={{ healthcheck.timeout | default('10s') }} \
+            --start-period={{ healthcheck.start_period | default('5s') }} \
+            --retries={{ healthcheck.retries | default('3') }} \
+            CMD {{ healthcheck.command }}
+{% endif %}
+
+# Entry point and command
+{% if entrypoint %}
+ENTRYPOINT {{ entrypoint | tojson }}
+{% endif %}
+
+{% if cmd %}
+CMD {{ cmd | tojson }}
+{% else %}
+CMD ["python", "{{ main_script | default('main.py') }}"]
+{% endif %}

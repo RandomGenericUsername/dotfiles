@@ -1,0 +1,90 @@
+"""Container management module - runtime-agnostic container operations."""
+
+from .core import (
+    BuildContext,
+    ContainerEngine,
+    ContainerError,
+    ContainerInfo,
+    ContainerManager,
+    ContainerNotFoundError,
+    ContainerRuntime,
+    ContainerRuntimeError,
+    ContainerState,
+    ImageBuildError,
+    ImageError,
+    ImageInfo,
+    ImageManager,
+    ImageNotFoundError,
+    InvalidConfigError,
+    LogDriver,
+    NetworkError,
+    NetworkInfo,
+    NetworkManager,
+    NetworkMode,
+    NetworkNotFoundError,
+    PortMapping,
+    RestartPolicy,
+    RunConfig,
+    RuntimeNotAvailableError,
+    VolumeDriver,
+    VolumeError,
+    VolumeInfo,
+    VolumeManager,
+    VolumeMount,
+    VolumeNotFoundError,
+)
+from .factory import ContainerEngineFactory
+from .implementations import (
+    DockerContainerManager,
+    DockerEngine,
+    DockerImageManager,
+    DockerNetworkManager,
+    DockerVolumeManager,
+)
+
+__all__ = [
+    # Factory
+    "ContainerEngineFactory",
+    # Core
+    "ContainerEngine",
+    "ImageManager",
+    "ContainerManager",
+    "VolumeManager",
+    "NetworkManager",
+    # Enums
+    "ContainerRuntime",
+    "ContainerState",
+    "RestartPolicy",
+    "NetworkMode",
+    "VolumeDriver",
+    "LogDriver",
+    # Types
+    "BuildContext",
+    "RunConfig",
+    "VolumeMount",
+    "PortMapping",
+    "ImageInfo",
+    "ContainerInfo",
+    "VolumeInfo",
+    "NetworkInfo",
+    # Exceptions
+    "ContainerError",
+    "ImageError",
+    "ImageNotFoundError",
+    "ImageBuildError",
+    "ContainerRuntimeError",
+    "ContainerNotFoundError",
+    "VolumeError",
+    "VolumeNotFoundError",
+    "NetworkError",
+    "NetworkNotFoundError",
+    "RuntimeNotAvailableError",
+    "InvalidConfigError",
+    # Implementations
+    "DockerEngine",
+    "DockerImageManager",
+    "DockerContainerManager",
+    "DockerVolumeManager",
+    "DockerNetworkManager",
+]
+

@@ -1,0 +1,107 @@
+{
+  // Python Configuration
+  "python.defaultInterpreterPath": "${workspaceFolder}/src/dotfiles-installer/cli/.venv/bin/python",
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": false,
+
+  // Black Formatter Configuration
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "python.formatting.provider": "black",
+  "python.formatting.blackArgs": [
+    "--line-length=79",
+    "--target-version=py312"
+  ],
+
+  // isort Configuration
+  "isort.args": [
+    "--profile=black",
+    "--line-length=79",
+    "--multi-line-mode=3",
+    "--trailing-comma",
+    "--use-parentheses",
+    "--ensure-newline-before-comments"
+  ],
+
+  // Ruff Configuration
+  "ruff.lineLength": 79,
+  "ruff.targetVersion": "py312",
+  "ruff.lint.select": [
+    "E",
+    "W",
+    "F",
+    "I",
+    "B",
+    "C4",
+    "UP",
+    "ARG",
+    "SIM",
+    "PTH"
+  ],
+  "ruff.lint.ignore": [
+    "E501",
+    "B008",
+    "C901",
+    "W191"
+  ],
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+
+  // mypy Configuration
+  "mypy-type-checker.args": [
+    "--python-version=3.12",
+    "--check-untyped-defs",
+    "--disallow-any-generics",
+    "--disallow-incomplete-defs",
+    "--disallow-untyped-defs",
+    "--no-implicit-optional",
+    "--warn-redundant-casts",
+    "--warn-unused-ignores",
+    "--warn-return-any",
+    "--strict-equality",
+    "--show-error-codes"
+  ],
+  "mypy-type-checker.runUsingActiveInterpreter": true,
+
+  // Editor Configuration
+  "editor.rulers": [79],
+  "editor.wordWrap": "off",
+  "editor.insertSpaces": true,
+  "editor.tabSize": 4,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+
+  // File Exclusions
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/.pytest_cache": true,
+    "**/.mypy_cache": true,
+    "**/.ruff_cache": true,
+    "**/.venv": true,
+    "**/node_modules": true
+  },
+
+  // Search Exclusions
+  "search.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/.mypy_cache": true,
+    "**/.ruff_cache": true,
+    "**/.venv": true,
+    "**/node_modules": true
+  },
+  "DockerRun.DisableAutoGenerateConfig": true
+}
+

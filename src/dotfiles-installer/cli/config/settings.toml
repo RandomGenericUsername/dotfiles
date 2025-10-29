@@ -1,44 +1,76 @@
-[safety]
+[package_manager]
+prefer_third_party = true
+update_system = true
+remove_dependencies = true
+dry_run = false
+
+# NOTE: Paths are auto-generated from cli/config/directories.py
+# Do not configure paths here - they are managed programmatically
+
+# NOTE: System packages are loaded from distribution-specific files in
+# config/packages/{distro}/system.toml based on the detected package manager
+# (arch, debian, redhat). Package configs and features defined here are defaults
+# that can be overridden by distro-specific configs.
+
+# Default package configurations (can be overridden per distro)
+[project.settings.system.packages.config.zsh]
+type = "template"
+path = "src/dotfiles/config-files/zsh/.zshrc.j2"
+
+[project.settings.system.packages.config.tmux]
+type = "template"
+path = "src/dotfiles/config-files/tmux/.tmux.conf.j2"
+
+[project.settings.system.packages.config.starship]
+type = "file"
+path = "src/dotfiles/config-files/starship/starship.toml"
+
+# Default features with version specifications (can be overridden per distro)
+[project.settings.system.packages.features]
+python = { version = "3.12.0" }
+nvm = { version = "0.40.3" }
+nodejs = { version = "20.9.0" }
+rust = { version = "1.75.0" }
+
 [safety.directory_deletion]
-# Protected system directories that should never be deleted
 protected_directories = [
-    # System root and core directories
-    "/",
-    "/root",
-    "/usr",
-    "/etc",
-    "/var",
-    "/bin",
-    "/sbin",
-    "/lib",
-    "/boot",
-    "/sys",
-    "/proc",
-    "/dev",
-    # User and home directories
-    "/home",
-    "/Users",
-    # Mount points and external storage
-    "/mnt",
-    "/media",
-    "/run/media",
-    # Package managers and applications
-    "/opt",
-    "/usr/local",
-    "/snap",
-    "/opt/homebrew",
-    "/flatpak",
-    # Service and application data
-    "/var/www",
-    "/srv",
-    "/var/lib",
-    "/var/log",
-    "/var/spool",
-    # Common backup and temp locations
-    "/backup",
-    "/backups",
-    "/tmp",
-    "/var/tmp",
+  # System root and core directories
+  "/",
+  "/root",
+  "/usr",
+  "/etc",
+  "/var",
+  "/bin",
+  "/sbin",
+  "/lib",
+  "/boot",
+  "/sys",
+  "/proc",
+  "/dev",
+  # User and home directories
+  "/home",
+  "/Users",
+  # Mount points and external storage
+  "/mnt",
+  "/media",
+  "/run/media",
+  # Package managers and applications
+  "/opt",
+  "/usr/local",
+  "/snap",
+  "/opt/homebrew",
+  "/flatpak",
+  # Service and application data
+  "/var/www",
+  "/srv",
+  "/var/lib",
+  "/var/log",
+  "/var/spool",
+  # Common backup and temp locations
+  "/backup",
+  "/backups",
+  "/tmp",
+  "/var/tmp",
 ]
 
 # Keywords that make a path dangerous to delete
@@ -52,3 +84,4 @@ protect_user_homes = true
 
 # Minimum depth for keyword checking (keywords only checked for shallow paths)
 keyword_check_depth_threshold = 4
+

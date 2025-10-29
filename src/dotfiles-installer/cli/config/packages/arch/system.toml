@@ -1,0 +1,27 @@
+# Arch Linux system packages
+# Package names specific to Arch/AUR
+# Package configs and features inherit from settings.toml unless overridden here
+
+[project.settings.system.packages]
+packages = [
+    "git",
+    "vim",
+    "neovim",
+    "htop",
+    "zsh",
+    "tmux",
+    "base-devel",  # Arch-specific: development tools
+    "yay",         # AUR helper (if using AUR)
+]
+
+# Override default package configs or features here if needed for Arch
+# Example:
+# [project.settings.system.packages.config.zsh]
+# type = "template"
+# path = "src/dotfiles/config-files/zsh/.zshrc-arch.j2"  # Arch-specific template
+
+# Example: Override features for Arch
+# [project.settings.system.packages.features]
+# python = { version = "3.13.0" }  # Arch-specific Python version
+# go = { version = "1.21.0" }  # Add Go for Arch
+

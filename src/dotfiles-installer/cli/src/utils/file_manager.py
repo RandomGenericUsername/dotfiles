@@ -1,3 +1,4 @@
+import hashlib
 import shutil
 from pathlib import Path
 
@@ -126,7 +127,6 @@ def count_directory_contents(
 
 
 def copy_directory(src_path: Path, dest_path: Path) -> None:
-
     if not src_path.exists():
         raise FileNotFoundError(f"Source directory {src_path} does not exist")
 
@@ -177,11 +177,11 @@ def is_safe_to_delete(directory_path: Path) -> tuple[bool, str]:
         - is_safe: True if safe to delete, False otherwise
         - reason: Explanation of why it's safe or unsafe
     """
-    from src.config.settings import get_settings
+    from src.config.settings import Settings
 
     # Get safety configuration
-    settings = get_settings()
-    safety_config = settings.safety.directory_deletion
+    settings = Settings.get()
+    safety_config = settings.project.settings.safety.directory_deletion
 
     # Convert to absolute path for consistent checking
     abs_path = directory_path.resolve()
@@ -383,3 +383,12 @@ def copy_directory_filtered(
         raise OSError(
             f"OS error while copying {src_path} to {dest_path}: {e}"
         ) from e
+
+
+def get_file_hash(filepath: Path) -> str:
+    """Calculate SHA256 hash of file."""
+    sha256 = hashlib.sha256()
+    with filepath.open("rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            sha256.update(chunk)
+    return sha256.hexdigest()

@@ -1,0 +1,55 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}/src/dotfiles-installer/cli"
+    },
+    {
+      "name": "Python: CLI Install",
+      "type": "python",
+      "request": "launch",
+      "module": "main",
+      "args": ["install", "--help"],
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}/src/dotfiles-installer/cli"
+    },
+    {
+      "name": "Python: CLI Uninstall",
+      "type": "python",
+      "request": "launch",
+      "module": "main",
+      "args": ["uninstall", "--help"],
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}/src/dotfiles-installer/cli"
+    },
+    {
+      "name": "Python: Tests",
+      "type": "python",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-v", "tests/"],
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}/src/dotfiles-installer/cli"
+    },
+    {
+      "name": "Python: Tests (Current File)",
+      "type": "python",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-v", "${file}"],
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}/src/dotfiles-installer/cli"
+    }
+  ]
+}
+

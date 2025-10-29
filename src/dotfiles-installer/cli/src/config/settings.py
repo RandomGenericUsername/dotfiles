@@ -7,21 +7,68 @@ from pydantic import ValidationError
 
 from src.config.config import AppConfig as PydanticAppConfig
 from src.config.enums import InstallType
+from src.config.project_root import get_project_path
 
-# Get the project root directory
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent.parent
-SETTINGS_FILE = PROJECT_ROOT / "settings.toml"
-PROJECT_SETTINGS = (
-    PROJECT_ROOT / "src" / "dotfiles-installer" / "config" / "settings.toml"
-)
 
-settings_files = [str(SETTINGS_FILE), str(PROJECT_SETTINGS)]
+def _get_settings_files() -> list[str]:
+    """Get configuration files in loading order.
+
+    This function is called lazily to ensure project root is set before
+    accessing configuration files.
+
+    Configuration hierarchy (lowest to highest priority):
+    1. Python defaults (config/default_settings.py) - Pydantic Field defaults
+    2. settings.toml (cli/config) - Project settings
+    3. system.toml (cli/config/packages/{distro}/) - Distro-specific packages
+    4. settings.toml (root) - User overrides
+    5. CLI arguments - Runtime overrides (handled in update() method)
+
+    Returns:
+        List of configuration file paths in loading order
+    """
+    # Configuration files (in loading order - later files override earlier)
+    PROJECT_SETTINGS = get_project_path(
+        "src/dotfiles-installer/cli/config/settings.toml"
+    )
+    SETTINGS_FILE = get_project_path("settings.toml")
+
+    # Get distro-specific packages config
+    from config.directories import get_distro_packages_path
+
+    try:
+        DISTRO_PACKAGES = get_distro_packages_path()
+    except FileNotFoundError:
+        # If distro config not found, skip it
+        DISTRO_PACKAGES = None
+
+    # Order matters! Later files override earlier ones.
+    # Python defaults are in Pydantic Field defaults, not loaded from TOML
+    files = [
+        str(PROJECT_SETTINGS),  # 1. Project-level settings
+    ]
+
+    if DISTRO_PACKAGES:
+        files.append(str(DISTRO_PACKAGES))  # 2. Distro-specific packages
+
+    files.append(str(SETTINGS_FILE))  # 3. User overrides (highest priority)
+
+    return files
 
 
 class SettingsModel:
-    def __init__(self, settings_files: list[str]):
+    def __init__(self, settings_files: list[str] | None = None):
+        """Initialize settings model.
+
+        Args:
+            settings_files: List of configuration files to load.
+                           If None, will call _get_settings_files() to get them.
+        """
+        if settings_files is None:
+            settings_files = _get_settings_files()
+
         self.dynaconf_settings: Dynaconf = Dynaconf(
             settings_files=settings_files,
+            merge_enabled=True,  # Enable deep merging of nested dicts
         )
         self.settings: PydanticAppConfig = self.get_pydantic_config(
             self._convert_dict_to_lower_case(
@@ -70,156 +117,145 @@ class SettingsModel:
         try:
             return PydanticAppConfig(**settings)
         except ValidationError as e:
-            print("🚨 Configuration Error:")
-            print("-" * 40)
+            raise e
 
-            missing_fields = SettingsModel._extract_missing_fields(e)
+    def get(self) -> PydanticAppConfig:
+        return self.settings
 
-            if missing_fields:
-                print("❌ Missing required fields:")
-                for field_path in missing_fields:
-                    print(f"   - {field_path}")
+    def update(
+        self,
+        log_level_str: str | None = None,
+        install_directory: Path | None = None,
+        backup_directory: Path | None = None,
+        install_type: InstallType | None = None,
+        hide: bool | None = None,
+        log_to_file: bool | None = None,
+        log_directory: Path | None = None,
+    ) -> PydanticAppConfig:
+        debug_updates = {}
+        if log_level_str is not None:
+            debug_updates["log_level"] = log_level_str
+        if log_to_file is not None:
+            debug_updates["output_to_file"] = log_to_file
+        if log_directory is not None:
+            debug_updates["log_directory"] = log_directory
 
-                print("\n💡 Add these sections to your settings.toml:")
-                toml_suggestions = SettingsModel._generate_toml_suggestions(
-                    missing_fields
+        # Build update dictionary for CLI settings
+        cli_settings_updates = {}
+        if install_directory is not None:
+            cli_settings_updates["installation_directory"] = install_directory
+        if backup_directory is not None:
+            cli_settings_updates["backup_directory"] = backup_directory
+        if install_type is not None:
+            cli_settings_updates["install_type"] = install_type
+        if hide is not None:
+            cli_settings_updates["hidden"] = hide
+
+        if debug_updates:
+            cli_settings_updates["debug"] = (
+                self.settings.cli_settings.debug.model_copy(
+                    update=debug_updates
                 )
-                print(toml_suggestions)
+            )
 
-            # Handle other validation errors
-            other_errors = [
-                err for err in e.errors() if err["type"] != "missing"
-            ]
-            if other_errors:
-                print("\n❌ Other validation errors:")
-                for error in other_errors:
-                    field_path = ".".join(str(loc) for loc in error["loc"])
-                    print(f"   - {field_path}: {error['msg']}")
-
-            print("\n📁 Settings file locations:")
-            print(f"   {SETTINGS_FILE}")
-
-            raise SystemExit(1)
-
-    @staticmethod
-    def _extract_missing_fields(
-        validation_error: ValidationError,
-    ) -> list[str]:
-        """Extract missing field paths from validation error."""
-        missing_fields = []
-        for error in validation_error.errors():
-            if error["type"] == "missing":
-                field_path = ".".join(str(loc) for loc in error["loc"])
-                missing_fields.append(field_path)
-        return missing_fields
-
-    @staticmethod
-    def _generate_toml_suggestions(missing_fields: list[str]) -> str:
-        """Generate TOML configuration suggestions for missing fields."""
-        # Group fields by section
-        sections = {}
-
-        for field_path in missing_fields:
-            parts = field_path.split(".")
-            section_path = parts[:-1]
-            field_name = parts[-1]
-
-            section_key = ".".join(section_path)
-            if section_key not in sections:
-                sections[section_key] = []
-
-            sections[section_key].append(field_name)
-
-        # Generate TOML
-        toml_lines = []
-
-        for section_path, fields in sections.items():
-            toml_lines.append(f"[{section_path}]")
-
-            for field_name in fields:
-                full_path = f"{section_path}.{field_name}"
-                default_value = SettingsModel._get_default_value_for_field(
-                    full_path
+        main_updates = {}
+        if cli_settings_updates:
+            main_updates["cli_settings"] = (
+                self.settings.cli_settings.model_copy(
+                    update=cli_settings_updates
                 )
-                toml_lines.append(f"{field_name} = {default_value}")
+            )
 
-            toml_lines.append("")  # Empty line between sections
+        # Create updated settings
+        updated = self.settings.model_copy(update=main_updates)
 
-        return "\n".join(toml_lines)
-
-    @staticmethod
-    def _get_default_value_for_field(field_path: str) -> str:
-        """Get appropriate default value for a field based on its type."""
-        # Define common defaults based on field names and paths
-        defaults = {
-            "log_level": '"info"',
-            "output_to_file": "false",
-            "log_directory": '"/tmp/logs"',
-            "directory": '"$HOME/.dotfiles"',
-            "backup_directory": '"$HOME/.backup"',
-            "type": '"update"',
-            "hidden": "true",
-            "python": '""',
-            "nodejs": '""',
-            "wallpapers_directory": '"$HOME/wallpapers"',
-            "screenshots_directory": '"$HOME/Pictures/Screenshots"',
-        }
-
-        field_name = field_path.split(".")[-1]
-        return defaults.get(field_name, '"value"')
+        return updated
 
 
-Settings: PydanticAppConfig = SettingsModel(settings_files=settings_files).settings
+# Global Settings singleton
+# Initialized lazily when first accessed (after project root is set in main.py)
+_settings_instance: SettingsModel | None = None
 
 
-def get_settings() -> PydanticAppConfig:
-    """Get the application settings."""
-    return Settings
+def _get_settings_instance() -> SettingsModel:
+    """Get or create the global Settings instance.
+
+    This ensures Settings is only initialized after project root is set.
+    """
+    global _settings_instance
+    if _settings_instance is None:
+        _settings_instance = SettingsModel()
+    return _settings_instance
 
 
-def update_settings(
-    config: PydanticAppConfig,
-    log_level_str: str | None = None,
-    install_directory: Path | None = None,
-    backup_directory: Path | None = None,
-    install_type: InstallType | None = None,
-    hide: bool | None = None,
-    log_to_file: bool | None = None,
-    log_directory: Path | None = None,
-) -> PydanticAppConfig:
-    debug_updates = {}
-    if log_level_str is not None:
-        debug_updates["log_level"] = log_level_str
-    if log_to_file is not None:
-        debug_updates["output_to_file"] = log_to_file
-    if log_directory is not None:
-        debug_updates["log_directory"] = log_directory
+class _SettingsProxy:
+    """Proxy object that lazily initializes Settings on first access."""
 
-    # Build update dictionary for install settings
-    install_updates = {}
-    if install_directory is not None:
-        install_updates["directory"] = install_directory
-    if backup_directory is not None:
-        install_updates["backup_directory"] = backup_directory
-    if install_type is not None:
-        install_updates["type"] = install_type
-    if hide is not None:
-        install_updates["hidden"] = hide
+    def get(self) -> PydanticAppConfig:
+        """Get the current configuration."""
+        return _get_settings_instance().get()
 
-    # Add debug updates if any exist
-    if debug_updates:
-        install_updates["debug"] = config.install.debug.model_copy(
-            update=debug_updates
+    def update(
+        self,
+        log_level_str: str | None = None,
+        install_directory: Path | None = None,
+        backup_directory: Path | None = None,
+        install_type: InstallType | None = None,
+        hide: bool | None = None,
+        log_to_file: bool | None = None,
+        log_directory: Path | None = None,
+    ) -> PydanticAppConfig:
+        """Update settings with CLI arguments."""
+        return _get_settings_instance().update(
+            log_level_str=log_level_str,
+            install_directory=install_directory,
+            backup_directory=backup_directory,
+            install_type=install_type,
+            hide=hide,
+            log_to_file=log_to_file,
+            log_directory=log_directory,
         )
 
-    # Build the main update dictionary
-    main_updates = {}
-    if install_updates:
-        main_updates["install"] = config.install.model_copy(
-            update=install_updates
-        )
 
-    # Create updated settings
-    updated = config.model_copy(update=main_updates)
+# Global Settings proxy - safe to import at module level
+Settings = _SettingsProxy()
 
-    return updated
+
+class _ProjectSettingsPath:
+    """Lazy wrapper for PROJECT_SETTINGS path.
+
+    This allows importing PROJECT_SETTINGS at module level without
+    calling get_project_path() before project root is set.
+    """
+
+    _path: Path | None = None
+
+    @property
+    def parent(self) -> Path:
+        """Get the parent directory of the project settings file."""
+        if self._path is None:
+            self._path = get_project_path(
+                "src/dotfiles-installer/cli/config/settings.toml"
+            )
+        return self._path.parent
+
+    def __truediv__(self, other: str) -> Path:
+        """Allow path concatenation: PROJECT_SETTINGS / "file"."""
+        if self._path is None:
+            self._path = get_project_path(
+                "src/dotfiles-installer/cli/config/settings.toml"
+            )
+        return self._path / other
+
+    def __str__(self) -> str:
+        """String representation."""
+        if self._path is None:
+            self._path = get_project_path(
+                "src/dotfiles-installer/cli/config/settings.toml"
+            )
+        return str(self._path)
+
+
+# Lazy constant for PROJECT_SETTINGS path
+# Used by install.py to locate packages directory
+PROJECT_SETTINGS = _ProjectSettingsPath()

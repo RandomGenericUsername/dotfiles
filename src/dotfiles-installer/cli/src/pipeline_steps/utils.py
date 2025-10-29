@@ -1,16 +1,117 @@
+from pathlib import Path
+
+from dotfiles_logging.rich.rich_logger import RichLogger
+from dotfiles_package_manager.core.base import (
+    PackageManager,
+    PackageManagerError,
+)
+from dotfiles_package_manager.core.factory import PackageManagerFactory
+from dotfiles_pipeline import PipelineContext
+from dotfiles_template_renderer import Jinja2Renderer, RenderConfig
+
+from src.config.enums import InstallType
 from src.exceptions import InstallationConfirmationDeclinedException
-from src.modules.pipeline import PipelineContext
+from src.tasks.install_starship import (
+    StarshipInstallError,
+    check_starship_installed,
+    get_starship_version,
+    install_starship,
+)
 from src.utils import file_manager
+from src.utils.file_manager import (
+    delete_directory_safe,
+    get_file_hash,
+)
+
+
+def detect_and_initialize_package_manager(
+    context: PipelineContext,
+) -> PipelineContext:
+    """Detect and initialize the package manager.
+
+    Args:
+        context: The pipeline context
+
+    Returns:
+        Updated pipeline context with package manager initialized
+
+    Raises:
+        PackageManagerError: If package manager detection fails
+    """
+    try:
+        # Get settings from config
+        pm_settings = context.app_config.project.settings.package_manager
+        prefer_third_party = pm_settings.prefer_third_party
+
+        # Auto-detect best available manager
+        package_manager = PackageManagerFactory.create_auto(
+            prefer_third_party=prefer_third_party
+        )
+        manager_type = package_manager.manager_type.value
+        context.logger_instance.debug(
+            f"Auto-detected package manager: {manager_type}"
+        )
+
+        # Store package manager in context (using dedicated field)
+        context.package_manager = package_manager
+        # Store type in results for informational purposes
+        context.results["package_manager_type"] = package_manager.manager_type
+
+        # Log available managers for debugging
+        available = PackageManagerFactory.get_available_managers()
+        context.logger_instance.debug(
+            f"Available package managers: {[m.value for m in available]}"
+        )
+
+    except PackageManagerError as e:
+        context.logger_instance.error(
+            f"Failed to initialize package manager: {e}"
+        )
+        context.errors.append(e)
+        raise
+
+    return context
+
+
+def handle_previous_installation(context: PipelineContext) -> PipelineContext:
+    """Handle previous installation based on install type."""
+    install_type: InstallType = context.app_config.cli_settings.install_type
+    install_directory: Path = context.app_config.project.paths.install.path
+    dotfiles_directory: Path = (
+        context.app_config.project.paths.install.dotfiles.path
+    )
+    try:
+        match install_type:
+            case InstallType.clean:
+                context = handle_clean_installation(context, install_directory)
+            case InstallType.update:
+                context = handle_update_installation(
+                    context, dotfiles_directory
+                )
+            case _:
+                raise ValueError(f"Unknown install type: {install_type}")
+    except Exception as e:
+        context.logger_instance.error(
+            f"Failed to handle {install_type.value} installation: {e}"
+        )
+        context.errors.append(e)
+        # Re-raise to stop pipeline execution for critical errors
+        raise
+
+    return context
 
 
 def backup_previous_installation(context: PipelineContext) -> PipelineContext:
+    install_directory: Path = context.app_config.project.paths.install.path
+    backup_directory: Path = context.app_config.cli_settings.backup_directory
+
     try:
         file_manager.copy_directory_filtered(
-            src_path=context.install_directory,
-            dest_path=context.backup_directory,
+            src_path=install_directory,
+            dest_path=backup_directory,
         )
         context.logger_instance.info(
-            f"Previous installation backed up to {context.backup_directory}"
+            f"Previous installation backed up to {backup_directory}"
         )
     except Exception as e:
         context.logger_instance.error(
@@ -21,9 +122,11 @@ def backup_previous_installation(context: PipelineContext) -> PipelineContext:
 
 
 def confirm_overwrite_previous_installation(context: PipelineContext) -> bool:
+    install_directory: Path = context.app_config.project.paths.install.path
+
     confirmation_message = (
         f"[bold yellow]Overwrite previous installation at "
-        f"[/bold yellow]'{context.install_directory}'?",
+        f"[/bold yellow]'{install_directory}'?",
         "This will delete all files in the previous installation directory.",
     )
     overwrite_previous_installation: bool = context.logger_instance.confirm(
@@ -42,29 +145,33 @@ def confirm_backup(context: PipelineContext) -> bool:
     return backup_install_directory
 
 
-def handle_clean_installation(context: PipelineContext) -> PipelineContext:
+def handle_clean_installation(
+    context: PipelineContext, install_directory: Path
+) -> PipelineContext:
     from src.utils import file_manager
     from src.utils.file_manager import has_any_contents, is_directory_empty
 
-    context.logger_instance.info(
-        f"Performing {context.install_type.value} installation"
+    install_type = context.app_config.cli_settings.install_type
+
+    context.logger_instance.debug(
+        f"Performing {install_type.value} installation"
     )
     if not is_directory_empty(
-        context.install_directory
+        install_directory
     ) and not confirm_overwrite_previous_installation(context):
         raise InstallationConfirmationDeclinedException(
             "User declined to overwrite previous installation"
         )
 
-    if has_any_contents(context.install_directory) and confirm_backup(context):
+    if has_any_contents(install_directory) and confirm_backup(context):
         backup_previous_installation(context)
 
     # Delete the installation directory safely
     try:
         context.logger_instance.debug(
-            f"Deleting installation directory: {context.install_directory}"
+            f"Deleting installation directory: {install_directory}"
         )
-        file_manager.delete_directory_safe(context.install_directory)
+        file_manager.delete_directory_safe(install_directory)
         context.logger_instance.debug(
             "Installation directory deleted successfully"
         )
@@ -77,22 +184,554 @@ def handle_clean_installation(context: PipelineContext) -> PipelineContext:
     return context
 
 
-def handle_update_installation(context: PipelineContext) -> PipelineContext:
-    context.logger_instance.info(
-        f"Performing {context.install_type.value} installation"
+def handle_update_installation(
+    context: PipelineContext, dir_to_delete: Path
+) -> PipelineContext:
+    install_type = context.app_config.cli_settings.install_type
+    context.logger_instance.debug(
+        f"Performing {install_type.value} installation"
     )
     try:
-        file_manager.delete_directory_safe(context.config_directory)
+        context.logger_instance.debug(f"Deleting directory: {dir_to_delete}")
+        file_manager.delete_directory_safe(dir_to_delete)
     except FileNotFoundError:
         pass
     except Exception as e:
         context.errors.append(e)
+    return context
+
+
+def update_system_packages(context: PipelineContext) -> PipelineContext:
+    """Update system packages.
+
+    Args:
+        context: The pipeline context
+
+    Returns:
+        Updated pipeline context with system update results
+
+    Note:
+        Assumes DetectPackageManagerStep has run successfully.
+        Pipeline will have stopped if package manager detection failed.
+    """
+    # Get settings from config
+    pm_settings = context.app_config.project.settings.package_manager
+    update_system = pm_settings.update_system
+    dry_run = pm_settings.dry_run
+
+    # Skip if update_system is disabled
+    if not update_system:
+        context.logger_instance.debug(
+            "System update disabled in settings, skipping"
+        )
+        context.results["system_update_skipped"] = True
+        return context
+
+    # Package manager is guaranteed to exist if we reached this step
+    pm: PackageManager = context.package_manager  # type: ignore[assignment]
 
     try:
-        file_manager.delete_directory_safe(context.dependencies_directory)
-    except FileNotFoundError:
-        pass
-    except Exception as e:
+        if dry_run:
+            context.logger_instance.debug("Checking for system updates...")
+        else:
+            context.logger_instance.debug("Updating system packages...")
+
+        result = pm.update_system(dry_run=dry_run)
+
+        if result.success:
+            context.logger_instance.debug(
+                f"System update check completed: {result.output}"
+            )
+            context.results["system_update_success"] = True
+        else:
+            msg = (
+                f"System update completed with issues: {result.error_message}"
+            )
+            context.logger_instance.warning(msg)
+            context.results["system_update_success"] = False
+
+        context.results["system_update_result"] = result
+
+    except PackageManagerError as e:
+        context.logger_instance.error(f"System update failed: {e}")
         context.errors.append(e)
+        context.results["system_update_success"] = False
+
+    return context
+
+
+def install_packages(context: PipelineContext) -> PipelineContext:
+    """Install system packages.
+
+    Args:
+        context: The pipeline context
+
+    Returns:
+        Updated pipeline context with installation results
+
+    Note:
+        Assumes DetectPackageManagerStep has run successfully.
+        Pipeline will have stopped if package manager detection failed.
+        System update should be handled by UpdateSystemStep before this step.
+    """
+    # Get packages from config
+    packages = context.app_config.project.settings.system.packages.packages
+
+    if not packages:
+        context.logger_instance.debug("No packages to install")
+        return context
+
+    # Package manager is guaranteed to exist if we reached this step
+    pm: PackageManager = context.package_manager  # type: ignore[assignment]
+
+    try:
+        context.logger_instance.debug(
+            f"Installing packages: {', '.join(packages)}"
+        )
+        # Don't update system here - rely on UpdateSystemStep
+        result = pm.install(packages, update_system=False)
+
+        if result.success:
+            if result.packages_installed:
+                installed = ", ".join(result.packages_installed)
+                msg = f"Successfully installed: {installed}"
+                context.logger_instance.debug(msg)
+            if result.packages_failed:
+                failed = ", ".join(result.packages_failed)
+                msg = f"Failed to install: {failed}"
+                context.logger_instance.warning(msg)
+        else:
+            msg = f"Package installation failed: {result.error_message}"
+            context.logger_instance.error(msg)
+
+        # Store results
+        context.results["install_result"] = result
+
+        # Track overall installation success
+        if "packages_installed" not in context.results:
+            context.results["packages_installed"] = []
+        if "packages_failed" not in context.results:
+            context.results["packages_failed"] = []
+
+        context.results["packages_installed"].extend(result.packages_installed)
+        context.results["packages_failed"].extend(result.packages_failed)
+
+    except PackageManagerError as e:
+        context.logger_instance.error(f"Package installation failed: {e}")
+        context.errors.append(e)
+
+        # Track failed packages
+        if "packages_failed" not in context.results:
+            context.results["packages_failed"] = []
+        context.results["packages_failed"].extend(packages)
+
+    return context
+
+
+def _sync_starship_config(
+    config_source: Path,
+    config_dest: Path,
+    logger: RichLogger,
+) -> bool:
+    """Sync starship config from source to destination.
+
+    Args:
+        config_source: Source config file path
+        config_dest: Destination config file path
+        logger: Logger instance
+
+    Returns:
+        True if config was synced, False if already up to date
+    """
+    if not config_dest.exists():
+        try:
+            config_dest.write_text(config_source.read_text())
+            logger.debug(f"Starship config created at {config_dest}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to create starship config: {e}")
+            raise
+
+    source_hash = get_file_hash(config_source)
+    dest_hash = get_file_hash(config_dest)
+
+    if source_hash != dest_hash:
+        logger.debug("Starship config out of date, updating...")
+        delete_directory_safe(config_dest)
+        config_dest.write_text(config_source.read_text())
+        return True
+
+    logger.debug(f"Starship config at '{config_dest}' is up to date")
+    return False
+
+
+def _handle_starship_already_installed(
+    context: PipelineContext,
+    force: bool,
+) -> bool:
+    """Check if Starship is already installed and handle accordingly.
+
+    Args:
+        context: The pipeline context
+        force: Whether to force reinstallation
+
+    Returns:
+        True if Starship is already installed and should skip installation
+    """
+    if force or not check_starship_installed():
+        return False
+
+    logger = context.logger_instance
+    version = get_starship_version()
+    logger.debug(f"Starship is already installed (version: {version})")
+
+    context.results["starship_installed"] = True
+    context.results["starship_version"] = version
+    context.results["starship_already_present"] = True
+
+    return True
+
+
+def _perform_starship_installation(
+    context: PipelineContext,
+    timeout: int,
+) -> None:
+    """Perform the actual Starship installation.
+
+    Args:
+        context: The pipeline context
+        timeout: Installation timeout in seconds
+
+    Raises:
+        StarshipInstallError: If installation fails
+    """
+    logger = context.logger_instance
+    logger.info("Installing Starship prompt...")
+    install_starship(force=False, timeout=timeout)
+
+    version = get_starship_version()
+    logger.info(f"Successfully installed Starship (version: {version})")
+
+    context.results["starship_installed"] = True
+    context.results["starship_version"] = version
+    context.results["starship_already_present"] = False
+
+
+def install_starship_prompt(
+    context: PipelineContext,
+    force: bool = False,
+    timeout: int = 300,
+    critical: bool = False,
+) -> PipelineContext:
+    """Install Starship prompt with config management.
+
+    Args:
+        context: The pipeline context
+        force: Force reinstallation even if already installed
+        timeout: Installation timeout in seconds (default: 300)
+        critical: Whether failure should stop the pipeline (default: False)
+
+    Returns:
+        Updated pipeline context with installation results
+
+    Raises:
+        StarshipInstallError: If installation fails and critical is True
+    """
+    logger = context.logger_instance
+
+    # Get config paths
+    starship_config = (
+        context.app_config.project.settings.system.packages.config.starship
+    )
+    config_source: Path = starship_config.path
+    config_dest: Path = (
+        context.app_config.project.paths.install.dotfiles.starship.file(
+            "starship.toml"
+        )
+    )
+
+    # Handle already installed case
+    if _handle_starship_already_installed(context, force):
+        try:
+            _sync_starship_config(config_source, config_dest, logger)
+        except Exception as e:
+            logger.error(f"Failed to sync starship config: {e}")
+            context.errors.append(e)
+        return context
+
+    # Perform installation
+    try:
+        _perform_starship_installation(context, timeout)
+        _sync_starship_config(config_source, config_dest, logger)
+
+    except StarshipInstallError as e:
+        logger.error(f"Failed to install Starship: {e.message}")
+        context.errors.append(e)
+        context.results["starship_installed"] = False
+
+        if critical:
+            raise
+
+    return context
+
+
+def render_zsh_config(context: PipelineContext) -> PipelineContext:
+    """Render Zsh configuration from template.
+
+    Args:
+        context: The pipeline context
+
+    Returns:
+        Updated pipeline context with rendering results
+
+    Raises:
+        TemplateRenderError: If template rendering fails
+    """
+    logger = context.logger_instance
+
+    # Get zsh package config
+    zsh_config = dict(
+        context.app_config.project.settings.system.packages.config
+    ).get("zsh")
+    if not zsh_config:
+        logger.warning("No Zsh configuration found, skipping")
+        return context
+
+    # Extract paths
+    template_path: Path = zsh_config.path
+    template_dir: Path = template_path.parent
+    template_name: str = template_path.name
+
+    zshrc_path: Path = (
+        context.app_config.project.paths.install.dotfiles.zsh.file(".zshrc")
+    )
+    oh_my_zsh_path: Path = (
+        context.app_config.project.paths.install.dotfiles.oh_my_zsh.path
+    )
+    cache_dir: Path = context.app_config.project.paths.host.cache.path
+    nvm_path: Path = (
+        context.app_config.project.paths.install.dependencies.nvm.path
+    )
+    starship_config_path: Path = (
+        context.app_config.project.paths.install.dotfiles.starship.file(
+            "starship.toml"
+        )
+    )
+
+    # Build template variables
+    variables = {
+        "STARSHIP_CONFIG": str(starship_config_path),
+        "OH_MY_ZSH_DIR": str(oh_my_zsh_path),
+        "CACHE_DIR": str(cache_dir),
+        "NVM_DIR": str(nvm_path),
+    }
+
+    try:
+        # Get template renderer configuration
+        strict_mode = (
+            context.app_config.project.settings.template_renderer.strict_mode
+        )
+        render_config = RenderConfig(strict_mode=strict_mode)
+
+        # Initialize renderer
+        logger.debug(f"Rendering Zsh config from template: {template_path}")
+        renderer = Jinja2Renderer(template_dir, config=render_config)
+
+        # Render template to file
+        renderer.render_to_file(template_name, zshrc_path, variables=variables)
+
+        logger.info(f"Successfully rendered Zsh config to {zshrc_path}")
+        context.results["zsh_config_rendered"] = True
+
+    except Exception as e:
+        logger.error(f"Failed to render Zsh config: {e}")
+        context.errors.append(e)
+        context.results["zsh_config_rendered"] = False
+        raise
+
+    return context
+
+
+def install_nvm_manager(
+    context: PipelineContext,
+    force: bool = False,
+    timeout: int = 300,
+    critical: bool = True,
+) -> PipelineContext:
+    """Install NVM (Node Version Manager).
+
+    Args:
+        context: The pipeline context
+        force: Force reinstallation even if already installed
+        timeout: Installation timeout in seconds (default: 300)
+        critical: Whether failure should stop the pipeline (default: True)
+
+    Returns:
+        Updated pipeline context with installation results
+
+    Raises:
+        NvmInstallError: If installation fails and critical is True
+    """
+    from src.tasks.install_nvm import (
+        NvmInstallError,
+        check_nvm_installed,
+        get_nvm_version,
+        install_nvm,
+    )
+
+    logger = context.logger_instance
+
+    # Get NVM configuration
+    features = context.app_config.project.settings.system.packages.features
+    if "nvm" not in features:
+        logger.debug("NVM feature not configured, skipping installation")
+        context.results["nvm_installed"] = False
+        context.results["nvm_skipped"] = True
+        return context
+
+    nvm_version = features["nvm"].version
+    nvm_dir: Path = (
+        context.app_config.project.paths.install.dependencies.nvm.path
+    )
+
+    # Handle already installed case
+    if not force and check_nvm_installed(nvm_dir):
+        version = get_nvm_version(nvm_dir)
+        logger.info(f"NVM already installed (version: {version})")
+        context.results["nvm_installed"] = True
+        context.results["nvm_version"] = version
+        context.results["nvm_already_present"] = True
+        return context
+
+    # Perform installation
+    try:
+        logger.info(f"Installing NVM version {nvm_version}...")
+        install_nvm(nvm_dir, version=nvm_version, force=force, timeout=timeout)
+
+        version = get_nvm_version(nvm_dir)
+        logger.info(f"Successfully installed NVM (version: {version})")
+
+        context.results["nvm_installed"] = True
+        context.results["nvm_version"] = version
+        context.results["nvm_already_present"] = False
+
+    except NvmInstallError as e:
+        logger.error(f"Failed to install NVM: {e.message}")
+        context.errors.append(e)
+        context.results["nvm_installed"] = False
+
+        if critical:
+            raise
+
+    return context
+
+
+def install_nodejs_runtime(
+    context: PipelineContext,
+    timeout: int = 600,
+    critical: bool = True,
+) -> PipelineContext:
+    """Install Node.js using NVM.
+
+    Args:
+        context: The pipeline context
+        timeout: Installation timeout in seconds (default: 600)
+        critical: Whether failure should stop the pipeline (default: True)
+
+    Returns:
+        Updated pipeline context with installation results
+
+    Raises:
+        NodejsInstallError: If installation fails and critical is True
+    """
+    from src.tasks.install_nodejs import (
+        NodejsInstallError,
+        check_nodejs_installed,
+        get_nodejs_version,
+        install_nodejs_with_nvm,
+    )
+
+    logger = context.logger_instance
+
+    # Get Node.js configuration
+    features = context.app_config.project.settings.system.packages.features
+
+    # Check if Node.js feature is configured
+    if "nodejs" not in features:
+        logger.debug("Node.js feature not configured, skipping installation")
+        context.results["nodejs_installed"] = False
+        context.results["nodejs_skipped"] = True
+        return context
+
+    # Check if NVM feature is also configured (required for Node.js)
+    if "nvm" not in features:
+        error_msg = (
+            "Node.js feature is configured but NVM feature is not. "
+            "NVM is required to install Node.js. "
+            "Please add 'nvm = { version = \"0.40.3\" }' to features."
+        )
+        logger.error(error_msg)
+        error = NodejsInstallError(error_msg)
+        context.errors.append(error)
+        context.results["nodejs_installed"] = False
+
+        if critical:
+            raise error
+
+        return context
+
+    # Check if NVM was successfully installed
+    if not context.results.get("nvm_installed", False):
+        error_msg = (
+            "Cannot install Node.js because NVM installation failed or was skipped. "
+            "Please ensure NVM is installed first."
+        )
+        logger.error(error_msg)
+        error = NodejsInstallError(error_msg)
+        context.errors.append(error)
+        context.results["nodejs_installed"] = False
+
+        if critical:
+            raise error
+
+        return context
+
+    nodejs_version = features["nodejs"].version
+    nvm_dir: Path = (
+        context.app_config.project.paths.install.dependencies.nvm.path
+    )
+
+    # Handle already installed case
+    if check_nodejs_installed(nvm_dir, nodejs_version):
+        version = get_nodejs_version(nvm_dir)
+        logger.info(f"Node.js already installed (version: {version})")
+        context.results["nodejs_installed"] = True
+        context.results["nodejs_version"] = version
+        context.results["nodejs_already_present"] = True
+        return context
+
+    # Perform installation
+    try:
+        logger.info(
+            f"Installing Node.js version {nodejs_version} using NVM..."
+        )
+        install_nodejs_with_nvm(
+            nvm_dir, version=nodejs_version, set_default=True, timeout=timeout
+        )
+
+        version = get_nodejs_version(nvm_dir)
+        logger.info(f"Successfully installed Node.js (version: {version})")
+
+        context.results["nodejs_installed"] = True
+        context.results["nodejs_version"] = version
+        context.results["nodejs_already_present"] = False
+
+    except NodejsInstallError as e:
+        logger.error(f"Failed to install Node.js: {e.message}")
+        context.errors.append(e)
+        context.results["nodejs_installed"] = False
+
+        if critical:
+            raise
 
     return context

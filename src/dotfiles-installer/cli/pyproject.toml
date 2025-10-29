@@ -4,6 +4,12 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.12"
 dependencies = [
+    "dotfiles-logging",
+    "dotfiles-package-manager",
+    "dotfiles-pipeline",
+    "dotfiles-template-renderer",
+    "dotfiles-container-manager",
+    "filesystem-path-builder",
     "pydantic>=2.11.9",
     "dynaconf>=3.2.11",
     "rich>=13.0.0",
@@ -33,6 +39,17 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.uv.sources]
+dotfiles-logging = { path = "../../common/modules/logging" }
+dotfiles-package-manager = { path = "../../common/modules/package_manager" }
+dotfiles-pipeline = { path = "../../common/modules/pipeline" }
+dotfiles-template-renderer = { path = "../../common/modules/template_renderer" }
+dotfiles-container-manager = { path = "../../common/modules/container_manager" }
+filesystem-path-builder = { path = "../../common/modules/filesystem-path-builder" }
 
 # Formatting and linting configuration
 [tool.black]
@@ -103,5 +120,12 @@ strict_equality = true
 show_error_codes = true
 
 [[tool.mypy.overrides]]
-module = ["dynaconf.*", "shellingham.*"]
+module = ["dynaconf.*", "shellingham.*", "dotfiles.*"]
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "../../..",  # Project root for dotfiles module
+    "src",       # CLI src for src.* imports
+]
+testpaths = ["../../../tests"]

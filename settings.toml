@@ -1,18 +1,25 @@
-[install]
-directory = "$HOME/.tmp/install"
+# ============================================================================
+# User Configuration Overrides
+# ============================================================================
+# This file overrides defaults from cli/config/defaults.toml
+
+# ============================================================================
+# User CLI Settings
+# ============================================================================
+
+[cli_settings]
+installation_directory = "$HOME/.tmp/inumaki-dotfiles"
 backup_directory = "$HOME/.tmp/backup"
-type = "update"
+install_type = "update"
 hidden = true
 
-[install.debug]
+[cli_settings.debug]
 log_level = "info"
 output_to_file = true
-log_directory = "/tmp/logs"
+log_directory = "/tmp/dotfiles/logs"
 
-[project_paths]
-wallpapers_directory = "$HOME/wallpapers"
-screenshots_directory = "$HOME/Pictures/Screenshots"
-
-[features]
-python = "3.10.4"
-nodejs = "20.9.0"
+# ============================================================================
+# Project Configuration Overrides
+# ============================================================================
+# NOTE: Path overrides should be done in directories.toml or using dynaconf
+# merge syntax to avoid replacing entire sections
