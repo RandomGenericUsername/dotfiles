@@ -252,11 +252,39 @@ class PackageConfigFile(BaseModel):
         return path
 
 
+class PluginPaths(BaseModel):
+    """Plugin paths for zsh configuration."""
+
+    model_config = {"extra": "allow"}  # Allow additional fields
+
+    syntax_highlighting: str = Field(
+        default="", description="Path to zsh-syntax-highlighting plugin"
+    )
+    autosuggestions: str = Field(
+        default="", description="Path to zsh-autosuggestions plugin"
+    )
+    history_substring_search: str = Field(
+        default="", description="Path to zsh-history-substring-search plugin"
+    )
+    fzf_key_bindings: str = Field(
+        default="", description="Path to fzf key-bindings script"
+    )
+    fzf_completion: str = Field(
+        default="", description="Path to fzf completion script"
+    )
+
+
 class PackageConfig(BaseModel):
     """Configuration for a specific package."""
 
+    model_config = {"extra": "allow"}  # Allow additional fields
+
     conf: PackageConfigFile = Field(
         description="Configuration file specification",
+    )
+    plugin_paths: PluginPaths | None = Field(
+        default=None,
+        description="Plugin paths (for zsh package)",
     )
 
     @property
@@ -344,8 +372,13 @@ class SystemPackages(BaseModel):
         [config.zsh]
         type = "template"
         path = "..."
+        [config.zsh.plugin_paths]
+        syntax_highlighting = "..."
 
-        Into PackageConfig(conf=PackageConfigFile(type="template", path="..."))
+        Into PackageConfig(
+            conf=PackageConfigFile(type="template", path="..."),
+            plugin_paths=PluginPaths(syntax_highlighting="...")
+        )
         """
         if isinstance(v, PackageConfigDict):
             return dict(v)
@@ -356,14 +389,25 @@ class SystemPackages(BaseModel):
             if isinstance(pkg_data, PackageConfig):
                 result[pkg_name] = pkg_data
             elif isinstance(pkg_data, dict):
+                # Extract plugin_paths if present
+                plugin_paths_data = pkg_data.pop("plugin_paths", None)
+                plugin_paths = None
+                if plugin_paths_data:
+                    plugin_paths = PluginPaths(**plugin_paths_data)
+
                 # If dict has 'type' and 'path', wrap in PackageConfig
                 if "type" in pkg_data and "path" in pkg_data:
                     result[pkg_name] = PackageConfig(
-                        conf=PackageConfigFile(**pkg_data)
+                        conf=PackageConfigFile(
+                            type=pkg_data["type"], path=pkg_data["path"]
+                        ),
+                        plugin_paths=plugin_paths,
                     )
                 else:
                     # Assume it's already in the right format
-                    result[pkg_name] = PackageConfig(**pkg_data)
+                    result[pkg_name] = PackageConfig(
+                        **pkg_data, plugin_paths=plugin_paths
+                    )
             else:
                 result[pkg_name] = pkg_data
 

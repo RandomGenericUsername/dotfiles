@@ -121,6 +121,7 @@ _install_builder.add_path("dotfiles.oh-my-zsh", hidden=True)
 
 # ----------------------------- Dependencies ------------------------------ #
 _install_builder.add_path("dependencies.nvm")
+_install_builder.add_path("dependencies.pyenv")
 # ----------------------------- config ------------------------------ #
 _install_builder.add_path("dotfiles.config")
 # ----------------------------- scripts ----------------------------- #

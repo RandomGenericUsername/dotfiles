@@ -406,11 +406,11 @@ def _perform_starship_installation(
         StarshipInstallError: If installation fails
     """
     logger = context.logger_instance
-    logger.info("Installing Starship prompt...")
+    logger.debug("Installing Starship prompt...")
     install_starship(force=False, timeout=timeout)
 
     version = get_starship_version()
-    logger.info(f"Successfully installed Starship (version: {version})")
+    logger.debug(f"Successfully installed Starship (version: {version})")
 
     context.results["starship_installed"] = True
     context.results["starship_version"] = version
@@ -518,12 +518,37 @@ def render_zsh_config(context: PipelineContext) -> PipelineContext:
         )
     )
 
+    # Get distro-specific plugin paths
+    plugin_paths = {}
+    if zsh_config.plugin_paths is not None:
+        plugin_paths = {
+            "ZSH_SYNTAX_HIGHLIGHTING": zsh_config.plugin_paths.syntax_highlighting,
+            "ZSH_AUTOSUGGESTIONS": zsh_config.plugin_paths.autosuggestions,
+            "ZSH_HISTORY_SUBSTRING_SEARCH": zsh_config.plugin_paths.history_substring_search,
+            "FZF_KEY_BINDINGS": zsh_config.plugin_paths.fzf_key_bindings,
+            "FZF_COMPLETION": zsh_config.plugin_paths.fzf_completion,
+        }
+        logger.debug(f"Using distro-specific plugin paths: {plugin_paths}")
+    else:
+        # Fallback to Arch paths if plugin_paths not configured
+        logger.warning(
+            "No plugin_paths configured for zsh, using Arch defaults"
+        )
+        plugin_paths = {
+            "ZSH_SYNTAX_HIGHLIGHTING": "/usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh",
+            "ZSH_AUTOSUGGESTIONS": "/usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh",
+            "ZSH_HISTORY_SUBSTRING_SEARCH": "/usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh",
+            "FZF_KEY_BINDINGS": "/usr/share/fzf/key-bindings.zsh",
+            "FZF_COMPLETION": "/usr/share/fzf/completion.zsh",
+        }
+
     # Build template variables
     variables = {
         "STARSHIP_CONFIG": str(starship_config_path),
         "OH_MY_ZSH_DIR": str(oh_my_zsh_path),
         "CACHE_DIR": str(cache_dir),
         "NVM_DIR": str(nvm_path),
+        **plugin_paths,  # Add plugin paths
     }
 
     try:
@@ -540,7 +565,7 @@ def render_zsh_config(context: PipelineContext) -> PipelineContext:
         # Render template to file
         renderer.render_to_file(template_name, zshrc_path, variables=variables)
 
-        logger.info(f"Successfully rendered Zsh config to {zshrc_path}")
+        logger.debug(f"Successfully rendered Zsh config to {zshrc_path}")
         context.results["zsh_config_rendered"] = True
 
     except Exception as e:
@@ -548,6 +573,72 @@ def render_zsh_config(context: PipelineContext) -> PipelineContext:
         context.errors.append(e)
         context.results["zsh_config_rendered"] = False
         raise
+
+    return context
+
+
+def install_oh_my_zsh_framework(
+    context: PipelineContext,
+    force: bool = False,
+    timeout: int = 300,
+    critical: bool = True,
+) -> PipelineContext:
+    """Install Oh My Zsh framework.
+
+    Args:
+        context: The pipeline context
+        force: Force reinstallation even if already installed
+        timeout: Installation timeout in seconds (default: 300)
+        critical: Whether failure should stop the pipeline (default: True)
+
+    Returns:
+        Updated pipeline context with installation results
+
+    Raises:
+        OhMyZshInstallError: If installation fails and critical is True
+    """
+    from src.tasks.install_oh_my_zsh import (
+        OhMyZshInstallError,
+        check_oh_my_zsh_installed,
+        get_oh_my_zsh_version,
+        install_oh_my_zsh,
+    )
+
+    logger = context.logger_instance
+
+    # Get Oh My Zsh directory from config
+    oh_my_zsh_dir: Path = (
+        context.app_config.project.paths.install.dotfiles.oh_my_zsh.path
+    )
+
+    # Handle already installed case
+    if not force and check_oh_my_zsh_installed(oh_my_zsh_dir):
+        version = get_oh_my_zsh_version(oh_my_zsh_dir)
+        logger.debug(f"Oh My Zsh already installed (version: {version})")
+        context.results["oh_my_zsh_installed"] = True
+        context.results["oh_my_zsh_version"] = version
+        context.results["oh_my_zsh_already_present"] = True
+        return context
+
+    # Perform installation
+    try:
+        logger.debug("Installing Oh My Zsh framework...")
+        install_oh_my_zsh(oh_my_zsh_dir, force=force, timeout=timeout)
+
+        version = get_oh_my_zsh_version(oh_my_zsh_dir)
+        logger.debug(f"Successfully installed Oh My Zsh (version: {version})")
+
+        context.results["oh_my_zsh_installed"] = True
+        context.results["oh_my_zsh_version"] = version
+        context.results["oh_my_zsh_already_present"] = False
+
+    except OhMyZshInstallError as e:
+        logger.error(f"Failed to install Oh My Zsh: {e.message}")
+        context.errors.append(e)
+        context.results["oh_my_zsh_installed"] = False
+
+        if critical:
+            raise
 
     return context
 
@@ -597,7 +688,7 @@ def install_nvm_manager(
     # Handle already installed case
     if not force and check_nvm_installed(nvm_dir):
         version = get_nvm_version(nvm_dir)
-        logger.info(f"NVM already installed (version: {version})")
+        logger.debug(f"NVM already installed (version: {version})")
         context.results["nvm_installed"] = True
         context.results["nvm_version"] = version
         context.results["nvm_already_present"] = True
@@ -605,11 +696,11 @@ def install_nvm_manager(
 
     # Perform installation
     try:
-        logger.info(f"Installing NVM version {nvm_version}...")
+        logger.debug(f"Installing NVM version {nvm_version}...")
         install_nvm(nvm_dir, version=nvm_version, force=force, timeout=timeout)
 
         version = get_nvm_version(nvm_dir)
-        logger.info(f"Successfully installed NVM (version: {version})")
+        logger.debug(f"Successfully installed NVM (version: {version})")
 
         context.results["nvm_installed"] = True
         context.results["nvm_version"] = version
@@ -704,7 +795,7 @@ def install_nodejs_runtime(
     # Handle already installed case
     if check_nodejs_installed(nvm_dir, nodejs_version):
         version = get_nodejs_version(nvm_dir)
-        logger.info(f"Node.js already installed (version: {version})")
+        logger.debug(f"Node.js already installed (version: {version})")
         context.results["nodejs_installed"] = True
         context.results["nodejs_version"] = version
         context.results["nodejs_already_present"] = True
@@ -712,7 +803,7 @@ def install_nodejs_runtime(
 
     # Perform installation
     try:
-        logger.info(
+        logger.debug(
             f"Installing Node.js version {nodejs_version} using NVM..."
         )
         install_nodejs_with_nvm(
@@ -720,7 +811,7 @@ def install_nodejs_runtime(
         )
 
         version = get_nodejs_version(nvm_dir)
-        logger.info(f"Successfully installed Node.js (version: {version})")
+        logger.debug(f"Successfully installed Node.js (version: {version})")
 
         context.results["nodejs_installed"] = True
         context.results["nodejs_version"] = version
@@ -730,6 +821,191 @@ def install_nodejs_runtime(
         logger.error(f"Failed to install Node.js: {e.message}")
         context.errors.append(e)
         context.results["nodejs_installed"] = False
+
+        if critical:
+            raise
+
+    return context
+
+
+def install_pyenv_manager(
+    context: PipelineContext,
+    force: bool = False,
+    timeout: int = 300,
+    critical: bool = True,
+) -> PipelineContext:
+    """Install pyenv (Python Version Manager).
+
+    Args:
+        context: The pipeline context
+        force: Force reinstallation even if already installed
+        timeout: Installation timeout in seconds (default: 300)
+        critical: Whether failure should stop the pipeline (default: True)
+
+    Returns:
+        Updated pipeline context with installation results
+
+    Raises:
+        PyenvInstallError: If installation fails and critical is True
+    """
+    from src.tasks.install_pyenv import (
+        PyenvInstallError,
+        check_pyenv_installed,
+        get_pyenv_version,
+        install_pyenv,
+    )
+
+    logger = context.logger_instance
+
+    # Get pyenv configuration
+    features = context.app_config.project.settings.system.packages.features
+    if "pyenv" not in features:
+        logger.debug("Pyenv feature not configured, skipping installation")
+        context.results["pyenv_installed"] = False
+        context.results["pyenv_skipped"] = True
+        return context
+
+    pyenv_version = features["pyenv"].version
+    pyenv_dir: Path = (
+        context.app_config.project.paths.install.dependencies.pyenv.path
+    )
+
+    # Handle already installed case
+    if not force and check_pyenv_installed(pyenv_dir):
+        version = get_pyenv_version(pyenv_dir)
+        logger.debug(f"Pyenv already installed (version: {version})")
+        context.results["pyenv_installed"] = True
+        context.results["pyenv_version"] = version
+        context.results["pyenv_already_present"] = True
+        return context
+
+    # Perform installation
+    try:
+        logger.debug(f"Installing pyenv version {pyenv_version}...")
+        install_pyenv(pyenv_dir, version=pyenv_version, timeout=timeout)
+
+        version = get_pyenv_version(pyenv_dir)
+        logger.debug(f"Successfully installed pyenv (version: {version})")
+
+        context.results["pyenv_installed"] = True
+        context.results["pyenv_version"] = version
+        context.results["pyenv_already_present"] = False
+
+    except PyenvInstallError as e:
+        logger.error(f"Failed to install pyenv: {e.message}")
+        context.errors.append(e)
+        context.results["pyenv_installed"] = False
+
+        if critical:
+            raise
+
+    return context
+
+
+def install_python_runtime(
+    context: PipelineContext,
+    timeout: int = 600,
+    critical: bool = True,
+) -> PipelineContext:
+    """Install Python using pyenv.
+
+    Args:
+        context: The pipeline context
+        timeout: Installation timeout in seconds (default: 600)
+        critical: Whether failure should stop the pipeline (default: True)
+
+    Returns:
+        Updated pipeline context with installation results
+
+    Raises:
+        PythonInstallError: If installation fails and critical is True
+    """
+    from src.tasks.install_python import (
+        PythonInstallError,
+        check_python_installed,
+        get_python_version,
+        install_python_with_pyenv,
+    )
+
+    logger = context.logger_instance
+
+    # Get Python configuration
+    features = context.app_config.project.settings.system.packages.features
+
+    # Check if Python feature is configured
+    if "python" not in features:
+        logger.debug("Python feature not configured, skipping installation")
+        context.results["python_installed"] = False
+        context.results["python_skipped"] = True
+        return context
+
+    # Check if pyenv feature is also configured (required for Python)
+    if "pyenv" not in features:
+        error_msg = (
+            "Python feature is configured but pyenv feature is not. "
+            "Pyenv is required to install Python. "
+            "Please add 'pyenv = { version = \"2.4.17\" }' to features."
+        )
+        logger.error(error_msg)
+        error = PythonInstallError(error_msg)
+        context.errors.append(error)
+        context.results["python_installed"] = False
+
+        if critical:
+            raise error
+
+        return context
+
+    # Check if pyenv was successfully installed
+    if not context.results.get("pyenv_installed", False):
+        error_msg = (
+            "Cannot install Python because pyenv installation failed or was skipped. "
+            "Please ensure pyenv is installed first."
+        )
+        logger.error(error_msg)
+        error = PythonInstallError(error_msg)
+        context.errors.append(error)
+        context.results["python_installed"] = False
+
+        if critical:
+            raise error
+
+        return context
+
+    python_version = features["python"].version
+    pyenv_dir: Path = (
+        context.app_config.project.paths.install.dependencies.pyenv.path
+    )
+
+    # Handle already installed case
+    if check_python_installed(pyenv_dir, python_version):
+        version = get_python_version(pyenv_dir)
+        logger.debug(f"Python already installed (version: {version})")
+        context.results["python_installed"] = True
+        context.results["python_version"] = version
+        context.results["python_already_present"] = True
+        return context
+
+    # Perform installation
+    try:
+        logger.debug(
+            f"Installing Python version {python_version} using pyenv..."
+        )
+        install_python_with_pyenv(
+            pyenv_dir, version=python_version, timeout=timeout
+        )
+
+        version = get_python_version(pyenv_dir)
+        logger.debug(f"Successfully installed Python (version: {version})")
+
+        context.results["python_installed"] = True
+        context.results["python_version"] = version
+        context.results["python_already_present"] = False
+
+    except PythonInstallError as e:
+        logger.error(f"Failed to install Python: {e.message}")
+        context.errors.append(e)
+        context.results["python_installed"] = False
 
         if critical:
             raise

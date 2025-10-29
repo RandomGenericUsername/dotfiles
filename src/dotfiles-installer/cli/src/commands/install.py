@@ -32,7 +32,10 @@ from src.pipeline_steps.pipeline import (
     HandlePreviousInstallStep,
     InstallNodejsStep,
     InstallNvmStep,
+    InstallOhMyZshStep,
     InstallPackagesStep,
+    InstallPyenvStep,
+    InstallPythonStep,
     InstallStarshipStep,
     InstallZshConfigStep,
     PrintInstallationMessageStep,
@@ -158,8 +161,11 @@ def install(
         InstallPackagesStep(),
         InstallStarshipStep(),
         InstallZshConfigStep(),
+        InstallOhMyZshStep(),
         InstallNvmStep(),
         InstallNodejsStep(),
+        InstallPyenvStep(),
+        InstallPythonStep(),
     ]
     pipeline: Pipeline = Pipeline.create(steps)
     pipeline.run(context)

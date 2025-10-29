@@ -15,14 +15,26 @@ packages = [
     "make",
     "curl",
     "wget",
+    # Zsh plugins
+    "zsh-syntax-highlighting",
+    "zsh-autosuggestions",
+    # Note: zsh-history-substring-search may need EPEL or manual install
+    # Fuzzy finder
+    "fzf",
+    # Better CLI tools
+    "exa",   # Modern replacement for ls (may need EPEL or Copr)
+    "bat",   # Cat with syntax highlighting (may need EPEL or Copr)
 ]
 
-# Override default package configs or features here if needed for RedHat
-# Example:
-# [project.settings.system.packages.config.zsh]
-# type = "template"
-# path = "src/dotfiles/config-files/zsh/.zshrc-redhat.j2"  # RedHat-specific template
+# RedHat/Fedora-specific zsh plugin paths
+[project.settings.system.packages.config.zsh.plugin_paths]
+syntax_highlighting = "/usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+autosuggestions = "/usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+history_substring_search = ""  # Not available in default repos
+fzf_key_bindings = "/usr/share/fzf/shell/key-bindings.zsh"
+fzf_completion = ""  # Not included in Fedora's fzf package
 
+# Override default package configs or features here if needed for RedHat
 # Example: Override features for RedHat
 #[project.settings.system.packages.features]
 #python = { version = "3.11.5" }  # RedHat-specific Python version

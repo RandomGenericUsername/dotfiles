@@ -13,11 +13,24 @@ packages = [
     "build-essential",  # Debian-specific: development tools
     "curl",
     "wget",
+    # Zsh plugins
+    "zsh-syntax-highlighting",
+    "zsh-autosuggestions",
+    # Note: zsh-history-substring-search not in default repos, may need manual install
+    # Fuzzy finder
+    "fzf",
+    # Better CLI tools
+    "exa",   # Modern replacement for ls
+    "bat",   # Cat with syntax highlighting (package name is 'bat' on Debian 11+)
 ]
 
+# Debian/Ubuntu-specific zsh plugin paths
+[project.settings.system.packages.config.zsh.plugin_paths]
+syntax_highlighting = "/usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+autosuggestions = "/usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+history_substring_search = ""  # Not available in default repos
+fzf_key_bindings = "/usr/share/doc/fzf/examples/key-bindings.zsh"
+fzf_completion = "/usr/share/doc/fzf/examples/completion.zsh"
+
 # Override default package configs or features here if needed for Debian
-# Example:
-# [project.settings.system.packages.config.zsh]
-# type = "template"
-# path = "src/dotfiles/config-files/zsh/.zshrc-debian.j2"  # Debian-specific template
 

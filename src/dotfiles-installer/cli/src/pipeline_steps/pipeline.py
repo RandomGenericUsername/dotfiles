@@ -162,6 +162,34 @@ class InstallZshConfigStep(PipelineStep):
         return render_zsh_config(context)
 
 
+class InstallOhMyZshStep(PipelineStep):
+    """Pipeline step to install Oh My Zsh."""
+
+    @property
+    def step_id(self) -> str:
+        return "install_oh_my_zsh"
+
+    @property
+    def description(self) -> str:
+        return "Install Oh My Zsh framework"
+
+    @property
+    def timeout(self) -> float | None:
+        """Step timeout in seconds."""
+        return 300.0
+
+    @property
+    def critical(self) -> bool:
+        """Oh My Zsh installation is critical."""
+        return True
+
+    def run(self, context: PipelineContext) -> PipelineContext:
+        """Install Oh My Zsh."""
+        from src.pipeline_steps.utils import install_oh_my_zsh_framework
+
+        return install_oh_my_zsh_framework(context)
+
+
 class InstallStarshipStep(PipelineStep):
     """Pipeline step to install Starship prompt."""
 
@@ -269,3 +297,59 @@ class InstallNodejsStep(PipelineStep):
         from src.pipeline_steps.utils import install_nodejs_runtime
 
         return install_nodejs_runtime(context)
+
+
+class InstallPyenvStep(PipelineStep):
+    """Pipeline step to install pyenv."""
+
+    @property
+    def step_id(self) -> str:
+        return "install_pyenv"
+
+    @property
+    def description(self) -> str:
+        return "Install pyenv (Python Version Manager)"
+
+    @property
+    def timeout(self) -> float | None:
+        """Step timeout in seconds."""
+        return 300.0
+
+    @property
+    def critical(self) -> bool:
+        """Pyenv installation is critical if the feature is enabled."""
+        return True
+
+    def run(self, context: PipelineContext) -> PipelineContext:
+        """Install pyenv."""
+        from src.pipeline_steps.utils import install_pyenv_manager
+
+        return install_pyenv_manager(context)
+
+
+class InstallPythonStep(PipelineStep):
+    """Pipeline step to install Python using pyenv."""
+
+    @property
+    def step_id(self) -> str:
+        return "install_python"
+
+    @property
+    def description(self) -> str:
+        return "Install Python runtime"
+
+    @property
+    def timeout(self) -> float | None:
+        """Step timeout in seconds."""
+        return 600.0
+
+    @property
+    def critical(self) -> bool:
+        """Python installation is critical if the feature is enabled."""
+        return True
+
+    def run(self, context: PipelineContext) -> PipelineContext:
+        """Install Python using pyenv."""
+        from src.pipeline_steps.utils import install_python_runtime
+
+        return install_python_runtime(context)
