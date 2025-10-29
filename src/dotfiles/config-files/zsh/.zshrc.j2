@@ -17,17 +17,27 @@ precmd_functions+=(set_win_title)
 
 ## Plugins section: Enable fish style features
 # Use syntax highlighting
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+{% if ZSH_SYNTAX_HIGHLIGHTING %}
+[ -f "{{ZSH_SYNTAX_HIGHLIGHTING}}" ] && source "{{ZSH_SYNTAX_HIGHLIGHTING}}"
+{% endif %}
 
 # Use autosuggestion
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+{% if ZSH_AUTOSUGGESTIONS %}
+[ -f "{{ZSH_AUTOSUGGESTIONS}}" ] && source "{{ZSH_AUTOSUGGESTIONS}}"
+{% endif %}
 
 # Use history substring search
-source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+{% if ZSH_HISTORY_SUBSTRING_SEARCH %}
+[ -f "{{ZSH_HISTORY_SUBSTRING_SEARCH}}" ] && source "{{ZSH_HISTORY_SUBSTRING_SEARCH}}"
+{% endif %}
 
 # Use fzf
-source /usr/share/fzf/key-bindings.zsh
-source /usr/share/fzf/completion.zsh
+{% if FZF_KEY_BINDINGS %}
+[ -f "{{FZF_KEY_BINDINGS}}" ] && source "{{FZF_KEY_BINDINGS}}"
+{% endif %}
+{% if FZF_COMPLETION %}
+[ -f "{{FZF_COMPLETION}}" ] && source "{{FZF_COMPLETION}}"
+{% endif %}
 
 
 # Replace ls with exa
