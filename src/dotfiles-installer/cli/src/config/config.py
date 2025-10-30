@@ -333,7 +333,7 @@ class PackageConfigDict(dict[str, PackageConfig]):
             raise AttributeError(
                 f"Package config '{name}' not found. "
                 f"Available configs: {list(self.keys())}"
-            )
+            ) from None
 
     def __setattr__(self, name: str, value: PackageConfig) -> None:
         """Allow attribute assignment to package configs."""
@@ -604,7 +604,10 @@ class AppConfig(BaseModel):
         # Copy all path definitions from directories.install_builder
         # This ensures directories.py is the SINGLE SOURCE OF TRUTH
         builder = PathsBuilder(install_root)
-        for key, definition in directories.install_builder.definitions.items():
+        for (
+            _key,
+            definition,
+        ) in directories.install_builder.definitions.items():
             # Use original_key to preserve hyphens in directory names
             builder.add_path(definition.original_key, hidden=definition.hidden)
 

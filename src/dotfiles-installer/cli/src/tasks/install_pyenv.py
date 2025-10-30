@@ -64,7 +64,6 @@ def check_pyenv_installed(pyenv_dir: Path) -> bool:
 
 def install_pyenv(
     pyenv_dir: Path,
-    version: str = "2.4.17",
     timeout: int = 300,
 ) -> None:
     """
@@ -72,10 +71,10 @@ def install_pyenv(
 
     Downloads and executes the pyenv installation script with custom directory.
     Sets PYENV_ROOT environment variable to override default installation location.
+    The script installs the latest version of pyenv automatically.
 
     Args:
         pyenv_dir: Directory where pyenv should be installed
-        version: Pyenv version to install (default: "2.4.17")
         timeout: Installation timeout in seconds (default: 300)
 
     Raises:

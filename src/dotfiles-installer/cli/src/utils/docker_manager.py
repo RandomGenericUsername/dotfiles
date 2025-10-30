@@ -4,11 +4,9 @@ import io
 import subprocess
 import tarfile
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, Template
-
-from src.exceptions import InstallationConfirmationDeclinedException
 
 
 class DockerError(Exception):
@@ -17,8 +15,8 @@ class DockerError(Exception):
     def __init__(
         self,
         message: str,
-        command: Optional[str] = None,
-        exit_code: Optional[int] = None,
+        command: str | None = None,
+        exit_code: int | None = None,
     ):
         super().__init__(message)
         self.command = command
@@ -95,7 +93,7 @@ class DockerImageBuilder:
     def _run_docker_command(
         self,
         command: list[str],
-        input_data: Optional[bytes] = None,
+        input_data: bytes | None = None,
         timeout: int = 300,
     ) -> subprocess.CompletedProcess:
         """
@@ -143,7 +141,7 @@ class DockerImageBuilder:
     def _create_build_context_tar(
         self,
         dockerfile_content: str,
-        context_files: Optional[Dict[str, bytes]] = None,
+        context_files: dict[str, bytes] | None = None,
     ) -> bytes:
         """
         Create a tar archive for Docker build context.
@@ -180,8 +178,8 @@ class DockerImageBuilder:
         self,
         dockerfile_content: str,
         image_name: str,
-        context_files: Optional[Dict[str, bytes]] = None,
-        build_args: Optional[Dict[str, str]] = None,
+        context_files: dict[str, bytes] | None = None,
+        build_args: dict[str, str] | None = None,
         timeout: int = 600,
     ) -> str:
         """
@@ -276,9 +274,9 @@ def render_and_build_docker_image(
     template_dir: Path,
     image_name: str,
     template_name: str = "Dockerfile.j2",
-    template_vars: Optional[Dict[str, Any]] = None,
-    context_files: Optional[Dict[str, bytes]] = None,
-    build_args: Optional[Dict[str, str]] = None,
+    template_vars: dict[str, Any] | None = None,
+    context_files: dict[str, bytes] | None = None,
+    build_args: dict[str, str] | None = None,
     timeout: int = 600,
 ) -> str:
     """

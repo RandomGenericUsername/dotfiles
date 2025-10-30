@@ -104,7 +104,9 @@ def install_pip_packages(
     # Filter out already installed packages unless upgrade is True
     if not upgrade:
         packages_to_install = [
-            pkg for pkg in packages if not check_pip_package_installed(pyenv_dir, pkg)
+            pkg
+            for pkg in packages
+            if not check_pip_package_installed(pyenv_dir, pkg)
         ]
         if not packages_to_install:
             # All packages already installed
@@ -124,7 +126,7 @@ def install_pip_packages(
             f"pip install {upgrade_flag} {packages_str}"
         )
 
-        result = subprocess.run(
+        subprocess.run(
             ["bash", "-c", install_cmd],
             capture_output=True,
             text=True,
@@ -213,4 +215,3 @@ def get_installed_pip_packages(pyenv_dir: Path) -> list[str]:
         subprocess.TimeoutExpired,
     ):
         return []
-

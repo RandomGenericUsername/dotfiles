@@ -337,10 +337,7 @@ def copy_directory_filtered(
             return True
 
         # Check ignore extensions (for files only)
-        if path.is_file() and path.suffix.lower() in ignore_extensions:
-            return True
-
-        return False
+        return path.is_file() and path.suffix.lower() in ignore_extensions
 
     def ignore_function(directory: str, contents: list) -> list:
         """Function to pass to shutil.copytree for filtering."""

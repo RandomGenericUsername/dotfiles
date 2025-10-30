@@ -874,7 +874,6 @@ def install_pyenv_manager(
         context.results["pyenv_skipped"] = True
         return context
 
-    pyenv_version = features["pyenv"].version
     pyenv_dir: Path = (
         context.app_config.project.paths.install.dependencies.pyenv.path
     )
@@ -890,8 +889,8 @@ def install_pyenv_manager(
 
     # Perform installation
     try:
-        logger.debug(f"Installing pyenv version {pyenv_version}...")
-        install_pyenv(pyenv_dir, version=pyenv_version, timeout=timeout)
+        logger.debug("Installing pyenv (latest version)...")
+        install_pyenv(pyenv_dir, timeout=timeout)
 
         version = get_pyenv_version(pyenv_dir)
         logger.debug(f"Successfully installed pyenv (version: {version})")
