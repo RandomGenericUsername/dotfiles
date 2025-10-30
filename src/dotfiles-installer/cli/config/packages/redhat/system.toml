@@ -24,6 +24,7 @@ packages = [
     # Better CLI tools
     "exa",   # Modern replacement for ls (may need EPEL or Copr)
     "bat",   # Cat with syntax highlighting (may need EPEL or Copr)
+    "wlogout",  # Logout menu for Hyprland
 ]
 
 # RedHat/Fedora-specific zsh plugin paths

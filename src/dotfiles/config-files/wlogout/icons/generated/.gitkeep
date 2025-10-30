@@ -1,0 +1,2 @@
+# This directory contains generated SVG files with actual colors
+# These files are generated from templates/ by processing {%raw%}{{CURRENT_COLOR}}{%endraw%} placeholders

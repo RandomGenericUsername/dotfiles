@@ -28,7 +28,9 @@ class PythonInstallError(Exception):
         super().__init__(message)
 
 
-def check_python_installed(pyenv_dir: Path, version: str | None = None) -> bool:
+def check_python_installed(
+    pyenv_dir: Path, version: str | None = None
+) -> bool:
     """
     Check if Python is installed via pyenv.
 
@@ -73,7 +75,7 @@ def check_python_installed(pyenv_dir: Path, version: str | None = None) -> bool:
                     f'export PYENV_ROOT="{pyenv_dir}" && '
                     f'export PATH="$PYENV_ROOT/bin:$PATH" && '
                     f'eval "$(pyenv init -)" && '
-                    f'python --version',
+                    f"python --version",
                 ],
                 capture_output=True,
                 text=True,
@@ -124,8 +126,8 @@ def install_python_with_pyenv(
             f'export PYENV_ROOT="{pyenv_dir}" && '
             f'export PATH="$PYENV_ROOT/bin:$PATH" && '
             f'eval "$(pyenv init -)" && '
-            f'pyenv install {version} && '
-            f'pyenv global {version}'
+            f"pyenv install {version} && "
+            f"pyenv global {version}"
         )
 
         subprocess.run(
@@ -184,7 +186,7 @@ def get_python_version(pyenv_dir: Path) -> str | None:
                 f'export PYENV_ROOT="{pyenv_dir}" && '
                 f'export PATH="$PYENV_ROOT/bin:$PATH" && '
                 f'eval "$(pyenv init -)" && '
-                f'python --version',
+                f"python --version",
             ],
             capture_output=True,
             text=True,
@@ -206,4 +208,3 @@ def get_python_version(pyenv_dir: Path) -> str | None:
         subprocess.TimeoutExpired,
     ):
         return None
-

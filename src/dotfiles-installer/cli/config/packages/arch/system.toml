@@ -21,6 +21,7 @@ packages = [
     # Better CLI tools
     "exa",   # Modern replacement for ls
     "bat",   # Cat with syntax highlighting
+    "wlogout",  # Logout menu for Hyprland
 ]
 
 # Arch-specific zsh plugin paths

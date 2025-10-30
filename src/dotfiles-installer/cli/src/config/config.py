@@ -307,15 +307,19 @@ class Feature(BaseModel):
 
     Example TOML:
         [project.settings.system.packages.features]
-        python = { version = "3.12.0" }
+        python = { version = "3.12.0", pip_packages = ["ipython", "black"] }
         nodejs = { version = "20.9.0" }
 
     This maps to:
-        features["python"] = Feature(version="3.12.0")
+        features["python"] = Feature(version="3.12.0", pip_packages=["ipython", "black"])
         features["nodejs"] = Feature(version="20.9.0")
     """
 
     version: str = Field(description="Version of the feature")
+    pip_packages: list[str] = Field(
+        default_factory=list,
+        description="List of pip packages to install (for Python features)",
+    )
 
 
 class PackageConfigDict(dict[str, PackageConfig]):

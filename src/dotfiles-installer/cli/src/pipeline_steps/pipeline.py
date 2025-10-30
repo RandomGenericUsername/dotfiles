@@ -353,3 +353,31 @@ class InstallPythonStep(PipelineStep):
         from src.pipeline_steps.utils import install_python_runtime
 
         return install_python_runtime(context)
+
+
+class InstallPipPackagesStep(PipelineStep):
+    """Pipeline step to install pip packages for Python."""
+
+    @property
+    def step_id(self) -> str:
+        return "install_pip_packages"
+
+    @property
+    def description(self) -> str:
+        return "Install pip packages"
+
+    @property
+    def timeout(self) -> float | None:
+        """Step timeout in seconds."""
+        return 600.0
+
+    @property
+    def critical(self) -> bool:
+        """Pip package installation is not critical - allow pipeline to continue."""
+        return False
+
+    def run(self, context: PipelineContext) -> PipelineContext:
+        """Install pip packages for the pyenv-managed Python."""
+        from src.pipeline_steps.utils import install_pip_packages_runtime
+
+        return install_pip_packages_runtime(context)

@@ -28,7 +28,7 @@ path = "src/dotfiles/config-files/starship/starship.toml"
 # Default features with version specifications (can be overridden per distro)
 [project.settings.system.packages.features]
 pyenv = { version = "2.4.17" }
-python = { version = "3.12.0" }
+python = { version = "3.12.0", pip_packages = ["ipython"] }
 nvm = { version = "0.40.3" }
 nodejs = { version = "20.9.0" }
 rust = { version = "1.75.0" }

@@ -512,6 +512,9 @@ def render_zsh_config(context: PipelineContext) -> PipelineContext:
     nvm_path: Path = (
         context.app_config.project.paths.install.dependencies.nvm.path
     )
+    pyenv_path: Path = (
+        context.app_config.project.paths.install.dependencies.pyenv.path
+    )
     starship_config_path: Path = (
         context.app_config.project.paths.install.dotfiles.starship.file(
             "starship.toml"
@@ -542,12 +545,18 @@ def render_zsh_config(context: PipelineContext) -> PipelineContext:
             "FZF_COMPLETION": "/usr/share/fzf/completion.zsh",
         }
 
+    # Check if pyenv feature is configured
+    features = context.app_config.project.settings.system.packages.features
+    pyenv_configured = "pyenv" in features
+
     # Build template variables
     variables = {
         "STARSHIP_CONFIG": str(starship_config_path),
         "OH_MY_ZSH_DIR": str(oh_my_zsh_path),
         "CACHE_DIR": str(cache_dir),
         "NVM_DIR": str(nvm_path),
+        "PYENV_DIR": str(pyenv_path),
+        "PYENV_CONFIGURED": pyenv_configured,
         **plugin_paths,  # Add plugin paths
     }
 
@@ -1006,6 +1015,111 @@ def install_python_runtime(
         logger.error(f"Failed to install Python: {e.message}")
         context.errors.append(e)
         context.results["python_installed"] = False
+
+        if critical:
+            raise
+
+    return context
+
+
+def install_pip_packages_runtime(
+    context: PipelineContext,
+    timeout: int = 600,
+    critical: bool = False,
+) -> PipelineContext:
+    """Install pip packages for the pyenv-managed Python.
+
+    Args:
+        context: The pipeline context
+        timeout: Installation timeout in seconds (default: 600)
+        critical: Whether failure should stop the pipeline (default: False)
+
+    Returns:
+        Updated pipeline context with installation results
+
+    Raises:
+        PipPackageInstallError: If installation fails and critical is True
+    """
+    from src.tasks.install_pip_packages import (
+        PipPackageInstallError,
+        get_installed_pip_packages,
+        install_pip_packages,
+    )
+
+    logger = context.logger_instance
+
+    # Check if Python feature is configured
+    features = context.app_config.project.settings.system.packages.features
+    if "python" not in features:
+        logger.debug("Python feature not configured, skipping pip packages")
+        context.results["pip_packages_installed"] = False
+        context.results["pip_packages_skipped"] = True
+        return context
+
+    python_feature = features["python"]
+    pip_packages = python_feature.pip_packages
+
+    # Check if there are any pip packages to install
+    if not pip_packages:
+        logger.debug("No pip packages configured, skipping")
+        context.results["pip_packages_installed"] = False
+        context.results["pip_packages_skipped"] = True
+        return context
+
+    # Get pyenv directory
+    pyenv_dir: Path = (
+        context.app_config.project.paths.install.dependencies.pyenv.path
+    )
+
+    # Check if Python is installed
+    if not context.results.get("python_installed", False):
+        msg = "Python not installed, cannot install pip packages"
+        logger.warning(msg)
+        context.results["pip_packages_installed"] = False
+        context.results["pip_packages_error"] = msg
+        if critical:
+            raise PipPackageInstallError(msg)
+        return context
+
+    # Check if packages are already installed
+    installed_packages = get_installed_pip_packages(pyenv_dir)
+    packages_to_install = [
+        pkg for pkg in pip_packages if pkg not in installed_packages
+    ]
+
+    if not packages_to_install:
+        logger.debug(
+            f"All pip packages already installed: {', '.join(pip_packages)}"
+        )
+        context.results["pip_packages_installed"] = True
+        context.results["pip_packages_already_present"] = True
+        context.results["pip_packages_list"] = pip_packages
+        return context
+
+    # Perform installation
+    try:
+        logger.debug(
+            f"Installing pip packages: {', '.join(packages_to_install)}"
+        )
+        install_pip_packages(
+            pyenv_dir,
+            packages=packages_to_install,
+            upgrade=False,
+            timeout=timeout,
+        )
+
+        logger.debug(
+            f"Successfully installed pip packages: {', '.join(packages_to_install)}"
+        )
+
+        context.results["pip_packages_installed"] = True
+        context.results["pip_packages_list"] = pip_packages
+        context.results["pip_packages_already_present"] = False
+
+    except PipPackageInstallError as e:
+        logger.error(f"Failed to install pip packages: {e.message}")
+        context.errors.append(e)
+        context.results["pip_packages_installed"] = False
 
         if critical:
             raise

@@ -59,3 +59,18 @@ export NVM_DIR="{{NVM_DIR}}"
 
 # Load NVM bash completion (optional)
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+# Pyenv
+{% if PYENV_CONFIGURED %}
+# Set Pyenv directory to custom path
+export PYENV_ROOT="{{PYENV_DIR}}"
+export PATH="$PYENV_ROOT/bin:$PATH"
+
+# Initialize pyenv (adds shims to PATH)
+if command -v pyenv 1>/dev/null 2>&1; then
+  eval "$(pyenv init -)"
+fi
+
+# Suppress IPython virtualenv warning (we're using global pyenv Python, not a venv)
+export PYTHONWARNINGS="ignore::UserWarning:IPython.core.interactiveshell"
+{% endif %}
