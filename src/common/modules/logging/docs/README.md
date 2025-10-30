@@ -1,207 +1,246 @@
-# Logging Module Documentation
+# Dotfiles Logging Module Documentation
 
-A comprehensive, type-safe logging system with Rich integration, file handling, and extensible architecture.
+**Version:** 0.1.0  
+**Python:** 3.12+  
+**Dependencies:** `rich>=13.0.0`
 
-## 📚 Documentation Index
+## Overview
 
-### Core Documentation
-- **[Architecture Overview](./architecture.md)** - System design, patterns, and component relationships
-- **[API Reference](./api-reference.md)** - Complete API documentation with signatures and examples
-- **[Usage Guide](./usage-guide.md)** - Practical examples and common patterns
-- **[Configuration Guide](./configuration.md)** - All configuration options and settings
+The `dotfiles-logging` module is a standalone Python logging library that provides a clean, type-safe interface for creating and managing loggers with enhanced Rich library integration. It offers a simplified facade over Python's standard logging while adding powerful visual features through the Rich library.
 
-### Rich Features
-- **[Rich Features Guide](./rich-features.md)** - Tables, panels, progress bars, and more
-- **[Rich Integration](./rich-integration.md)** - How Rich features integrate with logging
+## Key Features
 
-### Advanced Topics
-- **[Extension Guide](./extension-guide.md)** - How to extend the logging system
-- **[File Handling](./file-handling.md)** - File logging, rotation, and management
-- **[Type Safety](./type-safety.md)** - Type-safe configuration and validation
-- **[Migration Guide](./migration.md)** - Migrating from other logging systems
+- **Simple API**: Single `Log.create_logger()` call for most use cases
+- **Rich Integration**: 20+ Rich features (tables, panels, progress bars, syntax highlighting, etc.)
+- **Type Safety**: Comprehensive type hints and enums for configuration
+- **Graceful Degradation**: Falls back to standard logging when Rich is unavailable
+- **Flexible Configuration**: Support for multiple handlers, formatters, and output destinations
+- **Factory Pattern**: Extensible handler and formatter registration system
+- **Thread-Safe**: Singleton console manager for coordinated Rich output
 
-### Development
-- **[Development Guide](./development.md)** - Contributing and development setup
-- **[Testing Guide](./testing.md)** - Testing patterns and examples
-- **[Troubleshooting](./troubleshooting.md)** - Common issues and solutions
+## Quick Start
 
-## 🚀 Quick Start
-
-### Basic Usage
 ```python
-from cli.modules.logging import Log, LogLevels, ConsoleHandlers
+from dotfiles_logging import Log, LogLevels
 
-# Simple logger
-logger = Log.create_logger("myapp", log_level=LogLevels.INFO)
-logger.info("Hello, world!")
-
-# Rich logger with features
+# Create a basic logger
 logger = Log.create_logger(
-    "myapp",
-    console_handler_type=ConsoleHandlers.RICH,
-    rich_features=RichFeatureSettings(enabled=True)
+    name="my_app",
+    log_level=LogLevels.INFO
 )
+
+# Use standard logging methods
+logger.info("Application started")
+logger.warning("This is a warning")
 
 # Use Rich features
-logger.table(data, title="Results")
-logger.panel("Important message", title="Alert")
-with logger.progress("Processing...") as progress:
-    # work here
-    pass
-```
-
-### Console + File Logging
-```python
-from cli.modules.logging import (
-    Log, ConsoleHandlers, RichHandlerSettings,
-    FileHandlerSpec, FileHandlerTypes, FileHandlerSettings
+logger.table(
+    data=[["Name", "Age"], ["Alice", "30"], ["Bob", "25"]],
+    title="User Data"
 )
 
-logger = Log.create_logger(
-    "myapp",
-    console_handler_type=ConsoleHandlers.RICH,
-    handler_config=RichHandlerSettings(show_time=True),
-    file_handlers=[
-        FileHandlerSpec(
-            handler_type=FileHandlerTypes.ROTATING_FILE,
-            config=RotatingFileHandlerSettings(
-                filename="app.log",
-                max_bytes=10_000_000,
-                backup_count=5
-            )
-        )
-    ]
-)
-
-logger.info("Logged to both console and file!")
+logger.panel("Important message", title="Alert", border_style="red")
 ```
 
-## 🏗️ Architecture Overview
+## Architecture
 
-The logging module follows a clean, extensible architecture:
+The module follows a clean layered architecture:
+
+### Core Layer
+- **Types & Configuration**: Enums, dataclasses, and type definitions (`core/log_types.py`)
+- **Configurator**: Logger setup and management (`core/configurator.py`)
+- **Utilities**: Helper functions for formatting and validation (`core/utils.py`)
+
+### Implementation Layer
+- **Handlers**: Console and file handlers with factory pattern (`handlers/`)
+- **Formatters**: Colored, Rich, and default formatters (`formatters/`)
+
+### Integration Layer
+- **Rich Features**: Enhanced logger wrapper with 20+ Rich methods (`rich/rich_logger.py`)
+- **Console Manager**: Singleton for shared console access (`rich/rich_console_manager.py`)
+- **Feature Settings**: Type-safe Rich configuration (`rich/rich_feature_settings.py`)
+
+### API Layer
+- **Facade**: Simplified `Log` class for easy access (`log.py`)
+- **Public Exports**: Clean public API through `__init__.py`
+
+## Design Patterns
+
+1. **Facade Pattern**: `Log` class provides simplified interface to complex subsystems
+2. **Factory Pattern**: `HandlerFactory`, `FormatterFactory`, `FileHandlerFactory` for extensibility
+3. **Singleton Pattern**: `RichConsoleManager` ensures single console instance
+4. **Wrapper Pattern**: `RichLogger` wraps standard logger with enhanced methods
+5. **Registry Pattern**: Factories use registries for handler/formatter types
+
+## Documentation Structure
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        Log (Facade)                        │
-├─────────────────────────────────────────────────────────────┤
-│  • create_logger()  • update()  • Static interface         │
-└─────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    LogConfigurator                         │
-├─────────────────────────────────────────────────────────────┤
-│  • configure()  • Orchestrates setup  • Type validation    │
-└─────────────────────────────────────────────────────────────┘
-                                │
-                ┌───────────────┼───────────────┐
-                ▼               ▼               ▼
-┌─────────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│    Formatters       │ │    Handlers     │ │  Rich Features  │
-├─────────────────────┤ ├─────────────────┤ ├─────────────────┤
-│ • ColoredFormatter  │ │ • ConsoleHandler│ │ • RichLogger    │
-│ • RichFormatter     │ │ • FileHandler   │ │ • RichConsole   │
-│ • DefaultFormatter  │ │ • RichHandler   │ │ • Manager       │
-└─────────────────────┘ └─────────────────┘ └─────────────────┘
+docs/
+├── README.md                          # This file - overview and quick start
+├── architecture/
+│   ├── overview.md                    # Detailed architecture explanation
+│   ├── design_patterns.md             # Design patterns and rationale
+│   └── components.md                  # Component breakdown and relationships
+├── api/
+│   ├── logger.md                      # Log facade and RichLogger API
+│   ├── handlers.md                    # Handler types and configuration
+│   ├── formatters.md                  # Formatter types and customization
+│   ├── types.md                       # Type definitions and enums
+│   └── utilities.md                   # Utility functions
+├── guides/
+│   ├── getting_started.md             # Installation and basic usage
+│   ├── configuration.md               # Configuration options and patterns
+│   ├── rich_features.md               # Using Rich features
+│   ├── file_logging.md                # File handlers and rotation
+│   └── advanced_usage.md              # Advanced patterns and customization
+├── reference/
+│   ├── examples.md                    # Comprehensive examples
+│   └── troubleshooting.md             # Common issues and solutions
+└── helpers/                           # Investigation helper documents
+    ├── README.md
+    ├── INTERACTIVE_PROMPT.md
+    ├── REQUIREMENTS_CHECKLIST.md
+    ├── INVESTIGATION_NOTES.md
+    └── SESSION_SUMMARY.md
 ```
 
-## 🎯 Key Features
+## Public API
 
-### ✅ Type Safety
-- **Dataclass-based configuration** with validation
-- **IDE autocomplete** and error detection
-- **Runtime validation** with helpful error messages
+### Main Entry Point
 
-### ✅ Rich Integration
-- **Beautiful console output** with colors and formatting
-- **Rich features** - tables, panels, progress bars, rules
-- **Console sharing** between logging and Rich features
-- **Graceful fallback** when Rich is unavailable
+- `Log.create_logger()` - Create and configure a logger
+- `Log.update()` - Update existing logger configuration
 
-### ✅ File Handling
-- **Multiple file handlers** with different configurations
-- **File rotation** - size-based and time-based
-- **Per-file formatting** - different formats for different files
-- **Type-safe configuration** for all file handler types
+### Logger Classes
 
-### ✅ Extensible Architecture
-- **Factory patterns** for formatters and handlers
-- **Plugin-style extension** points
-- **Clean separation of concerns**
-- **Easy to add new features**
+- `RichLogger` - Enhanced logger with Rich features
+- `LoggerConfigurator` - Logger configuration manager
 
-### ✅ Developer Experience
-- **Simple API** - create_logger() and update()
-- **Preset configurations** for common use cases
-- **Comprehensive documentation** and examples
-- **Backward compatibility** with standard logging
+### Configuration Types
 
-## 🔧 Configuration Options
+- `LogConfig` - Main logger configuration dataclass
+- `LogLevels` - Log level enumeration
+- `LogFormatters` - Formatter type enumeration
+- `ConsoleHandlers` - Console handler type enumeration
+- `FileHandlerTypes` - File handler type enumeration
 
-### Console Handlers
-- `ConsoleHandlers.DEFAULT` - Basic StreamHandler
-- `ConsoleHandlers.RICH` - Rich-enhanced output
+### Handler Settings
 
-### Formatters
-- `LogFormatters.DEFAULT` - Plain text
-- `LogFormatters.COLORED` - ANSI colors
-- `LogFormatters.RICH` - Rich markup
-
-### File Handlers
-- `FileHandlerTypes.FILE` - Basic file logging
-- `FileHandlerTypes.ROTATING_FILE` - Size-based rotation
-- `FileHandlerTypes.TIMED_ROTATING_FILE` - Time-based rotation
+- `RichHandlerSettings` - Rich handler configuration
+- `FileHandlerSettings` - Basic file handler configuration
+- `RotatingFileHandlerSettings` - Rotating file handler configuration
+- `TimedRotatingFileHandlerSettings` - Timed rotating file handler configuration
 
 ### Rich Features
-- **Tables** with customizable styling and data formats
-- **Panels** with borders, titles, and custom styling
-- **Progress bars** with multiple tasks and live updates
-- **Status indicators** with spinners and custom messages
-- **Rules** for section separation and organization
-- **Tree displays** for hierarchical data structures
-- **Multi-column layouts** for organized content presentation
-- **Syntax highlighting** for code display with multiple themes
-- **Markdown rendering** with full Rich formatting support
-- **JSON pretty printing** with syntax highlighting
-- **Live updates** for real-time display changes
-- **Bar charts** for simple data visualization
-- **Text styling** and alignment with Rich markup
-- **Interactive prompts** for user input and confirmations
-- **Object inspection** and pretty printing for debugging
 
-## 📖 Documentation Structure
+- `RichFeatureSettings` - Rich feature configuration
+- `RichConsoleManager` - Console management singleton
 
-This documentation is organized into focused guides:
+### Formatters
 
-1. **Getting Started** - Quick examples and basic usage
-2. **Core Concepts** - Understanding the architecture
-3. **Configuration** - All available options and settings
-4. **Rich Features** - Advanced UI elements
-5. **File Handling** - Logging to files with rotation
-6. **Extension** - Adding new features and customization
-7. **Reference** - Complete API documentation
+- `ColoredFormatter` - ANSI color formatter
+- `RichFormatter` - Rich markup formatter
 
-Each guide includes:
-- Clear explanations of concepts
-- Practical code examples
-- Common patterns and best practices
-- Troubleshooting tips
+## Usage Examples
 
-## 🤝 Contributing
+### Basic Logging
 
-See the [Development Guide](./development.md) for information on:
-- Setting up the development environment
-- Code style and conventions
-- Testing requirements
-- Submitting contributions
+```python
+from dotfiles_logging import Log, LogLevels
 
-## 📝 License
+logger = Log.create_logger(name="app", log_level=LogLevels.DEBUG)
+logger.debug("Debug message")
+logger.info("Info message")
+logger.warning("Warning message")
+logger.error("Error message")
+logger.critical("Critical message")
+```
 
-This logging module is part of the dotfiles-installer project.
+### File Logging with Rotation
 
----
+```python
+from dotfiles_logging import Log, LogConfig, FileHandlerTypes
+from dotfiles_logging.handlers import RotatingFileHandlerSettings
 
-**Next Steps:**
-- Read the [Architecture Overview](./architecture.md) to understand the system design
-- Check the [Usage Guide](./usage-guide.md) for practical examples
-- Explore [Rich Features](./rich-features.md) for advanced UI capabilities
+config = LogConfig(
+    log_level=LogLevels.INFO,
+    file_handler_type=FileHandlerTypes.ROTATING_FILE,
+    file_handler_settings=RotatingFileHandlerSettings(
+        filename="app.log",
+        max_bytes=10_485_760,  # 10 MB
+        backup_count=5
+    )
+)
+
+logger = Log.create_logger(name="app", config=config)
+```
+
+### Rich Features
+
+```python
+from dotfiles_logging import Log
+
+logger = Log.create_logger(name="app")
+
+# Display a table
+logger.table(
+    data=[["Name", "Status"], ["Task 1", "Complete"], ["Task 2", "Pending"]],
+    title="Task Status"
+)
+
+# Show a panel
+logger.panel("Deployment successful!", title="Success", border_style="green")
+
+# Display progress
+with logger.progress() as progress:
+    task = progress.add_task("Processing...", total=100)
+    for i in range(100):
+        progress.update(task, advance=1)
+```
+
+### Custom Configuration
+
+```python
+from dotfiles_logging import (
+    Log, LogConfig, LogLevels, LogFormatters, ConsoleHandlers
+)
+from dotfiles_logging.handlers import RichHandlerSettings
+from dotfiles_logging.rich import RichFeatureSettings
+
+config = LogConfig(
+    log_level=LogLevels.DEBUG,
+    formatter_type=LogFormatters.RICH,
+    console_handler_type=ConsoleHandlers.RICH,
+    rich_handler_settings=RichHandlerSettings(
+        show_time=True,
+        show_level=True,
+        show_path=True,
+        markup=True
+    ),
+    rich_feature_settings=RichFeatureSettings(
+        panel_border_style="cyan",
+        table_show_lines=True,
+        syntax_theme="dracula"
+    )
+)
+
+logger = Log.create_logger(name="app", config=config)
+```
+
+## Next Steps
+
+- **Getting Started**: See [guides/getting_started.md](guides/getting_started.md)
+- **API Reference**: See [api/](api/) directory for detailed API documentation
+- **Architecture**: See [architecture/](architecture/) directory for design details
+- **Examples**: See [reference/examples.md](reference/examples.md) for comprehensive examples
+
+## Contributing
+
+This module follows strict design principles:
+
+1. **Separation of Concerns**: Clean boundaries between layers
+2. **Type Safety**: Comprehensive type hints throughout
+3. **Graceful Degradation**: Always provide fallbacks
+4. **Extensibility**: Use factory pattern for new handlers/formatters
+5. **Documentation**: Document all public APIs and design decisions
+

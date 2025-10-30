@@ -601,7 +601,8 @@ class AppConfig(BaseModel):
         # This ensures directories.py is the SINGLE SOURCE OF TRUTH
         builder = PathsBuilder(install_root)
         for key, definition in directories.install_builder.definitions.items():
-            builder.add_path(key, hidden=definition.hidden)
+            # Use original_key to preserve hyphens in directory names
+            builder.add_path(definition.original_key, hidden=definition.hidden)
 
         # Build returns ManagedPathTree with create() and navigation
         self.project.paths.install = builder.build()

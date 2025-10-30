@@ -45,10 +45,10 @@ allow-direct-references = true
 
 [tool.uv.sources]
 dotfiles-logging = { path = "../../common/modules/logging" }
-dotfiles-package-manager = { path = "../../common/modules/package_manager" }
+dotfiles-package-manager = { path = "../../common/modules/package-manager" }
 dotfiles-pipeline = { path = "../../common/modules/pipeline" }
-dotfiles-template-renderer = { path = "../../common/modules/template_renderer" }
-dotfiles-container-manager = { path = "../../common/modules/container_manager" }
+dotfiles-template-renderer = { path = "../../common/modules/template-renderer" }
+dotfiles-container-manager = { path = "../../common/modules/container-manager" }
 filesystem-path-builder = { path = "../../common/modules/filesystem-path-builder" }
 
 # Formatting and linting configuration

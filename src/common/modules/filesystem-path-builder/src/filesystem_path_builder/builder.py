@@ -27,14 +27,23 @@ from filesystem_path_builder.pathtree import PathTree
 
 @dataclass
 class PathDefinition:
-    """Definition of a single path with its properties."""
+    """Definition of a single path with its properties.
 
-    key: str
+    The key is normalized (hyphens replaced with underscores) for Python
+    attribute access, while original_key preserves the original component
+    names for directory creation.
+
+    This allows defining paths like "dotfiles.oh-my-zsh" (with hyphens)
+    while accessing them via attributes like dotfiles.oh_my_zsh (with underscores).
+    """
+
+    key: str  # Normalized key for registry lookups (underscores)
+    original_key: str  # Original key as provided (may have hyphens)
     hidden: bool = False
 
     def get_parts(self) -> list[str]:
-        """Get path components from dot-separated key."""
-        return self.key.split(".")
+        """Get path components from original key (preserves hyphens)."""
+        return self.original_key.split(".")
 
 
 class PathsBuilder:
@@ -68,8 +77,13 @@ class PathsBuilder:
     def add_path(self, key: str, hidden: bool = False) -> "PathsBuilder":
         """Add a path definition.
 
+        The key is normalized (hyphens replaced with underscores) for Python
+        attribute access, but the original component names are preserved for
+        directory creation. This allows using hyphens in path names while
+        accessing them via Python attributes with underscores.
+
         Args:
-            key: Dot-separated path key (e.g., "dotfiles.starship")
+            key: Dot-separated path key (e.g., "dotfiles.oh-my-zsh")
             hidden: Whether this directory should be hidden (prefixed with .)
 
         Returns:
@@ -78,9 +92,17 @@ class PathsBuilder:
         Example:
             >>> builder = PathsBuilder(Path.home() / "dotfiles")
             >>> builder.add_path("dotfiles", hidden=True)
-            >>> builder.add_path("dotfiles.starship", hidden=True)
+            >>> builder.add_path("dotfiles.oh-my-zsh", hidden=True)
+            >>> paths = builder.build()
+            >>> # Access with underscores, creates with hyphens
+            >>> paths.dotfiles.oh_my_zsh.path
+            PosixPath('/home/user/.dotfiles/.oh-my-zsh')
         """
-        self.definitions[key] = PathDefinition(key=key, hidden=hidden)
+        # Normalize key for registry lookups (hyphens → underscores)
+        normalized_key = key.replace("-", "_")
+        self.definitions[normalized_key] = PathDefinition(
+            key=normalized_key, original_key=key, hidden=hidden
+        )
         return self
 
     def build(self) -> "ManagedPathTree":
@@ -134,8 +156,10 @@ class PathsBuilder:
             # Build path component by component, checking hidden status
             path_components = []
             for i in range(len(parts)):
-                # Build key for this level
-                level_key = ".".join(parts[: i + 1])
+                # Build key for this level (from original parts)
+                level_key_original = ".".join(parts[: i + 1])
+                # Normalize for registry lookup
+                level_key = level_key_original.replace("-", "_")
                 component = parts[i]
 
                 # Check if this level is marked as hidden
@@ -226,8 +250,10 @@ class ManagedPathTree(PathTree):
             # Build path component by component, checking hidden status for each level
             path_components = []
             for i in range(len(parts)):
-                # Build key for this level (e.g., "dependencies", "dependencies.nvm")
-                level_key = ".".join(parts[: i + 1])
+                # Build key for this level (from original parts)
+                level_key_original = ".".join(parts[: i + 1])
+                # Normalize for registry lookup
+                level_key = level_key_original.replace("-", "_")
                 component = parts[i]
 
                 # Check if this level is marked as hidden in registry
@@ -290,16 +316,20 @@ class ManagedPathTree(PathTree):
         this checks the registry for each component in the path and applies
         the dot prefix to any that are marked as hidden.
 
+        Uses original component names from the registry, preserving hyphens
+        even when accessed via attributes with underscores.
+
         Returns:
             Complete path with dot prefixes applied to all hidden components
 
         Example:
             >>> builder = PathsBuilder(Path("/tmp"))
             >>> builder.add_path("dependencies", hidden=True)
-            >>> builder.add_path("dependencies.nvm", hidden=False)
+            >>> builder.add_path("dependencies.oh-my-zsh", hidden=True)
             >>> paths = builder.build()
-            >>> paths.dependencies.nvm.path
-            PosixPath('/tmp/.dependencies/nvm')
+            >>> # Access with underscores, creates with hyphens
+            >>> paths.dependencies.oh_my_zsh.path
+            PosixPath('/tmp/.dependencies/.oh-my-zsh')
         """
         if self.rel == Path():
             return self.base
@@ -309,16 +339,22 @@ class ManagedPathTree(PathTree):
         path_components = []
 
         for i in range(len(parts)):
-            # Build key for this level
+            # Build key for this level (normalized with underscores)
             level_key = ".".join(parts[: i + 1])
-            component = parts[i]
 
-            # Check if this level is marked as hidden in registry
-            if (
-                level_key in self._registry
-                and self._registry[level_key].hidden
-            ):
-                component = f".{component}"
+            # Look up in registry to get original component name
+            if level_key in self._registry:
+                definition = self._registry[level_key]
+                # Use original component name (preserves hyphens)
+                original_parts = definition.get_parts()
+                component = original_parts[-1]
+
+                # Apply hidden prefix if needed
+                if definition.hidden:
+                    component = f".{component}"
+            else:
+                # Fallback to attribute name if not in registry
+                component = parts[i]
 
             path_components.append(component)
 

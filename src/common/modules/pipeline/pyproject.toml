@@ -30,7 +30,7 @@ allow-direct-references = true
 
 [tool.uv.sources]
 dotfiles-logging = { path = "../logging" }
-dotfiles-package-manager = { path = "../package_manager" }
+dotfiles-package-manager = { path = "../package-manager" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,0 +1,29 @@
+"""Default values for wallpaper processor configuration."""
+
+from wallpaper_processor.config.enums import OutputFormat, ProcessingMode
+
+# Processing defaults
+DEFAULT_PROCESSING_MODE = ProcessingMode.MEMORY
+DEFAULT_OUTPUT_FORMAT = OutputFormat.PNG
+DEFAULT_QUALITY = 95
+DEFAULT_WRITE_METADATA = False
+
+# Backend defaults
+DEFAULT_PREFER_IMAGEMAGICK = True
+DEFAULT_IMAGEMAGICK_BINARY = "convert"
+DEFAULT_STRICT_MODE = False
+DEFAULT_FALLBACK_ENABLED = True
+
+# Effect parameter defaults
+DEFAULT_BLUR_RADIUS = 0
+DEFAULT_BLUR_SIGMA = 8
+
+DEFAULT_BRIGHTNESS_ADJUSTMENT = -20
+
+DEFAULT_SATURATION_ADJUSTMENT = 0
+
+DEFAULT_VIGNETTE_STRENGTH = 20
+
+DEFAULT_COLOR_OVERLAY_COLOR = "#000000"
+DEFAULT_COLOR_OVERLAY_OPACITY = 0.3
+

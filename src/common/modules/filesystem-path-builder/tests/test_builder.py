@@ -16,24 +16,36 @@ class TestPathDefinition:
 
     def test_creation(self):
         """Test PathDefinition creation."""
-        pd = PathDefinition(key="foo.bar.baz", hidden=True)
+        pd = PathDefinition(
+            key="foo.bar.baz", original_key="foo.bar.baz", hidden=True
+        )
         assert pd.key == "foo.bar.baz"
+        assert pd.original_key == "foo.bar.baz"
         assert pd.hidden is True
 
     def test_get_parts(self):
         """Test get_parts() method."""
-        pd = PathDefinition(key="foo.bar.baz", hidden=False)
+        pd = PathDefinition(
+            key="foo.bar.baz", original_key="foo.bar.baz", hidden=False
+        )
         assert pd.get_parts() == ["foo", "bar", "baz"]
 
     def test_get_parts_single(self):
         """Test get_parts() with single part."""
-        pd = PathDefinition(key="foo", hidden=False)
+        pd = PathDefinition(key="foo", original_key="foo", hidden=False)
         assert pd.get_parts() == ["foo"]
 
     def test_default_hidden(self):
         """Test default hidden value is False."""
-        pd = PathDefinition(key="foo")
+        pd = PathDefinition(key="foo", original_key="foo")
         assert pd.hidden is False
+
+    def test_get_parts_with_hyphens(self):
+        """Test get_parts() preserves hyphens from original_key."""
+        pd = PathDefinition(
+            key="foo.bar_baz", original_key="foo.bar-baz", hidden=False
+        )
+        assert pd.get_parts() == ["foo", "bar-baz"]
 
 
 class TestPathNamespace:
@@ -294,3 +306,100 @@ class TestPathsBuilderEdgeCases:
             assert isinstance(created, list)
             assert len(created) == 2
             assert all(isinstance(p, Path) for p in created)
+
+
+class TestHyphenNormalization:
+    """Test hyphen-to-underscore normalization feature."""
+
+    def test_add_path_normalizes_hyphens(self):
+        """Test that add_path normalizes hyphens to underscores in registry."""
+        builder = PathsBuilder(Path("/tmp"))
+        builder.add_path("foo.bar-baz")
+
+        # Registry key should be normalized
+        assert "foo.bar_baz" in builder.definitions
+        # Original key should be preserved
+        assert builder.definitions["foo.bar_baz"].original_key == "foo.bar-baz"
+
+    def test_path_resolution_with_hyphens(self):
+        """Test that paths with hyphens resolve correctly."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            builder = PathsBuilder(Path(tmpdir))
+            builder.add_path("dotfiles.oh-my-zsh", hidden=True)
+            paths = builder.build()
+
+            # Access with underscores
+            resolved_path = paths.dotfiles.oh_my_zsh.path
+
+            # Should resolve to hyphenated directory name
+            expected = Path(tmpdir) / "dotfiles" / ".oh-my-zsh"
+            assert resolved_path == expected
+
+    def test_create_with_hyphens(self):
+        """Test that create() uses original hyphenated names."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            builder = PathsBuilder(Path(tmpdir))
+            builder.add_path("dotfiles.oh-my-zsh", hidden=True)
+
+            created = builder.create()
+
+            # Should create directory with hyphens
+            expected = Path(tmpdir) / "dotfiles" / ".oh-my-zsh"
+            assert expected.exists()
+            assert expected in created
+
+    def test_managed_path_tree_create_with_hyphens(self):
+        """Test that ManagedPathTree.create() uses original names."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            builder = PathsBuilder(Path(tmpdir))
+            builder.add_path("dotfiles.oh-my-zsh", hidden=True)
+            paths = builder.build()
+
+            created = paths.create()
+
+            # Should create directory with hyphens
+            expected = Path(tmpdir) / "dotfiles" / ".oh-my-zsh"
+            assert expected.exists()
+            assert expected in created
+
+    def test_nested_paths_with_hyphens(self):
+        """Test nested paths with multiple hyphenated components."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            builder = PathsBuilder(Path(tmpdir))
+            builder.add_path("my-dotfiles", hidden=True)
+            builder.add_path("my-dotfiles.oh-my-zsh", hidden=True)
+            builder.add_path(
+                "my-dotfiles.oh-my-zsh.custom-plugins", hidden=False
+            )
+            paths = builder.build()
+
+            # Access with underscores
+            resolved = paths.my_dotfiles.oh_my_zsh.custom_plugins.path
+
+            # Should resolve to hyphenated names
+            expected = (
+                Path(tmpdir) / ".my-dotfiles" / ".oh-my-zsh" / "custom-plugins"
+            )
+            assert resolved == expected
+
+            # Create and verify
+            paths.create()
+            assert expected.exists()
+
+    def test_mixed_hyphens_and_underscores(self):
+        """Test paths with both hyphens and underscores."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            builder = PathsBuilder(Path(tmpdir))
+            # Original has both hyphens and underscores
+            builder.add_path("my_config.oh-my-zsh")
+            paths = builder.build()
+
+            # Access with underscores (hyphens converted)
+            resolved = paths.my_config.oh_my_zsh.path
+
+            # Should preserve original naming
+            expected = Path(tmpdir) / "my_config" / "oh-my-zsh"
+            assert resolved == expected
+
+            paths.create()
+            assert expected.exists()

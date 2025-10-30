@@ -608,7 +608,7 @@ def install_oh_my_zsh_framework(
 
     # Get Oh My Zsh directory from config
     oh_my_zsh_dir: Path = (
-        context.app_config.project.paths.install.dotfiles.oh_my_zsh.path
+        context.app_config.project.paths.install.dependencies.oh_my_zsh.path
     )
 
     # Handle already installed case

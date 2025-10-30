@@ -1,0 +1,66 @@
+# Wallpaper Processor Settings
+# These are defaults that can be overridden at runtime
+
+# Processing defaults
+[processing]
+mode = "memory"  # "memory" or "file"
+output_format = "png"  # Default output format
+quality = 95  # Quality for lossy formats (1-100)
+write_metadata = false  # Write metadata.json by default
+
+# Backend preferences
+[backend]
+prefer_imagemagick = true  # Use ImageMagick if available
+imagemagick_binary = "convert"  # Path to ImageMagick binary
+strict_mode = false  # Raise error if preferred backend unavailable
+fallback_enabled = true  # Auto-fallback to PIL
+
+# Default effect parameters
+[defaults.blur]
+radius = 0
+sigma = 8
+
+[defaults.brightness]
+adjustment = -20
+
+[defaults.saturation]
+adjustment = 0
+
+[defaults.vignette]
+strength = 20
+
+[defaults.color_overlay]
+color = "#000000"
+opacity = 0.3
+
+# Effect presets
+[presets.dark_blur]
+description = "Blurred and darkened for better text readability"
+effects = [
+    { name = "blur", params = { sigma = 6 } },
+    { name = "brightness", params = { adjustment = -15 } },
+]
+
+[presets.aesthetic]
+description = "Aesthetic vaporwave style"
+effects = [
+    { name = "saturation", params = { adjustment = 70 } },
+    { name = "color_overlay", params = { color = "#ff00ff", opacity = 0.2 } },
+    { name = "vignette", params = { strength = 20 } },
+]
+
+[presets.lockscreen]
+description = "Heavy blur for lockscreen backgrounds"
+effects = [
+    { name = "blur", params = { sigma = 15 } },
+    { name = "brightness", params = { adjustment = -25 } },
+    { name = "saturation", params = { adjustment = -30 } },
+]
+
+[presets.minimal_dark]
+description = "Subtle darkening with slight blur"
+effects = [
+    { name = "blur", params = { sigma = 3 } },
+    { name = "brightness", params = { adjustment = -10 } },
+]
+

@@ -117,11 +117,11 @@ _install_builder.add_path("scripts")
 # ----------------------------- Dotfiles ------------------------------ #
 _install_builder.add_path("dotfiles.starship")
 _install_builder.add_path("dotfiles.zsh", hidden=True)
-_install_builder.add_path("dotfiles.oh-my-zsh", hidden=True)
 
 # ----------------------------- Dependencies ------------------------------ #
 _install_builder.add_path("dependencies.nvm")
 _install_builder.add_path("dependencies.pyenv")
+_install_builder.add_path("dependencies.oh-my-zsh")
 # ----------------------------- config ------------------------------ #
 _install_builder.add_path("dotfiles.config")
 # ----------------------------- scripts ----------------------------- #

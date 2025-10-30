@@ -69,6 +69,11 @@ def install_oh_my_zsh(
     # Ensure parent directory exists
     oh_my_zsh_dir.parent.mkdir(parents=True, exist_ok=True)
 
+    # Remove empty oh-my-zsh directory if it exists (created by PathsBuilder.create())
+    # The Oh My Zsh installer will fail if the directory already exists
+    if oh_my_zsh_dir.exists() and not any(oh_my_zsh_dir.iterdir()):
+        oh_my_zsh_dir.rmdir()
+
     try:
         # Download the installation script
         install_url = "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
@@ -111,7 +116,11 @@ def install_oh_my_zsh(
         ) from e
 
     except subprocess.CalledProcessError as e:
-        error_msg = e.stderr if e.stderr else "Unknown error"
+        error_msg = (
+            e.stderr
+            if e.stderr
+            else f"Unknown error (stdout: {e.stdout[:200] if e.stdout else 'empty'})"
+        )
         raise OhMyZshInstallError(
             f"Oh My Zsh installation failed: {error_msg}",
             command=" ".join(e.cmd) if e.cmd else None,
@@ -157,4 +166,3 @@ def get_oh_my_zsh_version(oh_my_zsh_dir: Path) -> str | None:
     ):
         # If git fails, just return "installed"
         return "installed"
-

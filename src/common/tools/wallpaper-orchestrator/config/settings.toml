@@ -1,0 +1,76 @@
+# Wallpaper Orchestrator Configuration
+
+[container]
+# Container runtime: "docker" or "podman"
+runtime = "docker"
+
+# Container image name
+image_name = "wallpaper-processor"
+image_tag = "latest"
+
+# Build options
+build_no_cache = false
+build_pull = true
+
+[processing]
+# Processing mode: "memory" or "file"
+mode = "memory"
+
+# Output format: "png", "jpeg", "webp", "bmp", "tiff"
+output_format = "png"
+
+# Quality for lossy formats (1-100)
+quality = 95
+
+# Write metadata file
+write_metadata = false
+
+[batch]
+# Number of parallel processes (0 = auto-detect CPU count)
+parallel = 0
+
+# Skip existing output files
+skip_existing = false
+
+# Continue on error
+continue_on_error = true
+
+[logging]
+# Log level: "DEBUG", "INFO", "WARNING", "ERROR"
+level = "INFO"
+
+# Enable colored output
+colored = true
+
+# Log to file
+log_file = ""
+
+[presets.dark_blur]
+description = "Blurred and darkened wallpaper"
+effects = [
+    { name = "blur", params = { sigma = 6, radius = 0 } },
+    { name = "brightness", params = { adjustment = -15 } },
+]
+
+[presets.aesthetic]
+description = "Aesthetic wallpaper with reduced saturation and vignette"
+effects = [
+    { name = "saturation", params = { adjustment = -30 } },
+    { name = "vignette", params = { strength = 15 } },
+]
+
+[presets.lockscreen]
+description = "Heavily blurred and darkened for lock screens"
+effects = [
+    { name = "blur", params = { sigma = 12, radius = 0 } },
+    { name = "brightness", params = { adjustment = -30 } },
+    { name = "color_overlay", params = { color = "#000000", opacity = 0.2 } },
+]
+
+[presets.minimal_dark]
+description = "Minimal dark theme with desaturation and darkening"
+effects = [
+    { name = "saturation", params = { adjustment = -50 } },
+    { name = "brightness", params = { adjustment = -25 } },
+]
+

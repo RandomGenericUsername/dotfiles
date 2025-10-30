@@ -2,7 +2,7 @@
 MODULES_DIR := src/common/modules
 
 # List of all modules
-MODULES := colorscheme_generator container_manager filesystem-path-builder logging package_manager pipeline template_renderer
+MODULES := colorscheme-generator container-manager filesystem-path-builder logging package-manager pipeline template-renderer
 
 # CLI directory
 CLI_DIR := src/dotfiles-installer/cli
