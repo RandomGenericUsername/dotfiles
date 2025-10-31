@@ -93,4 +93,3 @@ To add support for a new distribution:
 - Keep common packages across distributions when possible
 - Document distribution-specific packages with comments
 - Version specifications in features should be compatible with the distribution's package manager
-

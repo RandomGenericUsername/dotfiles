@@ -85,4 +85,3 @@ protect_user_homes = true
 
 # Minimum depth for keyword checking (keywords only checked for shallow paths)
 keyword_check_depth_threshold = 4
-

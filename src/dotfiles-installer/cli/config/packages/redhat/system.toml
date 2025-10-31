@@ -40,4 +40,3 @@ fzf_completion = ""  # Not included in Fedora's fzf package
 #[project.settings.system.packages.features]
 #python = { version = "3.11.5" }  # RedHat-specific Python version
 #go = { version = "1.20.0" }  # Add Go for RedHat
-

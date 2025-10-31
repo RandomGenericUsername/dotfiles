@@ -37,4 +37,3 @@ fzf_completion = "/usr/share/fzf/completion.zsh"
 # [project.settings.system.packages.features]
 # python = { version = "3.13.0" }  # Arch-specific Python version
 # go = { version = "1.21.0" }  # Add Go for Arch
-

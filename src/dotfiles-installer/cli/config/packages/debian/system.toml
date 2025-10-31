@@ -34,4 +34,3 @@ fzf_key_bindings = "/usr/share/doc/fzf/examples/key-bindings.zsh"
 fzf_completion = "/usr/share/doc/fzf/examples/completion.zsh"
 
 # Override default package configs or features here if needed for Debian
-
