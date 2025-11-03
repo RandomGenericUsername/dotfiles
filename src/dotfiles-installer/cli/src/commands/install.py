@@ -20,6 +20,8 @@ from dotfiles_logging.handlers.file import (
 from dotfiles_logging.rich.rich_logger import RichLogger
 from dotfiles_pipeline import Pipeline
 from dotfiles_pipeline.core.types import PipelineContext, TaskStep
+from typer import Option
+
 from src.config.config import AppConfig as PydanticAppConfig
 from src.config.enums import InstallType
 from src.config.settings import Settings
@@ -40,7 +42,6 @@ from src.pipeline_steps.pipeline import (
     PrintInstallationMessageStep,
     UpdateSystemStep,
 )
-from typer import Option
 
 
 def install(
