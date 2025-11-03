@@ -1,94 +1,92 @@
-# Makefile for wallpaper-orchestrator
-# Handles installation and dependency management
+MAKEFLAGS += --no-print-directory
 
-.PHONY: help install install-deps install-local clean build test lint format
+# Standard Makefile for wallpaper-orchestrator
+# Provides consistent development workflows
 
-# Default target
-help:
-	@echo "Wallpaper Orchestrator - Makefile Commands"
-	@echo "==========================================="
-	@echo ""
-	@echo "Installation:"
-	@echo "  make install          - Install orchestrator and all dependencies"
-	@echo "  make install-deps     - Install common module dependencies"
-	@echo "  make install-local    - Install orchestrator in editable mode"
-	@echo ""
-	@echo "Development:"
-	@echo "  make build            - Build the package"
-	@echo "  make test             - Run tests"
-	@echo "  make lint             - Run linters (ruff, mypy)"
-	@echo "  make format           - Format code (black, isort)"
-	@echo ""
-	@echo "Cleanup:"
-	@echo "  make clean            - Remove build artifacts and cache"
-	@echo ""
+.PHONY: help sync-check ensure-sync dev-shell format lint type-check test test-cov clean install build pre-commit-install pre-commit-run all-checks
 
-# Install everything (dependencies + orchestrator)
-install: install-deps install-local
-	@echo "✓ Installation complete"
-	@echo ""
-	@echo "Usage: wallpaper-process --help"
+help: ## Show this help message
+	@echo "Available commands:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
 
-# Install common module dependencies
-install-deps:
-	@echo "Installing common module dependencies..."
-	@echo ""
-	@echo "→ Installing dotfiles-container-manager..."
-	@cd ../../modules/container-manager && uv pip install -e .
-	@echo ""
-	@echo "→ Installing wallpaper-processor..."
-	@cd ../../modules/wallpaper-processor && uv pip install -e .
-	@echo ""
-	@echo "→ Installing dotfiles-logging..."
-	@cd ../../modules/logging && uv pip install -e .
-	@echo ""
-	@echo "✓ Common module dependencies installed"
+sync-check: ## Check if environment sync is needed
+	@if ! uv run python -c "import sys; sys.exit(0)" 2>/dev/null; then \
+		echo "❌ Package not installed - sync needed"; \
+		exit 1; \
+	elif [ uv.lock -nt .venv/pyvenv.cfg ] 2>/dev/null; then \
+		echo "❌ Lock file newer than venv - sync needed"; \
+		exit 1; \
+	elif [ pyproject.toml -nt .venv/pyvenv.cfg ] 2>/dev/null; then \
+		echo "❌ pyproject.toml newer than venv - sync needed"; \
+		exit 1; \
+	else \
+		echo "✅ Environment is up to date"; \
+	fi
 
-# Install orchestrator in editable mode
-install-local:
-	@echo "Installing wallpaper-orchestrator..."
-	@uv pip install -e .
-	@echo "✓ Orchestrator installed"
+ensure-sync: ## Ensure environment is synced
+	@$(MAKE) sync-check || (echo "Syncing environment..." && uv sync)
 
-# Build the package
-build:
+dev-shell: ensure-sync ## Activate development shell
+	@echo "Activating virtual environment..."
+	@echo "You can leave the dev shell by typing 'exit'"
+	@bash -c "source .venv/bin/activate && exec bash"
+
+format: ensure-sync ## Format code with black and isort
+	@echo "Formatting code..."
+	@uv run black .
+	@uv run isort .
+	@echo "✅ Formatting complete"
+
+lint: ensure-sync ## Lint code with ruff
+	@echo "Linting code..."
+	@uv run ruff check --fix .
+	@echo "✅ Linting complete"
+
+type-check: ensure-sync ## Type check with mypy
+	@echo "Type checking..."
+	@uv run mypy .
+	@echo "✅ Type checking complete"
+
+test: ensure-sync ## Run tests
+	@echo "Running tests..."
+	@uv run pytest -v
+	@echo "✅ Tests complete"
+
+test-cov: ensure-sync ## Run tests with coverage
+	@echo "Running tests with coverage..."
+	@uv run pytest --cov --cov-report=html --cov-report=term
+	@echo "✅ Coverage report generated in htmlcov/"
+
+clean: ## Clean cache files and build artifacts
+	@echo "Cleaning cache files..."
+	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
+	@find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
+	@find . -type d -name ".mypy_cache" -exec rm -rf {} + 2>/dev/null || true
+	@find . -type d -name ".ruff_cache" -exec rm -rf {} + 2>/dev/null || true
+	@find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
+	@rm -rf build/ dist/ htmlcov/ .coverage 2>/dev/null || true
+	@echo "✅ Cleanup complete"
+
+install: ## Install project in editable mode
+	@echo "Installing project..."
+	@uv sync
+	@echo "✅ Installation complete"
+
+build: ensure-sync ## Build the package
 	@echo "Building package..."
 	@uv build
-	@echo "✓ Build complete"
+	@echo "✅ Build complete"
 
-# Run tests
-test:
-	@echo "Running tests..."
-	@uv run pytest
-	@echo "✓ Tests complete"
+pre-commit-install: ensure-sync ## Install pre-commit hooks
+	@echo "Installing pre-commit hooks..."
+	@uv run pre-commit install
+	@echo "✅ Pre-commit hooks installed"
 
-# Run linters
-lint:
-	@echo "Running linters..."
-	@echo "→ Ruff..."
-	@uv run ruff check src/
-	@echo "→ Mypy..."
-	@uv run mypy src/
-	@echo "✓ Linting complete"
+pre-commit-run: ensure-sync ## Run pre-commit on all files
+	@echo "Running pre-commit on all files..."
+	@uv run pre-commit run --all-files
+	@echo "✅ Pre-commit checks complete"
 
-# Format code
-format:
-	@echo "Formatting code..."
-	@echo "→ Black..."
-	@uv run black src/
-	@echo "→ Isort..."
-	@uv run isort src/
-	@echo "✓ Formatting complete"
-
-# Clean build artifacts
-clean:
-	@echo "Cleaning build artifacts..."
-	@rm -rf build/
-	@rm -rf dist/
-	@rm -rf *.egg-info
-	@rm -rf .pytest_cache/
-	@rm -rf .mypy_cache/
-	@rm -rf .ruff_cache/
-	@find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-	@echo "✓ Cleanup complete"
-
+all-checks: format lint type-check test ## Run all checks (format, lint, type-check, test)
+	@echo "✅ All checks passed!"

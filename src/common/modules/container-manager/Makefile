@@ -1,6 +1,6 @@
 MAKEFLAGS += --no-print-directory
 
-# Standard Makefile for wallpaper-processor
+# Standard Makefile for dotfiles-container-manager
 # Provides consistent development workflows
 
 .PHONY: help sync-check ensure-sync dev-shell format lint type-check test test-cov clean install build pre-commit-install pre-commit-run all-checks
@@ -90,3 +90,4 @@ pre-commit-run: ensure-sync ## Run pre-commit on all files
 
 all-checks: format lint type-check test ## Run all checks (format, lint, type-check, test)
 	@echo "✅ All checks passed!"
+
