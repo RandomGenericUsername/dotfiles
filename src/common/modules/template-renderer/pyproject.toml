@@ -108,4 +108,3 @@ addopts = [
     "--strict-markers",
     "--tb=short",
 ]
-
