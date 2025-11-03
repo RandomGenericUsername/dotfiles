@@ -39,8 +39,14 @@ class DnfPackageManager(RedHatPackageManagerBase):
         # Update package metadata if requested
         if update_system:
             try:
-                update_cmd = ["sudo", str(self.executable_path), "check-update"]
-                self._run_command(update_cmd, check=False)  # check-update returns 100 if updates available
+                update_cmd = [
+                    "sudo",
+                    str(self.executable_path),
+                    "check-update",
+                ]
+                self._run_command(
+                    update_cmd, check=False
+                )  # check-update returns 100 if updates available
             except Exception:
                 pass  # Continue even if check-update fails
 
@@ -60,7 +66,9 @@ class DnfPackageManager(RedHatPackageManagerBase):
                 )
             else:
                 # Parse output to determine which packages failed
-                failed_packages = self._parse_failed_packages(result.stderr, packages)
+                failed_packages = self._parse_failed_packages(
+                    result.stderr, packages
+                )
                 successful_packages = [
                     pkg for pkg in packages if pkg not in failed_packages
                 ]
@@ -108,7 +116,9 @@ class DnfPackageManager(RedHatPackageManagerBase):
                     output=result.stdout,
                 )
             else:
-                failed_packages = self._parse_failed_packages(result.stderr, packages)
+                failed_packages = self._parse_failed_packages(
+                    result.stderr, packages
+                )
                 successful_packages = [
                     pkg for pkg in packages if pkg not in failed_packages
                 ]
@@ -163,12 +173,18 @@ class DnfPackageManager(RedHatPackageManagerBase):
                 # dnf check-update returns 100 if updates are available
                 if result.returncode == 100:
                     lines = result.stdout.strip().split("\n")
-                    upgradeable = [l for l in lines if l and not l.startswith(("Last", "Obsoleting"))]
+                    upgradeable = [
+                        ln
+                        for ln in lines
+                        if ln and not ln.startswith(("Last", "Obsoleting"))
+                    ]
                     return InstallResult(
                         success=True,
                         packages_installed=[],
                         packages_failed=[],
-                        output=f"Found {len(upgradeable)} upgradeable packages",
+                        output=(
+                            f"Found {len(upgradeable)} upgradeable packages"
+                        ),
                     )
                 else:
                     return InstallResult(
@@ -179,11 +195,16 @@ class DnfPackageManager(RedHatPackageManagerBase):
                     )
             else:
                 return InstallResult(
-                    success=result.returncode in (0, 100),  # 100 means updates available
+                    success=result.returncode
+                    in (0, 100),  # 100 means updates available
                     packages_installed=[],
                     packages_failed=[],
                     output=result.stdout,
-                    error_message=(result.stderr if result.returncode not in (0, 100) else None),
+                    error_message=(
+                        result.stderr
+                        if result.returncode not in (0, 100)
+                        else None
+                    ),
                 )
 
         except PackageManagerError as e:
@@ -229,4 +250,3 @@ class DnfPackageManager(RedHatPackageManagerBase):
             ):
                 failed.append(package)
         return failed
-

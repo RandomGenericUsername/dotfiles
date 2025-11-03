@@ -114,4 +114,3 @@ class DockerEngine(ContainerEngine):
         """
         if not self.is_available():
             raise RuntimeNotAvailableError(self.command)
-

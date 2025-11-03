@@ -13,7 +13,8 @@ from .task_executor import TaskExecutor
 
 
 class ParallelTaskExecutor:
-    """Executes parallel step groups with configurable logic and context merging."""
+    """Executes parallel step groups with configurable logic and context
+    merging."""
 
     def __init__(self, task_executor: TaskExecutor | None = None):
         """
@@ -108,7 +109,8 @@ class ParallelTaskExecutor:
                 if isinstance(merged.results, dict) and isinstance(
                     step_context.results, dict
                 ):
-                    # Dict-style results - merge with special handling for numeric values
+                    # Dict-style results - merge with special handling
+                    # for numeric values
                     for key, value in step_context.results.items():
                         original_value = (
                             original_context.results.get(key, 0)
@@ -119,7 +121,8 @@ class ParallelTaskExecutor:
                         if isinstance(value, (int, float)) and isinstance(
                             original_value, (int, float)
                         ):
-                            # For numeric values, calculate the increment from this step
+                            # For numeric values, calculate the increment
+                            # from this step
                             step_increment = value - original_value
                             if (
                                 step_increment > 0
@@ -134,7 +137,8 @@ class ParallelTaskExecutor:
                 elif isinstance(merged.results, list) and isinstance(
                     step_context.results, list
                 ):
-                    # List-style results - only add new items (items not in original)
+                    # List-style results - only add new items
+                    # (items not in original)
                     original_len = (
                         len(original_context.results)
                         if hasattr(original_context, "results")

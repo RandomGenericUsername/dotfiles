@@ -12,8 +12,8 @@ class Pipeline:
     """
     Main pipeline interface for step execution.
 
-    Provides a clean, high-level API for executing steps in serial and parallel,
-    similar to the Log class pattern used in the logging module.
+    Provides a clean, high-level API for executing steps in serial and
+    parallel, similar to the Log class pattern used in the logging module.
     """
 
     def __init__(
@@ -69,7 +69,8 @@ class Pipeline:
         steps: list[TaskStep], config: PipelineConfig | None = None
     ) -> "Pipeline":
         """
-        Create a new pipeline (factory method following Log.create_logger pattern).
+        Create a new pipeline (factory method following Log.create_logger
+        pattern).
 
         Args:
             steps: List of pipeline steps

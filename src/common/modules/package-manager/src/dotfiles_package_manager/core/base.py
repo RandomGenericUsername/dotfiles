@@ -46,7 +46,8 @@ class PackageManager(ABC):
         self.executable_path = executable_path or self._find_executable()
         if not self.executable_path or not self.executable_path.exists():
             raise PackageManagerError(
-                f"Package manager executable not found: {self.manager_type.value}"
+                "Package manager executable not found: "
+                f"{self.manager_type.value}"
             )
 
     @property

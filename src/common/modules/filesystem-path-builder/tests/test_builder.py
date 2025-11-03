@@ -240,7 +240,8 @@ class TestPathsBuilderEdgeCases:
         builder.add_path("foo")
         ns = builder.build()
 
-        # First definition wins for top-level attribute (due to `if not hasattr`)
+        # First definition wins for top-level attribute
+        # (due to `if not hasattr`)
         # "foo.bar" was added first, so ns.foo points to /tmp/foo/bar
         assert ns.foo.path == Path("/tmp/foo/bar")
         # Can navigate from there

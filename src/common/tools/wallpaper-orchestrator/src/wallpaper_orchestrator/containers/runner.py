@@ -1,5 +1,6 @@
 """Container runner for executing wallpaper processing."""
 
+import contextlib
 import json
 import time
 from pathlib import Path
@@ -109,11 +110,9 @@ class ContainerRunner:
             # Get logs
             logs = self.container_manager.logs(container_id)
         finally:
-            # Clean up container
-            try:
+            # Clean up container (ignore cleanup errors)
+            with contextlib.suppress(Exception):
                 self.container_manager.remove(container_id, force=True)
-            except Exception:
-                pass  # Ignore cleanup errors
 
         # Parse logs (stdout/stderr combined in logs)
         return exit_code, logs, ""
@@ -188,10 +187,8 @@ class ContainerRunner:
             # Get logs
             logs = self.container_manager.logs(container_id)
         finally:
-            # Clean up container
-            try:
+            # Clean up container (ignore cleanup errors)
+            with contextlib.suppress(Exception):
                 self.container_manager.remove(container_id, force=True)
-            except Exception:
-                pass  # Ignore cleanup errors
 
         return exit_code, logs, ""

@@ -6,7 +6,11 @@ import os
 import sys
 from pathlib import Path
 
-from colorscheme_generator import CustomGenerator, OutputManager, GeneratorConfig
+from colorscheme_generator import (
+    CustomGenerator,
+    GeneratorConfig,
+    OutputManager,
+)
 
 
 def main():
@@ -20,7 +24,9 @@ def main():
 
     # Validate inputs
     if not image_path:
-        print("ERROR: IMAGE_PATH environment variable not set", file=sys.stderr)
+        print(
+            "ERROR: IMAGE_PATH environment variable not set", file=sys.stderr
+        )
         sys.exit(1)
 
     image_path = Path(image_path)
@@ -31,14 +37,14 @@ def main():
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Custom Backend Container")
-    print(f"=" * 60)
+    print("Custom Backend Container")
+    print("=" * 60)
     print(f"Image:      {image_path}")
     print(f"Output:     {output_dir}")
     print(f"Formats:    {', '.join(formats)}")
     print(f"Colors:     {color_count}")
     print(f"Algorithm:  {algorithm}")
-    print(f"=" * 60)
+    print("=" * 60)
 
     try:
         # Create configuration
@@ -59,7 +65,7 @@ def main():
         print(f"  Special colors: {colorscheme.special}")
 
         # Create output manager
-        print(f"\n→ Writing output files...")
+        print("\n→ Writing output files...")
         output_manager = OutputManager(config=config)
 
         # Write output files
@@ -79,12 +85,12 @@ def main():
             "algorithm": algorithm,
         }
         metadata_path = output_dir / "metadata.json"
-        with open(metadata_path, "w") as f:
+        with metadata_path.open("w") as f:
             json.dump(metadata, f, indent=2)
         print(f"  • metadata: {metadata_path}")
 
         print(f"\n{'=' * 60}")
-        print(f"✓ Custom backend completed successfully")
+        print("✓ Custom backend completed successfully")
         print(f"{'=' * 60}")
 
         sys.exit(0)
@@ -94,10 +100,10 @@ def main():
         print(f"✗ Error: {e}", file=sys.stderr)
         print(f"{'=' * 60}", file=sys.stderr)
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
 
 if __name__ == "__main__":
     main()
-

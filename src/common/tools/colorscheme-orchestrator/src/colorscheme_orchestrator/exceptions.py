@@ -55,7 +55,7 @@ class InvalidBackendError(OrchestratorError):
     def __init__(self, backend: str, valid_backends: list[str]):
         self.backend = backend
         self.valid_backends = valid_backends
+        valid_str = ", ".join(valid_backends)
         super().__init__(
-            f"Invalid backend '{backend}'. Valid options: {', '.join(valid_backends)}"
+            f"Invalid backend '{backend}'. Valid options: {valid_str}"
         )
-

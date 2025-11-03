@@ -1,13 +1,14 @@
 """Tests for effect pipeline."""
 
-import tempfile
-from pathlib import Path
-
 import pytest
 from PIL import Image
 
 from wallpaper_processor.backends import PILBlur, PILBrightness
-from wallpaper_processor.core.types import BlurParams, BrightnessParams, ProcessorConfig
+from wallpaper_processor.core.types import (
+    BlurParams,
+    BrightnessParams,
+    ProcessorConfig,
+)
 from wallpaper_processor.pipeline import EffectPipeline
 
 
@@ -43,10 +44,12 @@ class TestEffectPipeline:
         blur = PILBlur()
         brightness = PILBrightness()
 
-        pipeline = EffectPipeline([
-            (blur, BlurParams(sigma=5)),
-            (brightness, BrightnessParams(adjustment=-20)),
-        ])
+        pipeline = EffectPipeline(
+            [
+                (blur, BlurParams(sigma=5)),
+                (brightness, BrightnessParams(adjustment=-20)),
+            ]
+        )
 
         result = pipeline.apply(test_image_file, output_path)
 
@@ -95,6 +98,7 @@ class TestEffectPipeline:
 
         # Check metadata content
         import json
+
         with open(metadata_path) as f:
             metadata = json.load(f)
 
@@ -131,4 +135,3 @@ class TestEffectPipeline:
 
         with pytest.raises(FileNotFoundError):
             pipeline.apply(input_path, output_path)
-

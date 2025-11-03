@@ -77,4 +77,3 @@ __all__ = [
     "EffectFactory",
     "EffectPipeline",
 ]
-

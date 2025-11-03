@@ -18,9 +18,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Union
 
-Segment = Union[str, Path]
+Segment = str | Path
 
 
 def _clean_segment(name: str) -> str:
@@ -127,7 +126,9 @@ class PathTree:
             >>> hidden = PathTree.from_str("/tmp", hidden=False)
             >>> hidden.foo.path  # hidden=False
             PosixPath('/tmp/foo')
-            >>> hidden_dir = PathTree(base=Path("/tmp"), rel=Path("foo"), hidden=True)
+            >>> hidden_dir = PathTree(
+            ...     base=Path("/tmp"), rel=Path("foo"), hidden=True
+            ... )
             >>> hidden_dir.path  # hidden=True
             PosixPath('/tmp/.foo')
         """

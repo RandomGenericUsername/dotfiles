@@ -35,7 +35,8 @@ def generate_command(
         None,
         "--backend",
         "-b",
-        help="Backend to use (pywal, wallust, custom). Uses default from settings if not specified.",
+        help="Backend to use (pywal, wallust, custom). Uses default "
+        "from settings if not specified.",
     ),
     image: Path = typer.Option(
         ...,
@@ -51,19 +52,22 @@ def generate_command(
         None,
         "--output",
         "-o",
-        help="Output directory for generated files. Uses default from settings if not specified.",
+        help="Output directory for generated files. Uses default from "
+        "settings if not specified.",
     ),
     formats: str | None = typer.Option(
         None,
         "--formats",
         "-f",
-        help="Comma-separated output formats (json,css,yaml,sh). Uses default from settings if not specified.",
+        help="Comma-separated output formats (json,css,yaml,sh). Uses "
+        "default from settings if not specified.",
     ),
     colors: int | None = typer.Option(
         None,
         "--colors",
         "-c",
-        help="Number of colors to extract. Uses default from settings if not specified.",
+        help="Number of colors to extract. Uses default from settings "
+        "if not specified.",
     ),
     algorithm: str | None = typer.Option(
         None,
@@ -158,18 +162,18 @@ def generate_command(
         console.print(
             f"[yellow]Valid backends: {', '.join(e.valid_backends)}[/yellow]"
         )
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
     except ImageNotFoundError as e:
         console.print(f"[red]✗ Image not found: {e.image_path}[/red]")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
     except OrchestratorError as e:
         console.print(f"[red]✗ Error: {e}[/red]")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
     except Exception as e:
         console.print(f"[red]✗ Unexpected error: {e}[/red]")
         if verbose:
             console.print_exception()
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
 
 @app.command(name="list")
@@ -201,7 +205,7 @@ def list_command():
 
     except Exception as e:
         console.print(f"[red]✗ Error: {e}[/red]")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
 
 @app.command(name="build")
@@ -252,7 +256,8 @@ def build_command(
                 )
             except NotImplementedError:
                 console.print(
-                    "[yellow]Image building will be implemented in Phase 2[/yellow]"
+                    "[yellow]Image building will be implemented in "
+                    "Phase 2[/yellow]"
                 )
         elif backend:
             console.print(
@@ -263,11 +268,13 @@ def build_command(
                     backend, rebuild=True, no_cache=no_cache
                 )
                 console.print(
-                    f"\n[green]✓ Image for '{backend}' built successfully![/green]"
+                    f"\n[green]✓ Image for '{backend}' built "
+                    "successfully![/green]"
                 )
             except NotImplementedError:
                 console.print(
-                    "[yellow]Image building will be implemented in Phase 2[/yellow]"
+                    "[yellow]Image building will be implemented in "
+                    "Phase 2[/yellow]"
                 )
         else:
             console.print("[red]✗ Please specify --backend or --all[/red]")
@@ -275,7 +282,7 @@ def build_command(
 
     except Exception as e:
         console.print(f"[red]✗ Error: {e}[/red]")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
 
 @app.command(name="clean")
@@ -329,7 +336,8 @@ def clean_command(
 
         if not clean_containers and not clean_images:
             console.print(
-                "[yellow]Nothing to clean (use --containers or --images)[/yellow]"
+                "[yellow]Nothing to clean (use --containers or "
+                "--images)[/yellow]"
             )
             return
 
@@ -370,7 +378,8 @@ def clean_command(
                                 removed_count += 1
                             except Exception as e:
                                 console.print(
-                                    f"  ✗ Failed to remove {container.name}: {e}"
+                                    f"  ✗ Failed to remove "
+                                    f"{container.name}: {e}"
                                 )
                 except Exception as e:
                     console.print(f"  ✗ Error listing containers: {e}")
@@ -403,7 +412,7 @@ def clean_command(
 
     except Exception as e:
         console.print(f"[red]✗ Error: {e}[/red]")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
 
 @app.callback()
@@ -416,10 +425,12 @@ def main(
     ),
 ):
     """
-    Colorscheme Orchestrator - Generate colorschemes using containerized backends.
+    Colorscheme Orchestrator - Generate colorschemes using containerized
+    backends.
 
-    This tool orchestrates colorscheme generation using Docker/Podman containers,
-    providing isolation and reproducibility for different backends (pywal, wallust, custom).
+    This tool orchestrates colorscheme generation using Docker/Podman
+    containers, providing isolation and reproducibility for different
+    backends (pywal, wallust, custom).
 
     Commands:
 

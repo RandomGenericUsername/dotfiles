@@ -10,7 +10,9 @@ from dotfiles_package_manager.core.types import (
     PackageManagerType,
     SearchResult,
 )
-from dotfiles_package_manager.implementations.arch.base import ArchPackageManagerBase
+from dotfiles_package_manager.implementations.arch.base import (
+    ArchPackageManagerBase,
+)
 
 
 class ParuPackageManager(ArchPackageManagerBase):
@@ -51,7 +53,9 @@ class ParuPackageManager(ArchPackageManagerBase):
                     output=result.stdout,
                 )
             else:
-                failed_packages = self._parse_failed_packages(result.stderr, packages)
+                failed_packages = self._parse_failed_packages(
+                    result.stderr, packages
+                )
                 successful_packages = [
                     pkg for pkg in packages if pkg not in failed_packages
                 ]
@@ -98,7 +102,9 @@ class ParuPackageManager(ArchPackageManagerBase):
                     output=result.stdout,
                 )
             else:
-                failed_packages = self._parse_failed_packages(result.stderr, packages)
+                failed_packages = self._parse_failed_packages(
+                    result.stderr, packages
+                )
                 successful_packages = [
                     pkg for pkg in packages if pkg not in failed_packages
                 ]
@@ -149,7 +155,9 @@ class ParuPackageManager(ArchPackageManagerBase):
 
             if dry_run:
                 upgradeable = (
-                    result.stdout.strip().split("\n") if result.stdout.strip() else []
+                    result.stdout.strip().split("\n")
+                    if result.stdout.strip()
+                    else []
                 )
                 return InstallResult(
                     success=result.returncode == 0,
@@ -160,7 +168,9 @@ class ParuPackageManager(ArchPackageManagerBase):
                         if upgradeable
                         else "System is up to date"
                     ),
-                    error_message=(result.stderr if result.returncode != 0 else None),
+                    error_message=(
+                        result.stderr if result.returncode != 0 else None
+                    ),
                 )
             else:
                 return InstallResult(
@@ -168,7 +178,9 @@ class ParuPackageManager(ArchPackageManagerBase):
                     packages_installed=[],
                     packages_failed=[],
                     output=result.stdout,
-                    error_message=(result.stderr if result.returncode != 0 else None),
+                    error_message=(
+                        result.stderr if result.returncode != 0 else None
+                    ),
                 )
 
         except PackageManagerError as e:
@@ -225,4 +237,3 @@ class ParuPackageManager(ArchPackageManagerBase):
             ):
                 failed.append(package)
         return failed
-

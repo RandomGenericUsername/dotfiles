@@ -23,4 +23,3 @@ RUN chmod +x /app/entrypoint.py
 
 # Set entrypoint
 ENTRYPOINT ["python", "/app/entrypoint.py"]
-

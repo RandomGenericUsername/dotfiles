@@ -57,7 +57,7 @@ class ContainerBuilder:
                     context_path = str(rel_path)
 
                 # Read file content
-                with open(item, "rb") as f:
+                with item.open("rb") as f:
                     files[context_path] = f.read()
 
     def image_exists(self, image_name: str, image_tag: str = "latest") -> bool:
@@ -73,10 +73,7 @@ class ContainerBuilder:
         try:
             images = self.engine.images.list()
             full_name = f"{image_name}:{image_tag}"
-            for image in images:
-                if full_name in image.tags:
-                    return True
-            return False
+            return any(full_name in image.tags for image in images)
         except Exception:
             return False
 
@@ -107,7 +104,8 @@ class ContainerBuilder:
             metadata.image_name, metadata.image_tag
         ):
             print(
-                f"✓ Image {metadata.image_name}:{metadata.image_tag} already exists"
+                f"✓ Image {metadata.image_name}:{metadata.image_tag} "
+                "already exists"
             )
             return f"{metadata.image_name}:{metadata.image_tag}"
 
@@ -120,10 +118,12 @@ class ContainerBuilder:
             if not metadata.dockerfile_path.exists():
                 raise ImageBuildError(
                     backend=backend,
-                    message=f"Dockerfile not found: {metadata.dockerfile_path}",
+                    message=(
+                        f"Dockerfile not found: {metadata.dockerfile_path}"
+                    ),
                 )
 
-            with open(metadata.dockerfile_path) as f:
+            with metadata.dockerfile_path.open() as f:
                 dockerfile_content = f.read()
 
             # Create build context with files
@@ -131,7 +131,7 @@ class ContainerBuilder:
 
             # Add entrypoint script
             if metadata.entrypoint_path.exists():
-                with open(metadata.entrypoint_path, "rb") as f:
+                with metadata.entrypoint_path.open("rb") as f:
                     files["entrypoint.py"] = f.read()
 
             # Add colorscheme-generator module files
@@ -146,7 +146,10 @@ class ContainerBuilder:
             else:
                 raise ImageBuildError(
                     backend=backend,
-                    message=f"colorscheme-generator module not found: {self.colorscheme_generator_path}",
+                    message=(
+                        "colorscheme-generator module not found: "
+                        f"{self.colorscheme_generator_path}"
+                    ),
                 )
 
             # Create BuildContext
@@ -162,7 +165,8 @@ class ContainerBuilder:
             image_id = self.engine.images.build(context, image_name)
 
             print(
-                f"✓ Image built successfully: {metadata.image_name}:{metadata.image_tag}"
+                f"✓ Image built successfully: "
+                f"{metadata.image_name}:{metadata.image_tag}"
             )
             print(f"  Image ID: {image_id[:12]}")
 

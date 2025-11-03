@@ -16,8 +16,8 @@ from .core import (
 from .renderers import Jinja2Renderer
 from .validators import (
     extract_jinja2_variables,
-    validate_variables,
     validate_variable_types,
+    validate_variables,
 )
 
 __all__ = [
@@ -41,4 +41,3 @@ __all__ = [
     "validate_variables",
     "validate_variable_types",
 ]
-

@@ -157,4 +157,3 @@ class PILColorOverlay(WallpaperEffect):
         result = Image.blend(image.convert("RGB"), overlay, params.opacity)
 
         return result
-

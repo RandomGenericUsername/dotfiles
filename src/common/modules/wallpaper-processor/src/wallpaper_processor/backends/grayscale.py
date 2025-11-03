@@ -153,4 +153,3 @@ class PILGrayscale(WallpaperEffect):
         # Convert to grayscale and back to RGB to maintain mode
         grayscale = ImageOps.grayscale(image)
         return grayscale.convert("RGB")
-

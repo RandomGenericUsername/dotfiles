@@ -24,7 +24,9 @@ Example:
     >>> # Write files
     >>> from colorscheme_generator.core.managers import OutputManager
     >>> manager = OutputManager(settings)
-    >>> output_files = manager.write_outputs(scheme, config.output_dir, config.formats)
+    >>> output_files = manager.write_outputs(
+    ...     scheme, config.output_dir, config.formats
+    ... )
 """
 
 __version__ = "0.1.0"

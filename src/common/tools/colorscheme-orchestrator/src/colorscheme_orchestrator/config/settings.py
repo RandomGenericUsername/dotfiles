@@ -133,7 +133,9 @@ def load_settings() -> OrchestratorConfig:
     # Convert to Pydantic models
     orchestrator_settings = OrchestratorSettings(
         default_backend=settings.orchestrator.default_backend,
-        default_output_dir=Path(settings.orchestrator.default_output_dir).expanduser(),
+        default_output_dir=Path(
+            settings.orchestrator.default_output_dir
+        ).expanduser(),
         default_formats=settings.orchestrator.default_formats,
         default_color_count=settings.orchestrator.default_color_count,
         container_runtime=settings.orchestrator.container_runtime,
@@ -168,4 +170,3 @@ def load_settings() -> OrchestratorConfig:
         orchestrator=orchestrator_settings,
         backends=backend_settings,
     )
-

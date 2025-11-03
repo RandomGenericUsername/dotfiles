@@ -53,4 +53,3 @@ class PresetManager:
             True if preset exists, False otherwise
         """
         return preset_name in self.settings.presets
-

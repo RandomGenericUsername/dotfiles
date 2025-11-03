@@ -1,7 +1,8 @@
 """Tests for CustomGenerator backend."""
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 from colorscheme_generator.backends.custom import CustomGenerator
 from colorscheme_generator.config.settings import Settings
@@ -33,10 +34,9 @@ def test_is_available(generator):
 def test_generate_requires_valid_image(generator, settings):
     """Test that generate requires a valid image."""
     from colorscheme_generator.core.exceptions import InvalidImageError
-    
+
     config = GeneratorConfig.from_settings(settings)
     invalid_path = Path("/nonexistent/image.png")
-    
+
     with pytest.raises(InvalidImageError):
         generator.generate(invalid_path, config)
-

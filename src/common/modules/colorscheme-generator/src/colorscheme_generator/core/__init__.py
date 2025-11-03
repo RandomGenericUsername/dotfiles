@@ -13,7 +13,11 @@ from colorscheme_generator.core.exceptions import (
     OutputWriteError,
     TemplateRenderError,
 )
-from colorscheme_generator.core.types import Color, ColorScheme, GeneratorConfig
+from colorscheme_generator.core.types import (
+    Color,
+    ColorScheme,
+    GeneratorConfig,
+)
 
 __all__ = [
     # Base classes
@@ -30,4 +34,3 @@ __all__ = [
     "OutputWriteError",
     "InvalidImageError",
 ]
-

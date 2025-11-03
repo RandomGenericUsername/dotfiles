@@ -1,7 +1,5 @@
 """Exceptions for container management."""
 
-from typing import Any
-
 
 class ContainerError(Exception):
     """Base exception for container operations."""
@@ -151,4 +149,3 @@ class InvalidConfigError(ContainerError):
     """Raised when configuration is invalid."""
 
     pass
-

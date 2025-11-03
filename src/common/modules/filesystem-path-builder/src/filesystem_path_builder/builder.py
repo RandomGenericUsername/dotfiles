@@ -34,7 +34,8 @@ class PathDefinition:
     names for directory creation.
 
     This allows defining paths like "dotfiles.oh-my-zsh" (with hyphens)
-    while accessing them via attributes like dotfiles.oh_my_zsh (with underscores).
+    while accessing them via attributes like dotfiles.oh_my_zsh
+    (with underscores).
     """
 
     key: str  # Normalized key for registry lookups (underscores)
@@ -150,7 +151,7 @@ class PathsBuilder:
         """
         created_paths = []
 
-        for key, definition in self.definitions.items():
+        for _key, definition in self.definitions.items():
             parts = definition.get_parts()
 
             # Build path component by component, checking hidden status
@@ -227,8 +228,9 @@ class ManagedPathTree(PathTree):
     def create(self) -> list[Path]:
         """Create all registered directories on the filesystem.
 
-        Creates all directories that were registered via PathsBuilder.add_path(),
-        respecting the hidden flag for each directory and its parent directories.
+        Creates all directories that were registered via
+        PathsBuilder.add_path(), respecting the hidden flag for each
+        directory and its parent directories.
 
         Returns:
             List of Path objects for all created directories
@@ -244,10 +246,11 @@ class ManagedPathTree(PathTree):
         """
         created_paths = []
 
-        for key, definition in self._registry.items():
+        for _key, definition in self._registry.items():
             parts = definition.get_parts()
 
-            # Build path component by component, checking hidden status for each level
+            # Build path component by component, checking hidden status
+            # for each level
             path_components = []
             for i in range(len(parts)):
                 # Build key for this level (from original parts)

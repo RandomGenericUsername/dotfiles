@@ -170,7 +170,9 @@ class EffectPipeline:
 
         import json
 
-        metadata_path = output_path.parent / f"{output_path.stem}_metadata.json"
+        metadata_path = (
+            output_path.parent / f"{output_path.stem}_metadata.json"
+        )
 
         # Convert metadata to dict
         metadata_dict = self.metadata.model_dump(mode="json")
@@ -189,4 +191,3 @@ class EffectPipeline:
             ProcessingMetadata if pipeline has been applied, None otherwise
         """
         return self.metadata
-

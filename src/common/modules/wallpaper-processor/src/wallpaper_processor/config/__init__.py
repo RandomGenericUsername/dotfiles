@@ -14,7 +14,10 @@ from wallpaper_processor.config.enums import (
     OutputFormat,
     ProcessingMode,
 )
-from wallpaper_processor.config.settings import get_default_config, load_settings
+from wallpaper_processor.config.settings import (
+    get_default_config,
+    load_settings,
+)
 
 __all__ = [
     # Config models
@@ -33,4 +36,3 @@ __all__ = [
     "get_default_config",
     "load_settings",
 ]
-

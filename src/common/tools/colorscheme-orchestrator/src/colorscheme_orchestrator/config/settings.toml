@@ -51,4 +51,3 @@ image_tag = "latest"
 # Backend-specific defaults
 algorithm = "kmeans"
 n_clusters = 16
-

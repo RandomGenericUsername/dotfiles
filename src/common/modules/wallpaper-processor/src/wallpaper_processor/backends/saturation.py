@@ -135,4 +135,3 @@ class PILSaturation(WallpaperEffect):
         factor = 1.0 + (params.adjustment / 100.0)
         enhancer = ImageEnhance.Color(image)
         return enhancer.enhance(factor)
-

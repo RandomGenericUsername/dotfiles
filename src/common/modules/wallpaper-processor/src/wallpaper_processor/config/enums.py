@@ -36,4 +36,3 @@ class BackendType(str, Enum):
 
     IMAGEMAGICK = "imagemagick"
     PIL = "pil"
-

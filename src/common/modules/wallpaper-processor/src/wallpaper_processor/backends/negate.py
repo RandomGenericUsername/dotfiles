@@ -133,4 +133,3 @@ class PILNegate(WallpaperEffect):
 
         # PIL's invert function inverts all channels
         return ImageOps.invert(image.convert("RGB"))
-

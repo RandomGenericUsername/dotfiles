@@ -10,7 +10,9 @@ from dotfiles_package_manager.core.types import (
     PackageManagerType,
     SearchResult,
 )
-from dotfiles_package_manager.implementations.arch.base import ArchPackageManagerBase
+from dotfiles_package_manager.implementations.arch.base import (
+    ArchPackageManagerBase,
+)
 
 
 class PacmanPackageManager(ArchPackageManagerBase):
@@ -52,7 +54,9 @@ class PacmanPackageManager(ArchPackageManagerBase):
                 )
             else:
                 # Parse output to determine which packages failed
-                failed_packages = self._parse_failed_packages(result.stderr, packages)
+                failed_packages = self._parse_failed_packages(
+                    result.stderr, packages
+                )
                 successful_packages = [
                     pkg for pkg in packages if pkg not in failed_packages
                 ]
@@ -94,12 +98,15 @@ class PacmanPackageManager(ArchPackageManagerBase):
             if result.returncode == 0:
                 return InstallResult(
                     success=True,
-                    packages_installed=packages.copy(),  # "installed" here means "removed"
+                    # "installed" here means "removed"
+                    packages_installed=packages.copy(),
                     packages_failed=[],
                     output=result.stdout,
                 )
             else:
-                failed_packages = self._parse_failed_packages(result.stderr, packages)
+                failed_packages = self._parse_failed_packages(
+                    result.stderr, packages
+                )
                 successful_packages = [
                     pkg for pkg in packages if pkg not in failed_packages
                 ]
@@ -144,7 +151,8 @@ class PacmanPackageManager(ArchPackageManagerBase):
             # For dry run, check for upgradeable packages without sudo
             command = [str(self.executable_path), "-Qu"]
         else:
-            # Use -Sy (sync databases) instead of -Syu (full upgrade) to avoid hanging
+            # Use -Sy (sync databases) instead of -Syu (full upgrade)
+            # to avoid hanging
             command = ["sudo", str(self.executable_path), "-Sy", "--noconfirm"]
 
         try:
@@ -153,7 +161,9 @@ class PacmanPackageManager(ArchPackageManagerBase):
             if dry_run:
                 # Parse the output to see how many packages can be updated
                 upgradeable = (
-                    result.stdout.strip().split("\n") if result.stdout.strip() else []
+                    result.stdout.strip().split("\n")
+                    if result.stdout.strip()
+                    else []
                 )
                 return InstallResult(
                     success=result.returncode == 0,
@@ -164,15 +174,20 @@ class PacmanPackageManager(ArchPackageManagerBase):
                         if upgradeable
                         else "System is up to date"
                     ),
-                    error_message=(result.stderr if result.returncode != 0 else None),
+                    error_message=(
+                        result.stderr if result.returncode != 0 else None
+                    ),
                 )
             else:
                 return InstallResult(
                     success=result.returncode == 0,
-                    packages_installed=[],  # Don't track individual packages for system update
+                    # Don't track individual packages for system update
+                    packages_installed=[],
                     packages_failed=[],
                     output=result.stdout,
-                    error_message=(result.stderr if result.returncode != 0 else None),
+                    error_message=(
+                        result.stderr if result.returncode != 0 else None
+                    ),
                 )
 
         except PackageManagerError as e:
@@ -229,4 +244,3 @@ class PacmanPackageManager(ArchPackageManagerBase):
             ):
                 failed.append(package)
         return failed
-

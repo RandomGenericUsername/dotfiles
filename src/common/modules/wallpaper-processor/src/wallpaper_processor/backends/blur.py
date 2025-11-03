@@ -65,7 +65,13 @@ class ImageMagickBlur(WallpaperEffect):
             # Build ImageMagick command
             # -blur radiusxsigma
             blur_arg = f"{params.radius}x{params.sigma}"
-            cmd = ["convert", str(input_path), "-blur", blur_arg, str(output_path)]
+            cmd = [
+                "convert",
+                str(input_path),
+                "-blur",
+                blur_arg,
+                str(output_path),
+            ]
 
             # Run ImageMagick
             result = subprocess.run(
@@ -128,4 +134,3 @@ class PILBlur(WallpaperEffect):
         # PIL's GaussianBlur uses radius parameter
         # We use sigma as the radius for consistency
         return image.filter(ImageFilter.GaussianBlur(radius=params.sigma))
-

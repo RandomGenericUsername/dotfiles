@@ -59,4 +59,3 @@ class UnsupportedFormatError(WallpaperProcessorError):
         """
         self.format_name = format_name
         super().__init__(f"Format '{format_name}' is not supported")
-

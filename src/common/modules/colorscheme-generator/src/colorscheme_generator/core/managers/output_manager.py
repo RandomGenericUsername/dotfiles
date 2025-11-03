@@ -70,9 +70,11 @@ class OutputManager:
             loader=FileSystemLoader(str(template_dir)),
             trim_blocks=True,
             lstrip_blocks=True,
-            undefined=StrictUndefined
-            if settings.templates.strict_mode
-            else Undefined,
+            undefined=(
+                StrictUndefined
+                if settings.templates.strict_mode
+                else Undefined
+            ),
         )
 
     def write_outputs(
@@ -132,7 +134,7 @@ class OutputManager:
                 raise OutputWriteError(
                     str(output_dir / f"colors.{fmt.value}"),
                     f"Unexpected error: {e}",
-                )
+                ) from e
 
         return output_files
 
@@ -157,7 +159,7 @@ class OutputManager:
             raise TemplateRenderError(
                 template_name,
                 f"Template not found in {self.settings.templates.directory}",
-            )
+            ) from None
 
         # Prepare template context
         context = {
@@ -175,9 +177,9 @@ class OutputManager:
         except UndefinedError as e:
             raise TemplateRenderError(
                 template_name, f"Undefined variable: {e}"
-            )
+            ) from e
         except Exception as e:
-            raise TemplateRenderError(template_name, str(e))
+            raise TemplateRenderError(template_name, str(e)) from e
 
     def _write_file(self, path: Path, content: str) -> None:
         """Write content to file.
@@ -192,6 +194,6 @@ class OutputManager:
         try:
             path.write_text(content)
         except PermissionError:
-            raise OutputWriteError(str(path), "Permission denied")
+            raise OutputWriteError(str(path), "Permission denied") from None
         except OSError as e:
-            raise OutputWriteError(str(path), str(e))
+            raise OutputWriteError(str(path), str(e)) from e

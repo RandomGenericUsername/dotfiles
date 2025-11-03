@@ -3,7 +3,12 @@
 from abc import ABC, abstractmethod
 
 from .enums import ContainerRuntime
-from .managers import ContainerManager, ImageManager, NetworkManager, VolumeManager
+from .managers import (
+    ContainerManager,
+    ImageManager,
+    NetworkManager,
+    VolumeManager,
+)
 
 
 class ContainerEngine(ABC):
@@ -14,7 +19,8 @@ class ContainerEngine(ABC):
         Initialize the container engine.
 
         Args:
-            command: Command to use for container operations (e.g., 'docker', 'podman')
+            command: Command to use for container operations
+                (e.g., 'docker', 'podman')
         """
         self.command = command
         self._runtime = self._detect_runtime()
@@ -88,4 +94,3 @@ class ContainerEngine(ABC):
             ContainerError: If info retrieval fails
         """
         pass
-

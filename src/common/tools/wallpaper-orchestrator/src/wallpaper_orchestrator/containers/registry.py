@@ -1,6 +1,6 @@
 """Container registry for managing wallpaper-processor images."""
 
-from pathlib import Path
+import contextlib
 
 from dotfiles_container_manager import (
     ContainerEngineFactory,
@@ -64,10 +64,8 @@ class ContainerRegistry:
         Args:
             force: Force removal even if containers are using it
         """
-        try:
+        with contextlib.suppress(ImageNotFoundError):
             self.image_manager.remove(self.get_image_name(), force=force)
-        except ImageNotFoundError:
-            pass
 
     def list_images(self) -> list[ImageInfo]:
         """List all wallpaper-processor images.
@@ -97,9 +95,6 @@ class ContainerRegistry:
 
             # Remove old images
             if img.id:
-                try:
+                # Ignore errors (image might be in use)
+                with contextlib.suppress(Exception):
                     self.image_manager.remove(img.id, force=False)
-                except Exception:
-                    # Ignore errors (image might be in use)
-                    pass
-

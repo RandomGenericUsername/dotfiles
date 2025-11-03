@@ -95,4 +95,3 @@ class TemplateInfo:
 
     description: str | None = None
     """Template description (from docstring or metadata)"""
-

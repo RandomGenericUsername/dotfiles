@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
 
 
 @dataclass
@@ -38,7 +37,9 @@ class BackendRegistry:
                 image_name="colorscheme-pywal",
                 image_tag="latest",
                 dockerfile_path=self.containers_dir / "pywal" / "Dockerfile",
-                entrypoint_path=self.containers_dir / "pywal" / "entrypoint.py",
+                entrypoint_path=self.containers_dir
+                / "pywal"
+                / "entrypoint.py",
                 dependencies=["pywal"],
             ),
             "wallust": BackendMetadata(
@@ -46,7 +47,9 @@ class BackendRegistry:
                 image_name="colorscheme-wallust",
                 image_tag="latest",
                 dockerfile_path=self.containers_dir / "wallust" / "Dockerfile",
-                entrypoint_path=self.containers_dir / "wallust" / "entrypoint.py",
+                entrypoint_path=self.containers_dir
+                / "wallust"
+                / "entrypoint.py",
                 dependencies=["wallust"],
             ),
             "custom": BackendMetadata(
@@ -54,7 +57,9 @@ class BackendRegistry:
                 image_name="colorscheme-custom",
                 image_tag="latest",
                 dockerfile_path=self.containers_dir / "custom" / "Dockerfile",
-                entrypoint_path=self.containers_dir / "custom" / "entrypoint.py",
+                entrypoint_path=self.containers_dir
+                / "custom"
+                / "entrypoint.py",
                 dependencies=["pillow", "scikit-learn", "numpy"],
             ),
         }
@@ -93,4 +98,3 @@ class BackendRegistry:
             bool: True if backend is valid
         """
         return backend in self._backends
-

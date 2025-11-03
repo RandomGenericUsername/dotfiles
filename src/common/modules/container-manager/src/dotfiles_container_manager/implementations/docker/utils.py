@@ -185,7 +185,10 @@ def format_port_mappings(ports: list) -> list[str]:
     result = []
     for port in ports:
         if port.host_port:
-            mapping = f"{port.host_ip}:{port.host_port}:{port.container_port}/{port.protocol}"
+            mapping = (
+                f"{port.host_ip}:{port.host_port}:"
+                f"{port.container_port}/{port.protocol}"
+            )
         else:
             mapping = f"{port.container_port}/{port.protocol}"
         result.append(f"--publish={mapping}")
@@ -209,4 +212,3 @@ def format_volume_mounts(volumes: list) -> list[str]:
             mount += ":ro"
         result.append(f"--volume={mount}")
     return result
-

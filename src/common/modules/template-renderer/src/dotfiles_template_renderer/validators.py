@@ -8,7 +8,9 @@ from jinja2 import Environment, meta
 from .core.types import ValidationResult
 
 
-def extract_jinja2_variables(template_source: str, env: Environment) -> set[str]:
+def extract_jinja2_variables(
+    template_source: str, env: Environment
+) -> set[str]:
     """
     Extract all variables from a Jinja2 template.
 
@@ -74,8 +76,9 @@ def validate_variables(
                 f"Missing required variables: {', '.join(sorted(missing))}"
             )
         else:
+            missing_str = ", ".join(sorted(missing))
             warnings.append(
-                f"Missing variables (will use defaults): {', '.join(sorted(missing))}"
+                f"Missing variables (will use defaults): {missing_str}"
             )
 
     if unused:
@@ -123,4 +126,3 @@ def validate_variable_types(
                 )
 
     return errors
-

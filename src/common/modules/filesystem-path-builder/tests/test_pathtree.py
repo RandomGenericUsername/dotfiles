@@ -197,7 +197,8 @@ class TestPathTreeImmutability:
     def test_frozen_dataclass(self):
         """Test that PathTree is immutable."""
         paths = PathTree.from_str("/tmp")
-        with pytest.raises(Exception):  # FrozenInstanceError
+        # FrozenInstanceError
+        with pytest.raises((AttributeError, Exception)):
             paths.base = Path("/other")
 
     def test_navigation_creates_new_instance(self):
@@ -206,4 +207,3 @@ class TestPathTreeImmutability:
         child = paths.foo
         assert paths is not child
         assert paths.path != child.path
-

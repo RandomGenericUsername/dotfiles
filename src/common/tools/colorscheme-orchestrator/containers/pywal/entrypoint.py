@@ -101,7 +101,7 @@ def main():
             "output_files": {k: str(v) for k, v in output_files.items()},
         }
         metadata_path = output_dir / "metadata.json"
-        with open(metadata_path, "w") as f:
+        with metadata_path.open("w") as f:
             json.dump(metadata, f, indent=2)
         print(f"  • metadata: {metadata_path}")
 

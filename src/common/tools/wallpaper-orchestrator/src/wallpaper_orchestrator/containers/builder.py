@@ -27,14 +27,15 @@ class ContainerBuilder:
         self,
         dockerfile_content: str,
         files: dict[str, bytes],
-        progress_callback: Callable | None = None,
+        _progress_callback: Callable | None = None,
     ) -> str:
         """Build container image.
 
         Args:
             dockerfile_content: Dockerfile content as string
             files: Additional files to include in build context
-            progress_callback: Optional callback for build progress
+            _progress_callback: Optional callback for build progress
+                (reserved for future use)
 
         Returns:
             Image ID
@@ -82,7 +83,7 @@ class ContainerBuilder:
                     context_path = str(rel_path)
 
                 # Read file content
-                with open(item, "rb") as f:
+                with item.open("rb") as f:
                     files[context_path] = f.read()
 
     def prepare_build_context(
@@ -98,7 +99,7 @@ class ContainerBuilder:
             Tuple of (dockerfile_content, files_dict)
         """
         # Read Dockerfile
-        with open(dockerfile_path) as f:
+        with dockerfile_path.open() as f:
             dockerfile_content = f.read()
 
         # Create files dict
@@ -106,12 +107,13 @@ class ContainerBuilder:
 
         # Add entrypoint script
         if entrypoint_path.exists():
-            with open(entrypoint_path, "rb") as f:
+            with entrypoint_path.open("rb") as f:
                 files["entrypoint.py"] = f.read()
 
         # Get module paths
         # __file__ is in:
-        # src/common/tools/wallpaper-orchestrator/src/wallpaper_orchestrator/containers/builder.py
+        # src/common/tools/wallpaper-orchestrator/src/
+        # wallpaper_orchestrator/containers/builder.py
         # 7 parents up gets us to workspace_root/src, so we need 8 parents
         workspace_root = Path(
             __file__

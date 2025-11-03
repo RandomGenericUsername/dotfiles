@@ -111,7 +111,7 @@ class PywalGenerator(ColorSchemeGenerator):
             )
 
         try:
-            with open(colors_file) as f:
+            with Path(colors_file).open() as f:
                 pywal_colors = json.load(f)
         except Exception as e:
             raise ColorExtractionError(
@@ -124,16 +124,17 @@ class PywalGenerator(ColorSchemeGenerator):
         return self._parse_pywal_output(pywal_colors, image_path)
 
     def _run_pywal_library(
-        self, image_path: Path, config: GeneratorConfig
+        self,
+        image_path: Path,
+        config: GeneratorConfig,  # noqa: ARG002
     ) -> None:
         """Run pywal as Python library.
 
         Args:
             image_path: Path to source image
-            config: Runtime configuration
+            config: Runtime configuration (reserved for future use)
         """
         try:
-            import pywal
             from pywal import colors as pywal_colors
             from pywal import image as pywal_image
         except ImportError as e:
@@ -150,18 +151,20 @@ class PywalGenerator(ColorSchemeGenerator):
         pywal_colors.file(palette, self.cache_dir)
 
     def _run_pywal_cli(
-        self, image_path: Path, config: GeneratorConfig
+        self,
+        image_path: Path,
+        config: GeneratorConfig,  # noqa: ARG002
     ) -> None:
         """Run pywal as CLI command.
 
         Args:
             image_path: Path to source image
-            config: Runtime configuration
+            config: Runtime configuration (reserved for future use)
         """
         cmd = ["wal", "-i", str(image_path), "-n"]
 
         try:
-            result = subprocess.run(
+            subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
@@ -193,7 +196,9 @@ class PywalGenerator(ColorSchemeGenerator):
         """
         # Pywal format:
         # {
-        #   "special": {"background": "#...", "foreground": "#...", "cursor": "#..."},
+        #   "special": {
+        #     "background": "#...", "foreground": "#...", "cursor": "#..."
+        #   },
         #   "colors": {"color0": "#...", "color1": "#...", ...}
         # }
 

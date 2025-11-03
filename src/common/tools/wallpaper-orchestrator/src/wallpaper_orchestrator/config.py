@@ -11,10 +11,16 @@ class ContainerConfig(BaseModel):
     """Container configuration."""
 
     runtime: str = Field(default="docker", description="Container runtime")
-    image_name: str = Field(default="wallpaper-processor", description="Image name")
+    image_name: str = Field(
+        default="wallpaper-processor", description="Image name"
+    )
     image_tag: str = Field(default="latest", description="Image tag")
-    build_no_cache: bool = Field(default=False, description="Build without cache")
-    build_pull: bool = Field(default=True, description="Pull base image during build")
+    build_no_cache: bool = Field(
+        default=False, description="Build without cache"
+    )
+    build_pull: bool = Field(
+        default=True, description="Pull base image during build"
+    )
 
 
 class ProcessingConfig(BaseModel):
@@ -22,15 +28,23 @@ class ProcessingConfig(BaseModel):
 
     mode: str = Field(default="memory", description="Processing mode")
     output_format: str = Field(default="png", description="Output format")
-    quality: int = Field(default=95, ge=1, le=100, description="Output quality")
-    write_metadata: bool = Field(default=False, description="Write metadata file")
+    quality: int = Field(
+        default=95, ge=1, le=100, description="Output quality"
+    )
+    write_metadata: bool = Field(
+        default=False, description="Write metadata file"
+    )
 
 
 class BatchConfig(BaseModel):
     """Batch processing configuration."""
 
-    parallel: int = Field(default=0, ge=0, description="Number of parallel processes")
-    skip_existing: bool = Field(default=False, description="Skip existing files")
+    parallel: int = Field(
+        default=0, ge=0, description="Number of parallel processes"
+    )
+    skip_existing: bool = Field(
+        default=False, description="Skip existing files"
+    )
     continue_on_error: bool = Field(
         default=True, description="Continue on processing errors"
     )
@@ -48,7 +62,9 @@ class PresetEffect(BaseModel):
     """Effect configuration in preset."""
 
     name: str = Field(description="Effect name")
-    params: dict[str, Any] = Field(default_factory=dict, description="Effect parameters")
+    params: dict[str, Any] = Field(
+        default_factory=dict, description="Effect parameters"
+    )
 
 
 class Preset(BaseModel):
@@ -120,4 +136,3 @@ def get_default_config() -> AppConfig:
         config_dict["presets"][name] = Preset(**preset_data)
 
     return AppConfig(**config_dict)
-

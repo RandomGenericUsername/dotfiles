@@ -24,7 +24,9 @@ from ..validators import extract_jinja2_variables, validate_variables
 class Jinja2Renderer(TemplateRenderer):
     """Jinja2-based template renderer."""
 
-    def __init__(self, template_dir: Path | str, config: RenderConfig | None = None):
+    def __init__(
+        self, template_dir: Path | str, config: RenderConfig | None = None
+    ):
         """
         Initialize Jinja2 renderer.
 
@@ -76,7 +78,8 @@ class Jinja2Renderer(TemplateRenderer):
         Raises:
             TemplateNotFoundError: If template doesn't exist
             TemplateRenderError: If rendering fails
-            MissingVariableError: If required variables are missing (strict mode)
+            MissingVariableError: If required variables are missing
+                (strict mode)
         """
         # Merge variables
         all_variables = {**(variables or {}), **kwargs}
@@ -132,7 +135,9 @@ class Jinja2Renderer(TemplateRenderer):
             template_source = self._get_template_source(template_name)
 
             # Extract required variables
-            required_vars = extract_jinja2_variables(template_source, self._env)
+            required_vars = extract_jinja2_variables(
+                template_source, self._env
+            )
 
             # Validate
             return validate_variables(
@@ -254,4 +259,3 @@ class Jinja2Renderer(TemplateRenderer):
             return None
         except Exception:
             return None
-

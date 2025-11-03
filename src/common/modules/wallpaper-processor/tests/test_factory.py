@@ -2,7 +2,6 @@
 
 import pytest
 
-from wallpaper_processor.backends import PILBlur, PILBrightness
 from wallpaper_processor.config import AppConfig
 from wallpaper_processor.core.exceptions import PresetNotFoundError
 from wallpaper_processor.factory import EffectFactory
@@ -60,4 +59,3 @@ class TestEffectFactory:
         assert "blur" in available
         assert "brightness" in available
         assert "pil" in available["blur"]
-

@@ -109,4 +109,3 @@ class WallpaperEffect(ABC):
                 self.effect_name,
                 f"{self.effect_name} ({self.backend_name}) dependencies not available",
             )
-

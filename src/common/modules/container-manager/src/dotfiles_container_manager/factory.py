@@ -27,8 +27,12 @@ class ContainerEngineFactory:
             RuntimeNotAvailableError: If runtime is not available
 
         Examples:
-            >>> engine = ContainerEngineFactory.create(ContainerRuntime.DOCKER)
-            >>> engine = ContainerEngineFactory.create(ContainerRuntime.DOCKER, command="podman")
+            >>> engine = ContainerEngineFactory.create(
+            ...     ContainerRuntime.DOCKER
+            ... )
+            >>> engine = ContainerEngineFactory.create(
+            ...     ContainerRuntime.DOCKER, command="podman"
+            ... )
         """
         # Determine command
         if command is None:
@@ -94,4 +98,3 @@ class ContainerEngineFactory:
         engine = DockerEngine(command)
         engine.ensure_available()
         return engine
-

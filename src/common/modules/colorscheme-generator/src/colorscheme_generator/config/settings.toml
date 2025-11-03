@@ -29,4 +29,3 @@ n_clusters = 16
 [templates]
 directory = "templates"
 strict_mode = true
-

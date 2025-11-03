@@ -1,6 +1,7 @@
 """Package manager factory for automatic detection and creation."""
 
 import shutil
+from pathlib import Path
 
 from dotfiles_package_manager.core.base import (
     PackageManager,
@@ -33,7 +34,7 @@ def detect_distribution_family() -> DistributionFamily:
         DistributionFamily enum value
     """
     try:
-        with open("/etc/os-release") as f:
+        with Path("/etc/os-release").open() as f:
             content = f.read().lower()
 
             # Check for Arch-based
@@ -96,10 +97,13 @@ class PackageManagerFactory:
         Auto-detect and create the best available package manager.
 
         Args:
-            prefer_third_party: Prefer managers with third-party repo support.
+            prefer_third_party: Prefer managers with third-party repo
+                support.
                 - Arch: Prefer paru/yay over pacman (for AUR access)
-                - Debian/RedHat: No effect (apt/dnf handle third-party natively)
-            distribution_family: Override automatic distribution detection
+                - Debian/RedHat: No effect (apt/dnf handle third-party
+                  natively)
+            distribution_family: Override automatic distribution
+                detection
 
         Returns:
             PackageManager instance
@@ -159,7 +163,8 @@ class PackageManagerFactory:
             PackageManager instance
 
         Raises:
-            PackageManagerError: If package manager type is not supported or not available
+            PackageManagerError: If package manager type is not
+                supported or not available
         """
         if manager_type not in cls._MANAGERS:
             raise PackageManagerError(

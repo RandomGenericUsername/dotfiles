@@ -6,7 +6,11 @@ import os
 import sys
 from pathlib import Path
 
-from colorscheme_generator import WallustGenerator, OutputManager, GeneratorConfig
+from colorscheme_generator import (
+    GeneratorConfig,
+    OutputManager,
+    WallustGenerator,
+)
 
 
 def main():
@@ -21,7 +25,9 @@ def main():
 
     # Validate inputs
     if not image_path:
-        print("ERROR: IMAGE_PATH environment variable not set", file=sys.stderr)
+        print(
+            "ERROR: IMAGE_PATH environment variable not set", file=sys.stderr
+        )
         sys.exit(1)
 
     image_path = Path(image_path)
@@ -32,15 +38,15 @@ def main():
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Wallust Backend Container")
-    print(f"=" * 60)
+    print("Wallust Backend Container")
+    print("=" * 60)
     print(f"Image:         {image_path}")
     print(f"Output:        {output_dir}")
     print(f"Formats:       {', '.join(formats)}")
     print(f"Colors:        {color_count}")
     print(f"Backend Type:  {backend_type}")
     print(f"Output Format: {output_format}")
-    print(f"=" * 60)
+    print("=" * 60)
 
     try:
         # Create configuration
@@ -58,14 +64,14 @@ def main():
         )
 
         # Generate colorscheme
-        print(f"→ Extracting colors from image...")
+        print("→ Extracting colors from image...")
         colorscheme = generator.generate(image_path, color_count=color_count)
 
         print(f"✓ Extracted {len(colorscheme.colors)} colors")
         print(f"  Special colors: {colorscheme.special}")
 
         # Create output manager
-        print(f"\n→ Writing output files...")
+        print("\n→ Writing output files...")
         output_manager = OutputManager(config=config)
 
         # Write output files
@@ -86,12 +92,12 @@ def main():
             "output_format": output_format,
         }
         metadata_path = output_dir / "metadata.json"
-        with open(metadata_path, "w") as f:
+        with metadata_path.open("w") as f:
             json.dump(metadata, f, indent=2)
         print(f"  • metadata: {metadata_path}")
 
         print(f"\n{'=' * 60}")
-        print(f"✓ Wallust backend completed successfully")
+        print("✓ Wallust backend completed successfully")
         print(f"{'=' * 60}")
 
         sys.exit(0)
@@ -101,10 +107,10 @@ def main():
         print(f"✗ Error: {e}", file=sys.stderr)
         print(f"{'=' * 60}", file=sys.stderr)
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
 
 if __name__ == "__main__":
     main()
-

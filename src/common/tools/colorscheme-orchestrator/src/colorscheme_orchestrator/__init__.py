@@ -1,4 +1,5 @@
-"""Colorscheme Orchestrator - CLI tool for containerized colorscheme generation."""
+"""Colorscheme Orchestrator - CLI tool for containerized colorscheme
+generation."""
 
 __version__ = "0.1.0"
 
@@ -23,4 +24,3 @@ __all__ = [
     "ImageNotFoundError",
     "InvalidBackendError",
 ]
-

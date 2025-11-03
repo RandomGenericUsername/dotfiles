@@ -45,7 +45,8 @@ def load_variables_from_file(file_path: Path) -> dict[str, Any]:
                 return yaml.safe_load(content)
             except ImportError:
                 console.print(
-                    "[red]Error: PyYAML not installed. Install with: pip install pyyaml[/red]"
+                    "[red]Error: PyYAML not installed. "
+                    "Install with: pip install pyyaml[/red]"
                 )
                 sys.exit(1)
 
@@ -66,7 +67,8 @@ def parse_var_argument(var_str: str) -> tuple[str, Any]:
     """Parse a key=value argument into a tuple."""
     if "=" not in var_str:
         console.print(
-            f"[red]Error: Invalid variable format '{var_str}'. Use key=value[/red]"
+            f"[red]Error: Invalid variable format '{var_str}'. "
+            "Use key=value[/red]"
         )
         sys.exit(1)
 
@@ -167,18 +169,24 @@ def render_command(
         if show_info:
             try:
                 info = renderer.get_template_info(template)
+                req_vars = (
+                    ", ".join(info.required_variables)
+                    if info.required_variables
+                    else "None"
+                )
                 console.print(
                     Panel(
                         f"[cyan]Template:[/cyan] {info.name}\n"
                         f"[cyan]Size:[/cyan] {info.size} bytes\n"
-                        f"[cyan]Required Variables:[/cyan] {', '.join(info.required_variables) if info.required_variables else 'None'}",
+                        f"[cyan]Required Variables:[/cyan] {req_vars}",
                         title="Template Information",
                         border_style="cyan",
                     )
                 )
             except Exception as e:
                 console.print(
-                    f"[yellow]Warning: Could not get template info: {e}[/yellow]"
+                    "[yellow]Warning: Could not get template info: "
+                    f"{e}[/yellow]"
                 )
 
         # Collect variables from all sources
@@ -223,9 +231,8 @@ def render_command(
         sys.exit(1)
 
     except MissingVariableError as e:
-        console.print(
-            f"[red]✗ Missing required variables: {', '.join(e.missing_variables)}[/red]"
-        )
+        missing = ", ".join(e.missing_variables)
+        console.print(f"[red]✗ Missing required variables: {missing}[/red]")
         console.print(
             "[yellow]Tip: Use --show-info to see required variables[/yellow]"
         )
@@ -275,7 +282,8 @@ def list_command(
                 f"[yellow]No templates found in {template_dir}[/yellow]"
             )
             console.print(
-                "[dim]Templates should have .j2, .jinja, or .jinja2 extension[/dim]"
+                "[dim]Templates should have .j2, .jinja, or .jinja2 "
+                "extension[/dim]"
             )
             return
 
@@ -454,18 +462,21 @@ def validate_command(
 
         # Display results
         if validation.is_valid:
+            req_count = len(validation.required_variables)
             console.print(
                 Panel(
                     "[green]✓ Validation passed[/green]\n\n"
-                    f"All {len(validation.required_variables)} required variable(s) are provided.",
+                    f"All {req_count} required variable(s) are provided.",
                     title="Validation Result",
                     border_style="green",
                 )
             )
 
             if validation.unused_variables:
+                unused_count = len(validation.unused_variables)
                 console.print(
-                    f"\n[yellow]Note: {len(validation.unused_variables)} unused variable(s):[/yellow]"
+                    f"\n[yellow]Note: {unused_count} unused "
+                    "variable(s):[/yellow]"
                 )
                 for var in validation.unused_variables:
                     console.print(f"  • {var}")
@@ -479,8 +490,10 @@ def validate_command(
             )
 
             if validation.missing_variables:
+                missing_count = len(validation.missing_variables)
                 console.print(
-                    f"\n[red]Missing {len(validation.missing_variables)} required variable(s):[/red]"
+                    f"\n[red]Missing {missing_count} required "
+                    "variable(s):[/red]"
                 )
                 for var in validation.missing_variables:
                     console.print(f"  • {var}")

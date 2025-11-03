@@ -66,7 +66,9 @@ Examples:
     # Effect parameters
     parser.add_argument("--sigma", type=float, help="Blur sigma")
     parser.add_argument("--radius", type=float, help="Blur radius")
-    parser.add_argument("--adjustment", type=int, help="Brightness/saturation adjustment")
+    parser.add_argument(
+        "--adjustment", type=int, help="Brightness/saturation adjustment"
+    )
     parser.add_argument("--strength", type=int, help="Vignette strength")
     parser.add_argument("--color", type=str, help="Color overlay hex code")
     parser.add_argument("--opacity", type=float, help="Color overlay opacity")
@@ -122,7 +124,9 @@ Examples:
     # Build pipeline
     if args.preset:
         # Use preset
-        pipeline = EffectFactory.create_from_preset(args.preset, config, proc_config)
+        pipeline = EffectFactory.create_from_preset(
+            args.preset, config, proc_config
+        )
     elif args.effects:
         # Build from individual effects
         effects = []
@@ -137,11 +141,15 @@ Examples:
                 )
             elif effect_name == "brightness":
                 params = BrightnessParams(
-                    adjustment=args.adjustment if args.adjustment is not None else -20
+                    adjustment=(
+                        args.adjustment if args.adjustment is not None else -20
+                    )
                 )
             elif effect_name == "saturation":
                 params = SaturationParams(
-                    adjustment=args.adjustment if args.adjustment is not None else 0
+                    adjustment=(
+                        args.adjustment if args.adjustment is not None else 0
+                    )
                 )
             elif effect_name == "vignette":
                 params = VignetteParams(
@@ -181,4 +189,3 @@ Examples:
 
 if __name__ == "__main__":
     main()
-

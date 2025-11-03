@@ -26,4 +26,3 @@ custom_n_clusters = 16
 # Template defaults (OutputManager)
 template_directory = Path("templates")
 template_strict_mode = True
-

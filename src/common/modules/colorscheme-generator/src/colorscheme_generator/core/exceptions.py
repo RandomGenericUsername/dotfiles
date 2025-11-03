@@ -9,7 +9,7 @@ class ColorSchemeGeneratorError(Exception):
 
 class BackendNotAvailableError(ColorSchemeGeneratorError):
     """Raised when a backend is not available on the system.
-    
+
     Example:
         >>> raise BackendNotAvailableError("pywal", "pywal command not found")
     """
@@ -25,7 +25,7 @@ class BackendNotAvailableError(ColorSchemeGeneratorError):
 
 class ColorExtractionError(ColorSchemeGeneratorError):
     """Raised when color extraction fails.
-    
+
     Example:
         >>> raise ColorExtractionError("Failed to parse pywal output")
     """
@@ -35,9 +35,11 @@ class ColorExtractionError(ColorSchemeGeneratorError):
 
 class TemplateRenderError(ColorSchemeGeneratorError):
     """Raised when template rendering fails.
-    
+
     Example:
-        >>> raise TemplateRenderError("colors.json.j2", "Missing variable 'background'")
+        >>> raise TemplateRenderError(
+        ...     "colors.json.j2", "Missing variable 'background'"
+        ... )
     """
 
     def __init__(self, template: str, reason: str):
@@ -49,7 +51,7 @@ class TemplateRenderError(ColorSchemeGeneratorError):
 
 class OutputWriteError(ColorSchemeGeneratorError):
     """Raised when writing output files fails.
-    
+
     Example:
         >>> raise OutputWriteError("/path/to/colors.json", "Permission denied")
     """
@@ -63,7 +65,7 @@ class OutputWriteError(ColorSchemeGeneratorError):
 
 class InvalidImageError(ColorSchemeGeneratorError):
     """Raised when image file is invalid or cannot be read.
-    
+
     Example:
         >>> raise InvalidImageError("/path/to/image.png", "File not found")
     """
@@ -73,4 +75,3 @@ class InvalidImageError(ColorSchemeGeneratorError):
         self.reason = reason
         message = f"Invalid image '{path}': {reason}"
         super().__init__(message)
-

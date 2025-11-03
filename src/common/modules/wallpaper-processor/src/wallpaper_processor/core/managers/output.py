@@ -56,7 +56,11 @@ class OutputManager:
 
         # Prepare save kwargs
         save_kwargs = {}
-        if output_format in (OutputFormat.JPEG, OutputFormat.JPG, OutputFormat.WEBP):
+        if output_format in (
+            OutputFormat.JPEG,
+            OutputFormat.JPG,
+            OutputFormat.WEBP,
+        ):
             save_kwargs["quality"] = quality
 
         # Save image
@@ -79,4 +83,3 @@ class OutputManager:
             return fmt in OutputManager.SUPPORTED_FORMATS
         except ValueError:
             return False
-

@@ -53,7 +53,8 @@ class DebianPackageManagerBase(PackageManager, ABC):
                         version=version,
                         description=description,
                         repository=repository,
-                        installed=False,  # apt search doesn't show installed status
+                        # apt search doesn't show installed status
+                        installed=False,
                     )
                 )
 

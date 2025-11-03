@@ -140,4 +140,3 @@ class TestImageMagickBrightness:
         params = effect.get_default_params()
 
         assert isinstance(params, BrightnessParams)
-

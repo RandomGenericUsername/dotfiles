@@ -64,4 +64,3 @@ def get_default_config() -> AppConfig:
         AppConfig with default values
     """
     return load_settings()
-

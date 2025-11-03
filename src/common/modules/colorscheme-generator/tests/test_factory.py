@@ -2,7 +2,11 @@
 
 import pytest
 
-from colorscheme_generator.backends import CustomGenerator, PywalGenerator, WallustGenerator
+from colorscheme_generator.backends import (
+    CustomGenerator,
+    PywalGenerator,
+    WallustGenerator,
+)
 from colorscheme_generator.config.enums import Backend
 from colorscheme_generator.config.settings import Settings
 from colorscheme_generator.factory import ColorSchemeGeneratorFactory
@@ -57,4 +61,3 @@ def test_create_invalid_backend(settings):
     """Test creating invalid backend raises error."""
     with pytest.raises(ValueError, match="Unknown backend"):
         ColorSchemeGeneratorFactory.create("invalid", settings)  # type: ignore
-

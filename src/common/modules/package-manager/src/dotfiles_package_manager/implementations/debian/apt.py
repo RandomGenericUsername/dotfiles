@@ -65,7 +65,9 @@ class AptPackageManager(DebianPackageManagerBase):
                 )
             else:
                 # Parse output to determine which packages failed
-                failed_packages = self._parse_failed_packages(result.stderr, packages)
+                failed_packages = self._parse_failed_packages(
+                    result.stderr, packages
+                )
                 successful_packages = [
                     pkg for pkg in packages if pkg not in failed_packages
                 ]
@@ -113,7 +115,9 @@ class AptPackageManager(DebianPackageManagerBase):
                     output=result.stdout,
                 )
             else:
-                failed_packages = self._parse_failed_packages(result.stderr, packages)
+                failed_packages = self._parse_failed_packages(
+                    result.stderr, packages
+                )
                 successful_packages = [
                     pkg for pkg in packages if pkg not in failed_packages
                 ]
@@ -167,7 +171,8 @@ class AptPackageManager(DebianPackageManagerBase):
             if dry_run:
                 # Count upgradeable packages
                 lines = result.stdout.strip().split("\n")
-                upgradeable = [l for l in lines if "/" in l]  # Filter out header
+                # Filter out header
+                upgradeable = [ln for ln in lines if "/" in ln]
                 return InstallResult(
                     success=result.returncode == 0,
                     packages_installed=[],
@@ -177,7 +182,9 @@ class AptPackageManager(DebianPackageManagerBase):
                         if upgradeable
                         else "System is up to date"
                     ),
-                    error_message=(result.stderr if result.returncode != 0 else None),
+                    error_message=(
+                        result.stderr if result.returncode != 0 else None
+                    ),
                 )
             else:
                 return InstallResult(
@@ -185,7 +192,9 @@ class AptPackageManager(DebianPackageManagerBase):
                     packages_installed=[],
                     packages_failed=[],
                     output=result.stdout,
-                    error_message=(result.stderr if result.returncode != 0 else None),
+                    error_message=(
+                        result.stderr if result.returncode != 0 else None
+                    ),
                 )
 
         except PackageManagerError as e:
@@ -202,7 +211,10 @@ class AptPackageManager(DebianPackageManagerBase):
 
         try:
             result = self._run_command(command, check=False)
-            return result.returncode == 0 and "Status: install ok installed" in result.stdout
+            return (
+                result.returncode == 0
+                and "Status: install ok installed" in result.stdout
+            )
         except PackageManagerError:
             return False
 
@@ -227,8 +239,8 @@ class AptPackageManager(DebianPackageManagerBase):
         for package in packages:
             if (
                 f"Unable to locate package {package}" in error_output
-                or f"E: Package '{package}' has no installation candidate" in error_output
+                or f"E: Package '{package}' has no installation candidate"
+                in error_output
             ):
                 failed.append(package)
         return failed
-

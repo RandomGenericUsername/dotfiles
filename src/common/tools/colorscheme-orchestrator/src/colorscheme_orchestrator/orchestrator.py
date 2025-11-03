@@ -32,7 +32,8 @@ class ColorSchemeOrchestrator:
         """Initialize orchestrator.
 
         Args:
-            config: Orchestrator configuration (loads from settings.toml if None)
+            config: Orchestrator configuration (loads from settings.toml
+                if None)
             engine: Container engine instance (creates one if None)
         """
         # Load configuration

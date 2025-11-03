@@ -44,15 +44,18 @@ class RedHatPackageManagerBase(PackageManager, ABC):
             match = re.match(pattern, lines[i])
             if match:
                 name = match.group(1)
-                arch = match.group(2)
+                match.group(2)
                 summary = match.group(3)
 
                 # Next line might be description
                 description = summary
-                if i + 1 < len(lines) and not re.match(pattern, lines[i + 1]):
-                    if not lines[i + 1].startswith("="):
-                        description = lines[i + 1].strip()
-                        i += 1
+                if (
+                    i + 1 < len(lines)
+                    and not re.match(pattern, lines[i + 1])
+                    and not lines[i + 1].startswith("=")
+                ):
+                    description = lines[i + 1].strip()
+                    i += 1
 
                 packages.append(
                     PackageInfo(

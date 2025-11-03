@@ -163,4 +163,3 @@ class PILVignette(WallpaperEffect):
         background.paste(result, mask=mask)
 
         return background
-

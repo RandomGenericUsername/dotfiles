@@ -16,15 +16,19 @@ from colorscheme_generator.core.exceptions import (
     ColorExtractionError,
     InvalidImageError,
 )
-from colorscheme_generator.core.types import Color, ColorScheme, GeneratorConfig
+from colorscheme_generator.core.types import (
+    Color,
+    ColorScheme,
+    GeneratorConfig,
+)
 
 
 class WallustGenerator(ColorSchemeGenerator):
     """Wallust backend for color extraction.
-    
+
     Uses wallust (Rust binary) to generate colors. Wallust outputs JSON
     to stdout, which we parse directly without file I/O.
-    
+
     Attributes:
         settings: Application configuration
         output_format: Output format for wallust (json or plain)
@@ -33,7 +37,7 @@ class WallustGenerator(ColorSchemeGenerator):
 
     def __init__(self, settings: AppConfig):
         """Initialize WallustGenerator.
-        
+
         Args:
             settings: Application configuration
         """
@@ -48,22 +52,24 @@ class WallustGenerator(ColorSchemeGenerator):
 
     def is_available(self) -> bool:
         """Check if wallust is available.
-        
+
         Returns:
             True if wallust binary is in PATH
         """
         return shutil.which("wallust") is not None
 
-    def generate(self, image_path: Path, config: GeneratorConfig) -> ColorScheme:
+    def generate(
+        self, image_path: Path, config: GeneratorConfig
+    ) -> ColorScheme:
         """Generate color scheme using wallust.
-        
+
         Args:
             image_path: Path to source image
             config: Runtime configuration
-            
+
         Returns:
             ColorScheme object with extracted colors
-            
+
         Raises:
             BackendNotAvailableError: If wallust is not available
             InvalidImageError: If image is invalid
@@ -102,13 +108,17 @@ class WallustGenerator(ColorSchemeGenerator):
         # Convert to ColorScheme
         return self._parse_wallust_output(wallust_colors, image_path)
 
-    def _run_wallust(self, image_path: Path, config: GeneratorConfig) -> str:
+    def _run_wallust(
+        self,
+        image_path: Path,
+        config: GeneratorConfig,  # noqa: ARG002
+    ) -> str:
         """Run wallust command and return JSON output.
-        
+
         Args:
             image_path: Path to source image
-            config: Runtime configuration
-            
+            config: Runtime configuration (reserved for future use)
+
         Returns:
             JSON output from wallust
         """
@@ -116,7 +126,8 @@ class WallustGenerator(ColorSchemeGenerator):
             "wallust",
             "run",
             str(image_path),
-            "--backend", self.backend_type,
+            "--backend",
+            self.backend_type,
             "--json",  # Output JSON to stdout
         ]
 
@@ -137,27 +148,30 @@ class WallustGenerator(ColorSchemeGenerator):
         except FileNotFoundError as e:
             raise BackendNotAvailableError(
                 self.backend_name,
-                "wallust command not found. Install with: cargo install wallust",
+                "wallust command not found. "
+                "Install with: cargo install wallust",
             ) from e
 
     def _parse_wallust_output(
         self, wallust_colors: dict, image_path: Path
     ) -> ColorScheme:
         """Parse wallust JSON output into ColorScheme.
-        
+
         Args:
             wallust_colors: Wallust colors dict from JSON output
             image_path: Source image path
-            
+
         Returns:
             ColorScheme object
         """
         # Wallust format (similar to pywal):
         # {
-        #   "special": {"background": "#...", "foreground": "#...", "cursor": "#..."},
+        #   "special": {
+        #     "background": "#...", "foreground": "#...", "cursor": "#..."
+        #   },
         #   "colors": {"color0": "#...", "color1": "#...", ...}
         # }
-        
+
         special = wallust_colors.get("special", {})
         colors_dict = wallust_colors.get("colors", {})
 
@@ -187,20 +201,19 @@ class WallustGenerator(ColorSchemeGenerator):
 
     def _parse_color(self, hex_color: str) -> Color:
         """Parse hex color string to Color object.
-        
+
         Args:
             hex_color: Hex color string (e.g., "#1a1a1a")
-            
+
         Returns:
             Color object
         """
         # Remove '#' if present
         hex_color = hex_color.lstrip("#")
-        
+
         # Convert to RGB
         r = int(hex_color[0:2], 16)
         g = int(hex_color[2:4], 16)
         b = int(hex_color[4:6], 16)
-        
-        return Color(hex=f"#{hex_color}", rgb=(r, g, b))
 
+        return Color(hex=f"#{hex_color}", rgb=(r, g, b))

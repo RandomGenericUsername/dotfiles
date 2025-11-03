@@ -137,7 +137,9 @@ class DockerContainerManager(ContainerManager):
 
         except Exception as e:
             raise ContainerRuntimeError(
-                message=f"Failed to run container from image '{config.image}': {e}",
+                message=(
+                    f"Failed to run container from image '{config.image}': {e}"
+                ),
                 command=cmd,
             ) from e
 
@@ -258,7 +260,9 @@ class DockerContainerManager(ContainerManager):
 
         except json.JSONDecodeError as e:
             raise ContainerRuntimeError(
-                message=f"Failed to parse container info for '{container}': {e}",
+                message=(
+                    f"Failed to parse container info for '{container}': {e}"
+                ),
                 command=cmd,
             ) from e
         except Exception as e:

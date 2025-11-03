@@ -224,8 +224,9 @@ class WallpaperOrchestrator:
     ) -> dict[str, Path]:
         """Generate all effect variants for an input image.
 
-        Creates a subdirectory named after the input image (without extension)
-        and generates one variant for each available effect with default parameters.
+        Creates a subdirectory named after the input image (without
+        extension) and generates one variant for each available effect
+        with default parameters.
 
         Args:
             input_path: Path to input image

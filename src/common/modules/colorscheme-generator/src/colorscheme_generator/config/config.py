@@ -1,8 +1,8 @@
 """Pydantic configuration models for colorscheme generator.
 
-This module defines the configuration structure that matches the settings.toml file.
-It uses Pydantic for validation and type safety, following the same pattern as the
-dotfiles installer.
+This module defines the configuration structure that matches the
+settings.toml file. It uses Pydantic for validation and type safety,
+following the same pattern as the dotfiles installer.
 """
 
 from pathlib import Path
@@ -29,7 +29,7 @@ from colorscheme_generator.config.enums import Backend, ColorAlgorithm
 
 class OutputSettings(BaseModel):
     """Output configuration (controlled by OutputManager).
-    
+
     These settings control where and how the OutputManager writes
     generated color scheme files. Backends don't use these settings.
     """
@@ -46,13 +46,14 @@ class OutputSettings(BaseModel):
 
 class GenerationSettings(BaseModel):
     """Color scheme generation defaults.
-    
+
     These settings provide default values for color extraction
     that can be overridden at runtime via GeneratorConfig.
     """
 
     default_backend: str = Field(
-        default=default_backend, description="Default backend for color extraction"
+        default=default_backend,
+        description="Default backend for color extraction",
     )
     default_color_count: int = Field(
         default=default_color_count,
@@ -76,7 +77,9 @@ class GenerationSettings(BaseModel):
             return v
         except ValueError:
             valid = ", ".join([b.value for b in Backend])
-            raise ValueError(f"Invalid backend '{v}'. Valid options: {valid}")
+            raise ValueError(
+                f"Invalid backend '{v}'. Valid options: {valid}"
+            ) from None
 
 
 class PywalBackendSettings(BaseModel):
@@ -101,7 +104,8 @@ class WallustBackendSettings(BaseModel):
     """Wallust backend configuration (for color extraction only).
 
     Note: We run wallust with JSON output to stdout and parse it.
-    We don't use wallust's template system - OutputManager handles file generation.
+    We don't use wallust's template system - OutputManager handles file
+    generation.
     """
 
     output_format: str = Field(
@@ -136,20 +140,25 @@ class CustomBackendSettings(BaseModel):
             return v
         except ValueError:
             valid = ", ".join([a.value for a in ColorAlgorithm])
-            raise ValueError(f"Invalid algorithm '{v}'. Valid options: {valid}")
+            raise ValueError(
+                f"Invalid algorithm '{v}'. Valid options: {valid}"
+            ) from None
 
 
 class BackendSettings(BaseModel):
     """Backend-specific configurations (for color extraction only)."""
 
     pywal: PywalBackendSettings = Field(
-        default_factory=PywalBackendSettings, description="Pywal backend settings"
+        default_factory=PywalBackendSettings,
+        description="Pywal backend settings",
     )
     wallust: WallustBackendSettings = Field(
-        default_factory=WallustBackendSettings, description="Wallust backend settings"
+        default_factory=WallustBackendSettings,
+        description="Wallust backend settings",
     )
     custom: CustomBackendSettings = Field(
-        default_factory=CustomBackendSettings, description="Custom backend settings"
+        default_factory=CustomBackendSettings,
+        description="Custom backend settings",
     )
 
 
@@ -157,7 +166,8 @@ class TemplateSettings(BaseModel):
     """Template rendering configuration (for OutputManager)."""
 
     directory: Path = Field(
-        default=template_directory, description="Directory containing Jinja2 templates"
+        default=template_directory,
+        description="Directory containing Jinja2 templates",
     )
     strict_mode: bool = Field(
         default=template_strict_mode,
@@ -167,14 +177,15 @@ class TemplateSettings(BaseModel):
 
 class AppConfig(BaseModel):
     """Application configuration matching dynaconf structure.
-    
+
     This is the root configuration model that aggregates all settings
     from settings.toml. It follows the same pattern as the dotfiles
     installer's AppConfig.
     """
 
     output: OutputSettings = Field(
-        default_factory=OutputSettings, description="Output configuration (OutputManager)"
+        default_factory=OutputSettings,
+        description="Output configuration (OutputManager)",
     )
     generation: GenerationSettings = Field(
         default_factory=GenerationSettings, description="Generation defaults"
@@ -184,6 +195,6 @@ class AppConfig(BaseModel):
         description="Backend-specific settings (color extraction only)",
     )
     templates: TemplateSettings = Field(
-        default_factory=TemplateSettings, description="Template configuration (OutputManager)"
+        default_factory=TemplateSettings,
+        description="Template configuration (OutputManager)",
     )
-

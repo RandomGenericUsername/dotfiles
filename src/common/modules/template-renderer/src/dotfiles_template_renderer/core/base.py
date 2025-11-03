@@ -4,13 +4,20 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
-from .types import RenderConfig, TemplateContext, TemplateInfo, ValidationResult
+from .types import (
+    RenderConfig,
+    TemplateContext,
+    TemplateInfo,
+    ValidationResult,
+)
 
 
 class TemplateRenderer(ABC):
     """Abstract base class for template rendering engines."""
 
-    def __init__(self, template_dir: Path | str, config: RenderConfig | None = None):
+    def __init__(
+        self, template_dir: Path | str, config: RenderConfig | None = None
+    ):
         """
         Initialize the template renderer.
 
@@ -47,7 +54,8 @@ class TemplateRenderer(ABC):
         Raises:
             TemplateNotFoundError: If template doesn't exist
             TemplateRenderError: If rendering fails
-            MissingVariableError: If required variables are missing (strict mode)
+            MissingVariableError: If required variables are missing
+                (strict mode)
         """
         pass
 
@@ -151,4 +159,3 @@ class TemplateRenderer(ABC):
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(rendered)
-

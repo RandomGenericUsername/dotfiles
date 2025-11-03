@@ -1,8 +1,5 @@
 """Tests for Docker engine implementation."""
 
-import pytest
-from dotfiles_container_manager import DockerEngine
-
 
 def test_placeholder():
     """Placeholder test - implement actual tests later."""
@@ -12,4 +9,3 @@ def test_placeholder():
     # TODO: Add tests for container operations
     # TODO: Add tests for volume operations
     # TODO: Add tests for network operations
-

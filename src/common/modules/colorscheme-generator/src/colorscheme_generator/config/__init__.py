@@ -14,7 +14,11 @@ from colorscheme_generator.config.config import (
     TemplateSettings,
     WallustBackendSettings,
 )
-from colorscheme_generator.config.enums import Backend, ColorAlgorithm, ColorFormat
+from colorscheme_generator.config.enums import (
+    Backend,
+    ColorAlgorithm,
+    ColorFormat,
+)
 from colorscheme_generator.config.settings import Settings, SettingsModel
 
 __all__ = [
@@ -35,4 +39,3 @@ __all__ = [
     "ColorFormat",
     "ColorAlgorithm",
 ]
-

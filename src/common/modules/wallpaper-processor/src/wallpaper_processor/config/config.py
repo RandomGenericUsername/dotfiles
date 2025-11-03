@@ -23,7 +23,10 @@ class ProcessingConfig(BaseModel):
     mode: ProcessingMode = DEFAULT_PROCESSING_MODE
     output_format: OutputFormat = DEFAULT_OUTPUT_FORMAT
     quality: int = Field(
-        ge=1, le=100, default=DEFAULT_QUALITY, description="Quality for lossy formats"
+        ge=1,
+        le=100,
+        default=DEFAULT_QUALITY,
+        description="Quality for lossy formats",
     )
     write_metadata: bool = DEFAULT_WRITE_METADATA
 
@@ -40,11 +43,15 @@ class BackendConfig(BaseModel):
 class EffectDefaults(BaseModel):
     """Default parameters for all effects."""
 
-    blur: dict[str, Any] = Field(default_factory=lambda: {"radius": 0, "sigma": 8})
+    blur: dict[str, Any] = Field(
+        default_factory=lambda: {"radius": 0, "sigma": 8}
+    )
     brightness: dict[str, Any] = Field(
         default_factory=lambda: {"adjustment": -20}
     )
-    saturation: dict[str, Any] = Field(default_factory=lambda: {"adjustment": 0})
+    saturation: dict[str, Any] = Field(
+        default_factory=lambda: {"adjustment": 0}
+    )
     vignette: dict[str, Any] = Field(default_factory=lambda: {"strength": 20})
     color_overlay: dict[str, Any] = Field(
         default_factory=lambda: {"color": "#000000", "opacity": 0.3}
@@ -72,4 +79,3 @@ class AppConfig(BaseModel):
     backend: BackendConfig = Field(default_factory=BackendConfig)
     defaults: EffectDefaults = Field(default_factory=EffectDefaults)
     presets: dict[str, Preset] = Field(default_factory=dict)
-

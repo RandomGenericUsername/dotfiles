@@ -69,7 +69,10 @@ class DockerNetworkManager(NetworkManager):
             if "No such network" in str(e):
                 raise NetworkNotFoundError(network) from e
             raise NetworkError(
-                message=f"Failed to connect container '{container}' to network '{network}': {e}",
+                message=(
+                    f"Failed to connect container '{container}' "
+                    f"to network '{network}': {e}"
+                ),
                 command=cmd,
             ) from e
 
@@ -87,7 +90,10 @@ class DockerNetworkManager(NetworkManager):
             if "No such network" in str(e):
                 raise NetworkNotFoundError(network) from e
             raise NetworkError(
-                message=f"Failed to disconnect container '{container}' from network '{network}': {e}",
+                message=(
+                    f"Failed to disconnect container '{container}' "
+                    f"from network '{network}': {e}"
+                ),
                 command=cmd,
             ) from e
 
@@ -188,7 +194,7 @@ class DockerNetworkManager(NetworkManager):
                 for i, line in enumerate(lines):
                     if "Deleted Networks:" in line:
                         # Count non-empty lines after this
-                        deleted = sum(1 for l in lines[i + 1 :] if l.strip())
+                        deleted = sum(1 for ln in lines[i + 1 :] if ln.strip())
                         break
 
             return {"deleted": deleted}

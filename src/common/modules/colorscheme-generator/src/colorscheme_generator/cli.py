@@ -19,7 +19,7 @@ from colorscheme_generator.core.types import GeneratorConfig
 
 def main() -> int:
     """Main CLI entry point.
-    
+
     Returns:
         Exit code (0 for success, 1 for error)
     """
@@ -116,16 +116,16 @@ Examples:
 
     # Create runtime config
     config_kwargs = {}
-    
+
     if args.backend != "auto":
         config_kwargs["backend"] = Backend(args.backend)
-    
+
     if args.output_dir:
         config_kwargs["output_dir"] = args.output_dir.expanduser()
-    
+
     if args.formats:
         config_kwargs["formats"] = [ColorFormat(f) for f in args.formats]
-    
+
     if args.color_count:
         config_kwargs["color_count"] = args.color_count
 
@@ -141,7 +141,7 @@ Examples:
             generator = ColorSchemeGeneratorFactory.create(
                 Backend(args.backend), settings
             )
-        
+
         if args.verbose:
             print(f"Using backend: {generator.backend_name}")
     except BackendNotAvailableError as e:
@@ -152,9 +152,9 @@ Examples:
     try:
         if args.verbose:
             print(f"Extracting colors from: {args.image}")
-        
+
         scheme = generator.generate(args.image, config)
-        
+
         if args.verbose:
             print(f"Background: {scheme.background.hex}")
             print(f"Foreground: {scheme.foreground.hex}")
@@ -170,6 +170,7 @@ Examples:
         print(f"Error: {e}", file=sys.stderr)
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         return 1
 
@@ -177,14 +178,14 @@ Examples:
     try:
         if args.verbose:
             print(f"Writing output to: {config.output_dir}")
-        
+
         output_manager = OutputManager(settings)
         output_files = output_manager.write_outputs(
             scheme,
             config.output_dir,
             config.formats,
         )
-        
+
         print("Generated files:")
         for format_name, file_path in output_files.items():
             print(f"  {format_name}: {file_path}")
@@ -195,6 +196,7 @@ Examples:
         print(f"Error: {e}", file=sys.stderr)
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         return 1
 
@@ -203,4 +205,3 @@ Examples:
 
 if __name__ == "__main__":
     sys.exit(main())
-

@@ -135,4 +135,3 @@ class PILBrightness(WallpaperEffect):
         factor = 1.0 + (params.adjustment / 100.0)
         enhancer = ImageEnhance.Brightness(image)
         return enhancer.enhance(factor)
-

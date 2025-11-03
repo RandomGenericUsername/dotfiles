@@ -55,4 +55,3 @@ class LogDriver(Enum):
     SYSLOG = "syslog"
     JOURNALD = "journald"
     NONE = "none"
-

@@ -28,7 +28,9 @@ class TemplateError(Exception):
 class TemplateNotFoundError(TemplateError):
     """Raised when a template file cannot be found."""
 
-    def __init__(self, template_name: str, search_paths: list[str] | None = None):
+    def __init__(
+        self, template_name: str, search_paths: list[str] | None = None
+    ):
         """
         Initialize template not found error.
 
@@ -114,4 +116,3 @@ class InvalidVariableError(ValidationError):
         self.reason = reason
         message = f"Invalid value for variable '{variable_name}': {reason}"
         super().__init__(message, template_name)
-
