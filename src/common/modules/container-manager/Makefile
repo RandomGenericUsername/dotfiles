@@ -90,4 +90,3 @@ pre-commit-run: ensure-sync ## Run pre-commit on all files
 
 all-checks: format lint type-check test ## Run all checks (format, lint, type-check, test)
 	@echo "✅ All checks passed!"
-

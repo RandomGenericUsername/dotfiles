@@ -2,7 +2,6 @@ from pathlib import Path
 
 from dotfiles_pipeline import PipelineStep
 from dotfiles_pipeline.core.types import PipelineContext
-
 from src.pipeline_steps.utils import (
     detect_and_initialize_package_manager,
     handle_previous_installation,

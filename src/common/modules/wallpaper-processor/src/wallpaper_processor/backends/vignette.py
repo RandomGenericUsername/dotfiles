@@ -50,11 +50,14 @@ class ImageMagickVignette(WallpaperEffect):
             raise TypeError(f"Expected VignetteParams, got {type(params)}")
 
         # Create temporary files
-        with tempfile.NamedTemporaryFile(
-            suffix=".png", delete=False
-        ) as input_tmp, tempfile.NamedTemporaryFile(
-            suffix=".png", delete=False
-        ) as output_tmp:
+        with (
+            tempfile.NamedTemporaryFile(
+                suffix=".png", delete=False
+            ) as input_tmp,
+            tempfile.NamedTemporaryFile(
+                suffix=".png", delete=False
+            ) as output_tmp,
+        ):
             input_path = Path(input_tmp.name)
             output_path = Path(output_tmp.name)
 
@@ -134,7 +137,7 @@ class PILVignette(WallpaperEffect):
         # Create a radial gradient mask
         width, height = image.size
         mask = Image.new("L", (width, height), 0)
-        draw = ImageDraw.Draw(mask)
+        _ = ImageDraw.Draw(mask)  # Unused but kept for potential future use
 
         # Calculate center and radius
         center_x, center_y = width // 2, height // 2

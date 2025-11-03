@@ -39,4 +39,3 @@ repos:
     hooks:
       - id: mypy
         args: [--ignore-missing-imports, --explicit-package-bases]
-

@@ -10,7 +10,6 @@ from dotfiles_container_manager import (
     RunConfig,
     VolumeMount,
 )
-
 from wallpaper_orchestrator.config import ContainerConfig, ProcessingConfig
 
 

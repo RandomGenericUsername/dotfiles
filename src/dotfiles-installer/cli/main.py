@@ -1,10 +1,9 @@
 from pathlib import Path
 
-from typer import Typer
-
 from src.commands.install import install
 from src.commands.uninstall import uninstall
 from src.config.project_root import set_project_root
+from typer import Typer
 
 # Initialize project root at application startup
 # main.py is at: src/dotfiles-installer/cli/main.py

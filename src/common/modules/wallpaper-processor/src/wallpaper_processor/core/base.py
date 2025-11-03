@@ -105,7 +105,8 @@ class WallpaperEffect(ABC):
             EffectNotAvailableError: If effect dependencies are not available
         """
         if not self.is_available():
-            raise EffectNotAvailableError(
-                self.effect_name,
-                f"{self.effect_name} ({self.backend_name}) dependencies not available",
+            msg = (
+                f"{self.effect_name} ({self.backend_name}) "
+                "dependencies not available"
             )
+            raise EffectNotAvailableError(self.effect_name, msg)

@@ -34,25 +34,25 @@ for project in "${PROJECTS[@]}"; do
     if [ -d "$project" ]; then
         PROJECT_NAME=$(basename "$project")
         echo -e "${YELLOW}Processing: $PROJECT_NAME${NC}"
-        
+
         cd "$project"
-        
+
         # Run black
         echo -e "${BLUE}  → Running black...${NC}"
         uv run black . 2>&1 | grep -E "(reformatted|unchanged|files)" || true
-        
+
         # Run isort
         echo -e "${BLUE}  → Running isort...${NC}"
         uv run isort . 2>&1 | grep -E "(Fixing|Skipped)" || true
-        
+
         # Run ruff with unsafe fixes (for SIM105, etc.)
         echo -e "${BLUE}  → Running ruff with unsafe fixes...${NC}"
         uv run ruff check --fix --unsafe-fixes . 2>&1 | tail -5 || true
-        
+
         # Run ruff again with regular fixes
         echo -e "${BLUE}  → Running ruff final pass...${NC}"
         uv run ruff check --fix . 2>&1 | tail -5 || true
-        
+
         cd - > /dev/null
         echo ""
     fi
@@ -70,7 +70,7 @@ for project in "${PROJECTS[@]}"; do
     if [ -d "$project" ] && [ -f "$project/Makefile" ]; then
         PROJECT_NAME=$(basename "$project")
         echo -e "${YELLOW}Checking: $PROJECT_NAME${NC}"
-        
+
         cd "$project"
         if uv run ruff check . 2>&1 | grep -q "All checks passed"; then
             echo -e "${GREEN}  ✅ No issues${NC}"
@@ -82,4 +82,3 @@ for project in "${PROJECTS[@]}"; do
         echo ""
     fi
 done
-

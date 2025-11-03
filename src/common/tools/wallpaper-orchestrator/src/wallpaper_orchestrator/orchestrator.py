@@ -3,7 +3,6 @@
 from pathlib import Path
 
 from dotfiles_container_manager import ContainerEngineFactory, ContainerRuntime
-
 from wallpaper_orchestrator.config import AppConfig
 from wallpaper_orchestrator.containers import (
     ContainerBuilder,

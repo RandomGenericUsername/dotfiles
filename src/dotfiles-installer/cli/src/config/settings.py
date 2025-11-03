@@ -4,7 +4,6 @@ from typing import Any
 
 from dynaconf import Dynaconf
 from pydantic import ValidationError
-
 from src.config.config import AppConfig as PydanticAppConfig
 from src.config.enums import InstallType
 from src.config.project_root import get_project_path

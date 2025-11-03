@@ -111,4 +111,3 @@ To add a new project to these scripts:
 - Scripts use colored output for better readability
 - Each script exits on first error (`set -e`)
 - Virtual environment warnings are expected and can be ignored
-

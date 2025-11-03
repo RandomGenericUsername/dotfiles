@@ -38,9 +38,9 @@ for project in "${PROJECTS[@]}"; do
     if [ -d "$project" ] && [ -f "$project/.pre-commit-config.yaml" ]; then
         PROJECT_NAME=$(basename "$project")
         echo -e "${BLUE}Installing pre-commit in: $PROJECT_NAME${NC}"
-        
+
         cd "$project"
-        
+
         if make pre-commit-install 2>&1; then
             echo -e "${GREEN}✅ Pre-commit hooks installed${NC}"
             SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
@@ -48,7 +48,7 @@ for project in "${PROJECTS[@]}"; do
             echo -e "${RED}❌ Failed to install pre-commit hooks${NC}"
             FAIL_COUNT=$((FAIL_COUNT + 1))
         fi
-        
+
         cd - > /dev/null
         echo ""
     else
@@ -66,4 +66,3 @@ echo ""
 echo -e "${GREEN}Pre-commit hooks are now active!${NC}"
 echo "They will run automatically on 'git commit'"
 echo ""
-

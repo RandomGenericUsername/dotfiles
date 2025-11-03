@@ -1,7 +1,6 @@
 """Tests for configuration."""
 
 import pytest
-
 from wallpaper_orchestrator.config import (
     AppConfig,
     ContainerConfig,

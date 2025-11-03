@@ -15,8 +15,10 @@ def load_settings(
     """Load settings from TOML files using Dynaconf.
 
     Args:
-        settings_file: Path to module settings.toml (defaults to package config)
-        user_config_dir: Path to user config directory (defaults to ~/.config/wallpaper-processor)
+        settings_file: Path to module settings.toml
+            (defaults to package config)
+        user_config_dir: Path to user config directory
+            (defaults to ~/.config/wallpaper-processor)
 
     Returns:
         AppConfig instance with loaded settings

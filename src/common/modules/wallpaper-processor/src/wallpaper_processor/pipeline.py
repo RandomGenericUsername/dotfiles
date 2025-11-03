@@ -103,9 +103,11 @@ class EffectPipeline:
             try:
                 image = effect.apply(image, params)
             except Exception as e:
-                raise ProcessingError(
-                    f"Failed to apply {effect.effect_name} ({effect.backend_name}): {e}"
-                ) from e
+                msg = (
+                    f"Failed to apply {effect.effect_name} "
+                    f"({effect.backend_name}): {e}"
+                )
+                raise ProcessingError(msg) from e
 
         # Save with configured format and quality
         save_kwargs = {}
@@ -145,9 +147,11 @@ class EffectPipeline:
                 try:
                     effect.apply_to_file(current_input, current_output, params)
                 except Exception as e:
-                    raise ProcessingError(
-                        f"Failed to apply {effect.effect_name} ({effect.backend_name}): {e}"
-                    ) from e
+                    msg = (
+                        f"Failed to apply {effect.effect_name} "
+                        f"({effect.backend_name}): {e}"
+                    )
+                    raise ProcessingError(msg) from e
 
                 # Update input for next iteration
                 current_input = current_output
@@ -181,8 +185,9 @@ class EffectPipeline:
         metadata_dict["input_path"] = str(metadata_dict["input_path"])
         metadata_dict["output_path"] = str(metadata_dict["output_path"])
 
-        with open(metadata_path, "w") as f:
-            json.dump(metadata_dict, f, indent=2)
+        metadata_path.write_text(
+            json.dumps(metadata_dict, indent=2), encoding="utf-8"
+        )
 
     def get_metadata(self) -> ProcessingMetadata | None:
         """Get processing metadata.

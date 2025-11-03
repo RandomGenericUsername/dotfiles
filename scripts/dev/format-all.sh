@@ -41,9 +41,9 @@ for project in "${PROJECTS[@]}"; do
         echo -e "${YELLOW}========================================${NC}"
         echo -e "${YELLOW}Processing: $PROJECT_NAME${NC}"
         echo -e "${YELLOW}========================================${NC}"
-        
+
         cd "$project"
-        
+
         # Format
         echo -e "${BLUE}Formatting...${NC}"
         if make format 2>&1; then
@@ -56,7 +56,7 @@ for project in "${PROJECTS[@]}"; do
             echo ""
             continue
         fi
-        
+
         # Lint
         echo -e "${BLUE}Linting...${NC}"
         if make lint 2>&1; then
@@ -67,7 +67,7 @@ for project in "${PROJECTS[@]}"; do
             FAIL_COUNT=$((FAIL_COUNT + 1))
             FAILED_PROJECTS+=("$PROJECT_NAME (lint)")
         fi
-        
+
         cd - > /dev/null
         echo ""
     else
@@ -99,4 +99,3 @@ echo "2. Fix manual issues (unused variables, type annotations, etc.)"
 echo "3. Run 'make pre-commit-install' in each project"
 echo "4. Run 'make test' to verify everything works"
 echo ""
-

@@ -4,10 +4,9 @@ import time
 from pathlib import Path
 from typing import Any
 
-from dotfiles_container_manager import ContainerEngine, RunConfig, VolumeMount
-
 from colorscheme_orchestrator.containers.registry import BackendRegistry
 from colorscheme_orchestrator.exceptions import ContainerRuntimeError
+from dotfiles_container_manager import ContainerEngine, RunConfig, VolumeMount
 
 
 class ContainerRunner:

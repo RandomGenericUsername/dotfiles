@@ -6,7 +6,6 @@ from collections.abc import Callable
 from pathlib import Path
 
 from dotfiles_container_manager import BuildContext, ImageManager
-
 from wallpaper_orchestrator.config import ContainerConfig
 
 

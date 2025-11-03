@@ -9,7 +9,6 @@ from dotfiles_container_manager import (
     ImageManager,
     ImageNotFoundError,
 )
-
 from wallpaper_orchestrator.config import ContainerConfig
 
 

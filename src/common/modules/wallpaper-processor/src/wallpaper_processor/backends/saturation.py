@@ -50,11 +50,14 @@ class ImageMagickSaturation(WallpaperEffect):
             raise TypeError(f"Expected SaturationParams, got {type(params)}")
 
         # Create temporary files
-        with tempfile.NamedTemporaryFile(
-            suffix=".png", delete=False
-        ) as input_tmp, tempfile.NamedTemporaryFile(
-            suffix=".png", delete=False
-        ) as output_tmp:
+        with (
+            tempfile.NamedTemporaryFile(
+                suffix=".png", delete=False
+            ) as input_tmp,
+            tempfile.NamedTemporaryFile(
+                suffix=".png", delete=False
+            ) as output_tmp,
+        ):
             input_path = Path(input_tmp.name)
             output_path = Path(output_tmp.name)
 
@@ -131,7 +134,8 @@ class PILSaturation(WallpaperEffect):
             raise TypeError(f"Expected SaturationParams, got {type(params)}")
 
         # Convert adjustment percentage to PIL enhancement factor
-        # -100 = 0.0 (grayscale), 0 = 1.0 (original), 100 = 2.0 (double saturation)
+        # -100 = 0.0 (grayscale), 0 = 1.0 (original),
+        # 100 = 2.0 (double saturation)
         factor = 1.0 + (params.adjustment / 100.0)
         enhancer = ImageEnhance.Color(image)
         return enhancer.enhance(factor)

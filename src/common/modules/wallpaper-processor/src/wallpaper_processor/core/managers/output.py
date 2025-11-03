@@ -47,8 +47,8 @@ class OutputManager:
             ext = output_path.suffix.lstrip(".").lower()
             try:
                 output_format = OutputFormat(ext)
-            except ValueError:
-                raise UnsupportedFormatError(ext)
+            except ValueError as err:
+                raise UnsupportedFormatError(ext) from err
 
         # Validate format
         if output_format not in OutputManager.SUPPORTED_FORMATS:

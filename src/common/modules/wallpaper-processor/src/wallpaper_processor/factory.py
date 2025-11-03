@@ -47,7 +47,8 @@ class EffectFactory:
         """Create effect instance.
 
         Args:
-            effect_name: Effect identifier (blur, brightness, saturation, vignette, color_overlay)
+            effect_name: Effect identifier (blur, brightness,
+                saturation, vignette, color_overlay)
             settings: Application configuration
 
         Returns:
@@ -55,7 +56,8 @@ class EffectFactory:
 
         Raises:
             ValueError: If effect_name is unknown
-            EffectNotAvailableError: If effect dependencies unavailable (strict mode)
+            EffectNotAvailableError: If effect dependencies
+                unavailable (strict mode)
         """
         # Try ImageMagick first if preferred
         if settings.backend.prefer_imagemagick:
@@ -216,11 +218,11 @@ class EffectFactory:
         ]
 
     @staticmethod
-    def list_available_effects(settings: AppConfig) -> dict[str, list[str]]:
+    def list_available_effects(_settings: AppConfig) -> dict[str, list[str]]:
         """List available effects and their backends.
 
         Args:
-            settings: Application configuration
+            _settings: Application configuration (unused, for future use)
 
         Returns:
             Dict mapping effect names to list of available backends
@@ -255,8 +257,9 @@ class EffectFactory:
     ) -> dict[str, Path]:
         """Generate all effect variants for an input image.
 
-        Creates a subdirectory named after the input image (without extension)
-        and generates one variant for each available effect with default parameters.
+        Creates a subdirectory named after the input image
+        (without extension) and generates one variant for each
+        available effect with default parameters.
 
         Args:
             input_path: Path to input image

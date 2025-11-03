@@ -6,7 +6,6 @@ from pathlib import Path
 import typer
 from rich.console import Console
 from rich.table import Table
-
 from wallpaper_orchestrator.config import get_default_config
 from wallpaper_orchestrator.orchestrator import WallpaperOrchestrator
 
