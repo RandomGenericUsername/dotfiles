@@ -8,7 +8,6 @@ from dotfiles_package_manager.core.base import (
 from dotfiles_package_manager.core.factory import PackageManagerFactory
 from dotfiles_pipeline import PipelineContext
 from dotfiles_template_renderer import Jinja2Renderer, RenderConfig
-
 from src.config.enums import InstallType
 from src.exceptions import InstallationConfirmationDeclinedException
 from src.tasks.install_starship import (

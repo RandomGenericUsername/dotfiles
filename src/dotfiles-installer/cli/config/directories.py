@@ -2,7 +2,6 @@ from pathlib import Path
 
 from dotfiles_package_manager import PackageManagerFactory, PackageManagerType
 from filesystem_path_builder import PathsBuilder
-
 from src.config.project_root import get_project_root
 
 # ============================================================================
