@@ -1,7 +1,6 @@
 """Tests for effect factory."""
 
 import pytest
-
 from wallpaper_processor.config import AppConfig
 from wallpaper_processor.core.exceptions import PresetNotFoundError
 from wallpaper_processor.factory import EffectFactory

@@ -3,7 +3,6 @@
 from pathlib import Path
 
 from pydantic import BaseModel, Field
-
 from wallpaper_processor.config.defaults import (
     DEFAULT_BLUR_RADIUS,
     DEFAULT_BLUR_SIGMA,

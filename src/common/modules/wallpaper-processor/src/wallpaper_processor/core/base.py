@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from PIL import Image
-
 from wallpaper_processor.core.exceptions import EffectNotAvailableError
 from wallpaper_processor.core.types import EffectParams
 

@@ -3,7 +3,6 @@
 from pathlib import Path
 
 from PIL import Image
-
 from wallpaper_processor.config.enums import OutputFormat
 from wallpaper_processor.core.exceptions import UnsupportedFormatError
 

@@ -4,7 +4,6 @@ import tempfile
 from pathlib import Path
 
 from PIL import Image
-
 from wallpaper_processor.config.enums import ProcessingMode
 from wallpaper_processor.core.base import WallpaperEffect
 from wallpaper_processor.core.exceptions import ProcessingError

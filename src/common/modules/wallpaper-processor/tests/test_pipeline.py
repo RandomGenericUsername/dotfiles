@@ -2,7 +2,6 @@
 
 import pytest
 from PIL import Image
-
 from wallpaper_processor.backends import PILBlur, PILBrightness
 from wallpaper_processor.core.types import (
     BlurParams,

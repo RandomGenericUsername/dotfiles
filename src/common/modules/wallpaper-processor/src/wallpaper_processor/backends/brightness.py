@@ -6,7 +6,6 @@ import tempfile
 from pathlib import Path
 
 from PIL import Image, ImageEnhance
-
 from wallpaper_processor.core.base import WallpaperEffect
 from wallpaper_processor.core.exceptions import ProcessingError
 from wallpaper_processor.core.types import BrightnessParams, EffectParams

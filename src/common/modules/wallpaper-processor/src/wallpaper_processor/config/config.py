@@ -3,7 +3,6 @@
 from typing import Any
 
 from pydantic import BaseModel, Field
-
 from wallpaper_processor.config.defaults import (
     DEFAULT_FALLBACK_ENABLED,
     DEFAULT_IMAGEMAGICK_BINARY,

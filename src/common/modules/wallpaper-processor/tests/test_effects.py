@@ -2,7 +2,6 @@
 
 import pytest
 from PIL import Image
-
 from wallpaper_processor.backends import (
     ImageMagickBlur,
     ImageMagickBrightness,

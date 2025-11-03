@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Any
 
 from dynaconf import Dynaconf
-
 from wallpaper_processor.config.config import AppConfig
 
 
