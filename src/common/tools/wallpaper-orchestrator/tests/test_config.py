@@ -81,4 +81,3 @@ class TestAppConfig:
         assert isinstance(config, AppConfig)
         assert config.container.runtime in ("docker", "podman")
         assert len(config.presets) > 0
-

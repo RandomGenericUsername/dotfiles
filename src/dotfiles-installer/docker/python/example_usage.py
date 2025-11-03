@@ -7,26 +7,25 @@ Dockerfile templates and build Docker images without writing files to disk.
 """
 
 from pathlib import Path
-from typing import Dict, Any
 
 from src.utils.docker_manager import (
-    DockerTemplateRenderer,
-    DockerImageBuilder,
-    render_and_build_docker_image,
     DockerError,
+    DockerImageBuilder,
+    DockerTemplateRenderer,
+    render_and_build_docker_image,
 )
 
 
 def example_basic_rendering():
     """Example: Basic Dockerfile template rendering."""
     print("=== Basic Template Rendering ===")
-    
+
     # Get the template directory
     template_dir = Path(__file__).parent
-    
+
     # Create renderer
     renderer = DockerTemplateRenderer(template_dir)
-    
+
     # Basic template variables
     template_vars = {
         "base_image": "python:3.12-slim",
@@ -39,18 +38,18 @@ def example_basic_rendering():
         "use_uv": True,
         "port": 8000,
     }
-    
+
     try:
         # Render the template
         dockerfile_content = renderer.render_dockerfile(
             "Dockerfile.j2", **template_vars
         )
-        
+
         print("Rendered Dockerfile:")
         print("-" * 50)
         print(dockerfile_content)
         print("-" * 50)
-        
+
     except DockerError as e:
         print(f"Error rendering template: {e}")
 
@@ -58,10 +57,10 @@ def example_basic_rendering():
 def example_advanced_rendering():
     """Example: Advanced Dockerfile template rendering with system packages."""
     print("\n=== Advanced Template Rendering ===")
-    
+
     template_dir = Path(__file__).parent
     renderer = DockerTemplateRenderer(template_dir)
-    
+
     # Advanced template variables
     template_vars = {
         "base_image": "python:3.12-slim",
@@ -99,17 +98,17 @@ def example_advanced_rendering():
         "entrypoint": ["python", "-m", "uvicorn"],
         "cmd": ["src.main:app", "--host", "0.0.0.0", "--port", "8080"],
     }
-    
+
     try:
         dockerfile_content = renderer.render_dockerfile(
             "Dockerfile.j2", **template_vars
         )
-        
+
         print("Advanced Dockerfile:")
         print("-" * 50)
         print(dockerfile_content)
         print("-" * 50)
-        
+
     except DockerError as e:
         print(f"Error rendering advanced template: {e}")
 
@@ -117,9 +116,9 @@ def example_advanced_rendering():
 def example_build_image():
     """Example: Build Docker image from template (requires Docker)."""
     print("\n=== Building Docker Image ===")
-    
+
     template_dir = Path(__file__).parent
-    
+
     # Template variables for a simple Python app
     template_vars = {
         "base_image": "python:3.12-slim",
@@ -132,19 +131,19 @@ def example_build_image():
         "use_uv": False,  # Use regular pip for simplicity
         "main_script": "app.py",
     }
-    
+
     # Create a simple Python app file to include in build context
-    app_content = '''#!/usr/bin/env python3
+    app_content = """#!/usr/bin/env python3
 print("Hello from Docker container!")
 print("This is an example Python application.")
-'''
-    
+"""
+
     # Additional files for build context
     context_files = {
         "app.py": app_content.encode("utf-8"),
         "requirements.pip": b"# No additional requirements for this example\n",
     }
-    
+
     try:
         # Build the image
         image_id = render_and_build_docker_image(
@@ -155,11 +154,11 @@ print("This is an example Python application.")
             context_files=context_files,
             timeout=300,  # 5 minutes timeout
         )
-        
+
         print(f"Successfully built Docker image: {image_id}")
         print("You can run it with:")
         print("docker run --rm dotfiles-installer-example:latest")
-        
+
     except DockerError as e:
         print(f"Error building Docker image: {e}")
         if "docker" in str(e).lower():
@@ -169,12 +168,12 @@ print("This is an example Python application.")
 def example_list_templates():
     """Example: List available templates."""
     print("\n=== Available Templates ===")
-    
+
     template_dir = Path(__file__).parent
     renderer = DockerTemplateRenderer(template_dir)
-    
+
     templates = renderer.get_available_templates()
-    
+
     if templates:
         print("Available Dockerfile templates:")
         for template in templates:
@@ -186,7 +185,7 @@ def example_list_templates():
 def example_with_configuration():
     """Example: Using Docker utilities with application configuration."""
     print("\n=== Using with App Configuration ===")
-    
+
     # This would typically come from your app's configuration system
     docker_config = {
         "command": "docker",
@@ -199,11 +198,11 @@ def example_with_configuration():
         "workdir": "/app",
         "use_uv": True,
     }
-    
+
     # Use configuration values
     renderer = DockerTemplateRenderer(docker_config["template_directory"])
     builder = DockerImageBuilder(docker_config["command"])
-    
+
     # Check if Docker is available
     try:
         if builder.image_exists("hello-world"):
@@ -212,7 +211,7 @@ def example_with_configuration():
             print("Docker is available but hello-world image not found.")
     except DockerError:
         print("Docker is not available or not working.")
-    
+
     print(f"Template directory: {docker_config['template_directory']}")
     print(f"Available templates: {renderer.get_available_templates()}")
 
@@ -221,17 +220,19 @@ if __name__ == "__main__":
     """Run all examples."""
     print("Docker Template and Build Examples")
     print("=" * 50)
-    
+
     # Run examples
     example_list_templates()
     example_basic_rendering()
     example_advanced_rendering()
     example_with_configuration()
-    
+
     # Only try to build if user confirms (requires Docker)
     try:
-        response = input("\nDo you want to try building a Docker image? (y/N): ")
-        if response.lower().startswith('y'):
+        response = input(
+            "\nDo you want to try building a Docker image? (y/N): "
+        )
+        if response.lower().startswith("y"):
             example_build_image()
         else:
             print("Skipping Docker image build example.")

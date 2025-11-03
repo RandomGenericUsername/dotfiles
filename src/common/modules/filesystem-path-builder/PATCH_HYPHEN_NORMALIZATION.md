@@ -1,7 +1,7 @@
 # Patch: Hyphen-to-Underscore Normalization in PathsBuilder
 
-**Date:** 2025-10-29  
-**Module:** `filesystem-path-builder`  
+**Date:** 2025-10-29
+**Module:** `filesystem-path-builder`
 **Version:** Post-normalization patch
 
 ## Problem Statement
@@ -85,23 +85,23 @@ def add_path(self, key: str, hidden: bool = False) -> "PathsBuilder":
 def path(self) -> Path:
     parts = self.rel.parts  # From attribute access: ["dotfiles", "oh_my_zsh"]
     path_components = []
-    
+
     for i in range(len(parts)):
         level_key = ".".join(parts[: i + 1])  # "dotfiles.oh_my_zsh"
-        
+
         if level_key in self._registry:
             definition = self._registry[level_key]
             # Use original component name (preserves hyphens)
             original_parts = definition.get_parts()
             component = original_parts[-1]  # "oh-my-zsh"
-            
+
             if definition.hidden:
                 component = f".{component}"
         else:
             component = parts[i]
-        
+
         path_components.append(component)
-    
+
     return self.base / Path(*path_components)
 ```
 
@@ -112,15 +112,15 @@ Both `PathsBuilder.create()` and `ManagedPathTree.create()` were updated to norm
 ```python
 for key, definition in self.definitions.items():
     parts = definition.get_parts()  # Original parts: ["dotfiles", "oh-my-zsh"]
-    
+
     for i in range(len(parts)):
         level_key_original = ".".join(parts[: i + 1])  # "dotfiles.oh-my-zsh"
         level_key = level_key_original.replace("-", "_")  # "dotfiles.oh_my_zsh"
         component = parts[i]  # "oh-my-zsh"
-        
+
         if level_key in self.definitions and self.definitions[level_key].hidden:
             component = f".{component}"
-        
+
         path_components.append(component)
 ```
 
@@ -231,4 +231,3 @@ The following documentation should be updated to reflect this patch:
 - The normalization is **one-way:** hyphens are converted to underscores for lookups, but original names are preserved
 - Only hyphens are normalized; other special characters are not affected
 - The patch maintains full backward compatibility with existing code
-

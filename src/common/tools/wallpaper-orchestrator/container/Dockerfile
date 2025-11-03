@@ -33,4 +33,3 @@ RUN mkdir -p /input /output
 
 # Run entrypoint
 ENTRYPOINT ["python", "/app/entrypoint.py"]
-

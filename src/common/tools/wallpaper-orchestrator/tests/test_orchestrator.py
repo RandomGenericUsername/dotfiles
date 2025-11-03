@@ -1,7 +1,5 @@
 """Tests for orchestrator."""
 
-import pytest
-
 from wallpaper_orchestrator.config import AppConfig
 from wallpaper_orchestrator.orchestrator import WallpaperOrchestrator
 
@@ -27,4 +25,3 @@ class TestWallpaperOrchestrator:
         orchestrator = WallpaperOrchestrator(config)
 
         assert orchestrator.registry.config.runtime == "podman"
-

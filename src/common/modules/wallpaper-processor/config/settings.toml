@@ -63,4 +63,3 @@ effects = [
     { name = "blur", params = { sigma = 3 } },
     { name = "brightness", params = { adjustment = -10 } },
 ]
-

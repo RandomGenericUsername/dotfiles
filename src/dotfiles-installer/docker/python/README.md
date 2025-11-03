@@ -224,11 +224,11 @@ class BuildDockerImageStep(PipelineStep):
     def __init__(self, image_name: str, template_vars: dict):
         self.image_name = image_name
         self.template_vars = template_vars
-    
+
     @property
     def step_id(self) -> str:
         return "build_docker_image"
-    
+
     def run(self, context: PipelineContext) -> PipelineContext:
         try:
             template_dir = context.app_config.docker.template_directory
@@ -242,6 +242,6 @@ class BuildDockerImageStep(PipelineStep):
         except DockerError as e:
             context.errors.append(e)
             context.logger_instance.error(f"Docker build failed: {e}")
-        
+
         return context
 ```
