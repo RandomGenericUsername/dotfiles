@@ -168,7 +168,7 @@ logger = Log.create_logger(
 # Use throughout application
 def main():
     logger.info("Application starting")
-    
+
     try:
         run_application()
         logger.info("Application completed successfully")
@@ -271,17 +271,17 @@ logger = Log.create_logger(name="my_app")
 
 def process_items(items):
     logger.info(f"Processing {len(items)} items")
-    
+
     with logger.progress() as progress:
         task = progress.add_task("Processing", total=len(items))
-        
+
         for item in items:
             # Process item
             result = process_item(item)
-            
+
             # Update progress
             progress.update(task, advance=1)
-    
+
     logger.info("Processing complete")
 ```
 
@@ -420,4 +420,3 @@ The dotfiles-logging module provides:
 - **Flexible Configuration**: Multiple handlers, formatters, and options
 
 Start with basic logging and add features as needed!
-

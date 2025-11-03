@@ -163,7 +163,7 @@ echo "=== Black ===" && uv run black --version
 echo "=== isort ===" && uv run isort --version
 echo "=== Ruff ===" && uv run ruff --version
 echo "=== mypy ===" && uv run mypy --version
-echo "=== All tools ready! ===" 
+echo "=== All tools ready! ==="
 ```
 
 Expected output:
@@ -213,5 +213,3 @@ If all checkboxes are checked, your development environment is properly configur
 | Debug CLI | F5 → Python: CLI Install |
 | Type check | Terminal: `uv run mypy .` |
 | Lint | Terminal: `uv run ruff check .` |
-
-

@@ -469,4 +469,3 @@ If you're still having issues:
 - [Getting Started](../guides/getting_started.md) - Basic usage
 - [API Reference](../api/core.md) - Detailed API docs
 - [Examples](examples.md) - Code examples
-

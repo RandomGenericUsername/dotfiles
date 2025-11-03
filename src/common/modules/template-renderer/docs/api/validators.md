@@ -373,4 +373,3 @@ for template_file in template_dir.glob("**/*.j2"):
 - [Core API](core.md) - ValidationResult dataclass
 - [Renderers API](renderers.md) - How renderers use validators
 - [Getting Started](../guides/getting_started.md) - Validation examples
-

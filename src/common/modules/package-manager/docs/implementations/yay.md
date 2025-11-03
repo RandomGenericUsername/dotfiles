@@ -6,12 +6,12 @@ Documentation for the Yay AUR helper implementation.
 
 ## Overview
 
-**Class:** `YayPackageManager`  
-**Executable:** `yay`  
-**Repositories:** Official + AUR  
-**AUR Support:** ✅ Yes  
-**Sudo Required:** ❌ No (handles internally)  
-**Language:** Go  
+**Class:** `YayPackageManager`
+**Executable:** `yay`
+**Repositories:** Official + AUR
+**AUR Support:** ✅ Yes
+**Sudo Required:** ❌ No (handles internally)
+**Language:** Go
 **File:** `implementations/yay.py` (332 lines)
 
 ---
@@ -330,16 +330,16 @@ result = pm.install(["aur-package"])
 ```python
 class YayPackageManager(PackageManager):
     """Yay AUR helper implementation."""
-    
+
     @property
     def manager_type(self) -> PackageManagerType:
         return PackageManagerType.YAY
-    
+
     def _find_executable(self) -> Path | None:
         """Find yay executable."""
         executable = shutil.which("yay")
         return Path(executable) if executable else None
-    
+
     # Implement all abstract methods...
 ```
 
@@ -423,6 +423,5 @@ yay -Sc
 
 ---
 
-**Official Repository:** https://github.com/Jguer/yay  
+**Official Repository:** https://github.com/Jguer/yay
 **AUR Page:** https://aur.archlinux.org/packages/yay
-

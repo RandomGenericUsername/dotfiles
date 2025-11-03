@@ -454,4 +454,3 @@ result = renderer.render("dockerfile.j2", variables={
 - [Integration Guide](integration.md) - Integration patterns
 - [Best Practices](best_practices.md) - Recommended practices
 - [API Reference](../api/core.md) - Detailed API docs
-

@@ -75,8 +75,8 @@ This document describes the class relationships and inheritance hierarchy in the
 
 ### PathTree (Base Class)
 
-**Type:** Frozen dataclass with slots  
-**Purpose:** Base navigation functionality  
+**Type:** Frozen dataclass with slots
+**Purpose:** Base navigation functionality
 **Inheritance:** None (root class)
 
 ```python
@@ -100,8 +100,8 @@ class PathTree:
 
 ### ManagedPathTree (Derived Class)
 
-**Type:** Frozen dataclass with slots  
-**Purpose:** Extends PathTree with creation and registry  
+**Type:** Frozen dataclass with slots
+**Purpose:** Extends PathTree with creation and registry
 **Inheritance:** Extends PathTree
 
 ```python
@@ -130,8 +130,8 @@ class ManagedPathTree(PathTree):
 
 ### PathsBuilder (Independent Class)
 
-**Type:** Regular class (not frozen)  
-**Purpose:** Build ManagedPathTree instances  
+**Type:** Regular class (not frozen)
+**Purpose:** Build ManagedPathTree instances
 **Inheritance:** None
 
 ```python
@@ -155,8 +155,8 @@ class PathsBuilder:
 
 ### PathDefinition (Value Object)
 
-**Type:** Frozen dataclass with slots  
-**Purpose:** Store path configuration  
+**Type:** Frozen dataclass with slots
+**Purpose:** Store path configuration
 **Inheritance:** None
 
 ```python
@@ -450,4 +450,3 @@ builder.add("new")  # Modifies builder
 ---
 
 **Next:** [Back to Overview](overview.md) | [Design Patterns](design_patterns.md)
-

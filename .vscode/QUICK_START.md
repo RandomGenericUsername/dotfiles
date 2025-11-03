@@ -78,5 +78,3 @@ code --list-extensions
 1. Read `.vscode/README.md` for detailed setup
 2. Read `SETTINGS_ALIGNMENT_REFERENCE.md` to understand configuration
 3. Start coding! 🚀
-
-

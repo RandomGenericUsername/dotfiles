@@ -141,5 +141,3 @@ documents/IDE_SETUP/
 ---
 
 **Ready? Continue to `01_QUICK_START.md`** ⚡
-
-

@@ -274,5 +274,3 @@ When you press Ctrl+S:
 1. Read `03_VSCODE_REFERENCE.md` for VSCode settings reference
 2. Read `../GUIDES/01_SETUP_GUIDE.md` for setup instructions
 3. Read `../GUIDES/02_TROUBLESHOOTING.md` for common issues
-
-

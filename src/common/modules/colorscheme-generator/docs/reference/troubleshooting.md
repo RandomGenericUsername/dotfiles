@@ -588,4 +588,3 @@ This produces: `--color0: #fff;--color1: #000;...` (all on one line)
 - **[Examples](examples.md)** - Comprehensive code examples
 - **[Advanced Topics](advanced_topics.md)** - Advanced usage
 - **[API Reference](../api/)** - Detailed API documentation
-

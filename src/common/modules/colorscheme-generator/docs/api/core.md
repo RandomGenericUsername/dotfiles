@@ -1,6 +1,6 @@
 # Core API Reference
 
-**Module:** `colorscheme_generator.core`  
+**Module:** `colorscheme_generator.core`
 **Last Updated:** 2025-10-18
 
 ---
@@ -35,14 +35,14 @@ class ColorSchemeGenerator(ABC):
 @abstractmethod
 def generate(self, image_path: Path, config: GeneratorConfig) -> ColorScheme:
     """Generate color scheme from image.
-    
+
     Args:
         image_path: Path to the source image
         config: Runtime configuration for generation
-        
+
     Returns:
         ColorScheme object with extracted colors
-        
+
     Raises:
         InvalidImageError: If image cannot be read or is invalid
         ColorExtractionError: If color extraction fails
@@ -52,7 +52,7 @@ def generate(self, image_path: Path, config: GeneratorConfig) -> ColorScheme:
 
 **Purpose:** Extract colors from an image and return a ColorScheme object.
 
-**Responsibility:** 
+**Responsibility:**
 - Validate image file
 - Extract colors using backend-specific algorithm
 - Return standardized ColorScheme object
@@ -74,7 +74,7 @@ print(scheme.background.hex)  # '#1a1a1a'
 @abstractmethod
 def is_available(self) -> bool:
     """Check if backend is available on the system.
-    
+
     Returns:
         True if backend is available, False otherwise
     """
@@ -103,7 +103,7 @@ else:
 @abstractmethod
 def backend_name(self) -> str:
     """Get the backend name.
-    
+
     Returns:
         Backend name (e.g., "pywal", "wallust", "custom")
     """
@@ -126,7 +126,7 @@ print(generator.backend_name)  # 'pywal'
 ```python
 def ensure_available(self) -> None:
     """Ensure backend is available, raise error if not.
-    
+
     Raises:
         BackendNotAvailableError: If backend is not available
     """
@@ -153,7 +153,7 @@ Represents a single color in multiple formats.
 ```python
 class Color(BaseModel):
     """Single color in multiple formats.
-    
+
     Attributes:
         hex: Hex color code (e.g., "#FF5733")
         rgb: RGB tuple (0-255 for each channel)
@@ -230,7 +230,7 @@ Complete color scheme from an image.
 ```python
 class ColorScheme(BaseModel):
     """Complete color scheme from image.
-    
+
     Attributes:
         background: Background color
         foreground: Foreground/text color
@@ -245,12 +245,12 @@ class ColorScheme(BaseModel):
     foreground: Color
     cursor: Color
     colors: list[Color] = Field(..., min_length=16, max_length=16)
-    
+
     # Metadata
     source_image: Path
     backend: str
     generated_at: datetime = Field(default_factory=datetime.now)
-    
+
     # Output files (populated by OutputManager)
     output_files: dict[str, Path] = Field(default_factory=dict)
 ```
@@ -339,7 +339,7 @@ Runtime configuration for color scheme generation.
 ```python
 class GeneratorConfig(BaseModel):
     """Runtime configuration for color scheme generation.
-    
+
     Attributes:
         backend: Backend to use (overrides settings.generation.default_backend)
         color_count: Number of colors to extract
@@ -352,11 +352,11 @@ class GeneratorConfig(BaseModel):
     backend: Backend | None = None
     color_count: int | None = None
     saturation_adjustment: float | None = None
-    
+
     # File output settings (for OutputManager)
     output_dir: Path | None = None
     formats: list[ColorFormat] | None = None
-    
+
     # Backend-specific options
     backend_options: dict[str, Any] = Field(default_factory=dict)
 ```
@@ -388,11 +388,11 @@ def from_settings(
     cls, settings: AppConfig, **overrides: Any
 ) -> "GeneratorConfig":
     """Create config from settings with optional overrides.
-    
+
     Args:
         settings: AppConfig from settings.toml
         **overrides: Runtime overrides for any field
-        
+
     Returns:
         GeneratorConfig with merged settings and overrides
     """
@@ -417,10 +417,10 @@ config = GeneratorConfig.from_settings(
 ```python
 def get_backend_settings(self, settings: AppConfig) -> dict[str, Any]:
     """Get backend-specific settings merged with runtime options.
-    
+
     Args:
         settings: AppConfig from settings.toml
-        
+
     Returns:
         Merged backend settings
     """
@@ -473,4 +473,3 @@ scheme = generator.generate(image_path, config)
 - **[Managers API](managers.md)** - OutputManager
 - **[Configuration API](configuration.md)** - Configuration system
 - **[Exceptions API](exceptions.md)** - Exception hierarchy
-

@@ -22,7 +22,7 @@ class LogLevels(Enum):
     CRITICAL = logging.CRITICAL # 50
 ```
 
-**Purpose**: Type-safe log level selection  
+**Purpose**: Type-safe log level selection
 **Usage**: `log_level=LogLevels.INFO`
 
 #### LogFormatterStyleChoices (Enum)
@@ -33,7 +33,7 @@ class LogFormatterStyleChoices(Enum):
     DOLLAR = "$"     # $levelname
 ```
 
-**Purpose**: Format string style selection  
+**Purpose**: Format string style selection
 **Usage**: `formatter_style=LogFormatterStyleChoices.BRACE`
 
 #### LogFormatters (Enum)
@@ -44,7 +44,7 @@ class LogFormatters(Enum):
     RICH = "rich"        # Rich markup formatter
 ```
 
-**Purpose**: Formatter type selection  
+**Purpose**: Formatter type selection
 **Usage**: `formatter_type=LogFormatters.COLORED`
 
 #### ConsoleHandlers (Enum)
@@ -54,7 +54,7 @@ class ConsoleHandlers(Enum):
     RICH = "rich"        # RichHandler
 ```
 
-**Purpose**: Console handler type selection  
+**Purpose**: Console handler type selection
 **Usage**: `console_handler_type=ConsoleHandlers.RICH`
 
 #### FileHandlerTypes (Enum)
@@ -65,7 +65,7 @@ class FileHandlerTypes(Enum):
     TIMED_ROTATING_FILE = "timed_rotating" # TimedRotatingFileHandler
 ```
 
-**Purpose**: File handler type selection  
+**Purpose**: File handler type selection
 **Usage**: `file_handler_type=FileHandlerTypes.ROTATING_FILE`
 
 #### ColoredFormatterColors (Class)
@@ -80,7 +80,7 @@ class ColoredFormatterColors:
     RESET = "\033[0m"       # Reset
 ```
 
-**Purpose**: ANSI color code definitions  
+**Purpose**: ANSI color code definitions
 **Usage**: Internal to ColoredFormatter
 
 #### LogConfig (Dataclass)
@@ -99,8 +99,8 @@ class LogConfig:
     colors: type[ColoredFormatterColors] | None = None
 ```
 
-**Purpose**: Main configuration dataclass  
-**Validation**: Type checking via dataclass  
+**Purpose**: Main configuration dataclass
+**Validation**: Type checking via dataclass
 **Usage**: Pass to `Log.create_logger(config=...)`
 
 ### 2. Logger Configurator (`core/configurator.py`)
@@ -169,30 +169,30 @@ def format_exception(exc: Exception) -> str:
 class BaseHandlerConfig(ABC):
     def __init__(self, formatter: logging.Formatter):
         self.formatter = formatter
-    
+
     @abstractmethod
     def create(self) -> logging.Handler:
         """Create a handler instance."""
 ```
 
-**Purpose**: Abstract base for handler configurations  
+**Purpose**: Abstract base for handler configurations
 **Pattern**: Template Method pattern
 
 #### HandlerFactory
 ```python
 class HandlerFactory:
     _registry: dict[ConsoleHandlers, type[BaseHandlerConfig]] = {}
-    
+
     @classmethod
     def register(cls, handler_type, config_class):
         """Register a handler config class."""
-    
+
     @classmethod
     def create(cls, handler_type, formatter) -> logging.Handler:
         """Create a handler instance."""
 ```
 
-**Purpose**: Factory for creating console handlers  
+**Purpose**: Factory for creating console handlers
 **Pattern**: Factory + Registry pattern
 
 ### 2. Console Handlers (`handlers/console.py`)
@@ -206,7 +206,7 @@ class StreamHandlerConfig(BaseHandlerConfig):
         """Create a StreamHandler instance."""
 ```
 
-**Purpose**: Standard console output  
+**Purpose**: Standard console output
 **Registered As**: `ConsoleHandlers.DEFAULT`
 
 #### RichHandlerConfig
@@ -219,13 +219,13 @@ class RichHandlerConfig(BaseHandlerConfig):
         logger_name: str = None
     ):
         """Initialize Rich handler configuration."""
-    
+
     def create(self) -> logging.Handler:
         """Create RichHandler or fallback to StreamHandler."""
 ```
 
-**Purpose**: Rich-enhanced console output  
-**Registered As**: `ConsoleHandlers.RICH`  
+**Purpose**: Rich-enhanced console output
+**Registered As**: `ConsoleHandlers.RICH`
 **Fallback**: StreamHandler if Rich unavailable
 
 ### 3. File Handlers (`handlers/file.py`)
@@ -237,12 +237,12 @@ class RichHandlerConfig(BaseHandlerConfig):
 class FileHandlerConfig(BaseHandlerConfig):
     def __init__(self, formatter, settings: FileHandlerSettings):
         """Initialize file handler configuration."""
-    
+
     def create(self) -> logging.FileHandler:
         """Create a FileHandler instance."""
 ```
 
-**Purpose**: Basic file logging  
+**Purpose**: Basic file logging
 **Registered As**: `FileHandlerTypes.FILE`
 
 #### RotatingFileHandlerConfig
@@ -250,12 +250,12 @@ class FileHandlerConfig(BaseHandlerConfig):
 class RotatingFileHandlerConfig(BaseHandlerConfig):
     def __init__(self, formatter, settings: RotatingFileHandlerSettings):
         """Initialize rotating file handler configuration."""
-    
+
     def create(self) -> RotatingFileHandler:
         """Create a RotatingFileHandler instance."""
 ```
 
-**Purpose**: File logging with size-based rotation  
+**Purpose**: File logging with size-based rotation
 **Registered As**: `FileHandlerTypes.ROTATING_FILE`
 
 #### TimedRotatingFileHandlerConfig
@@ -263,25 +263,25 @@ class RotatingFileHandlerConfig(BaseHandlerConfig):
 class TimedRotatingFileHandlerConfig(BaseHandlerConfig):
     def __init__(self, formatter, settings: TimedRotatingFileHandlerSettings):
         """Initialize timed rotating file handler configuration."""
-    
+
     def create(self) -> TimedRotatingFileHandler:
         """Create a TimedRotatingFileHandler instance."""
 ```
 
-**Purpose**: File logging with time-based rotation  
+**Purpose**: File logging with time-based rotation
 **Registered As**: `FileHandlerTypes.TIMED_ROTATING_FILE`
 
 #### FileHandlerFactory
 ```python
 class FileHandlerFactory:
     _registry: dict[FileHandlerTypes, type[BaseHandlerConfig]] = {}
-    
+
     @classmethod
     def create(cls, handler_type, formatter, config) -> logging.Handler:
         """Create a file handler instance."""
 ```
 
-**Purpose**: Factory for creating file handlers  
+**Purpose**: Factory for creating file handlers
 **Pattern**: Factory + Registry pattern
 
 ### 4. Handler Settings (`handlers/file_settings.py`, `handlers/rich_settings.py`)
@@ -330,7 +330,7 @@ class RichHandlerSettings:
     rich_tracebacks: bool = True
     tracebacks_show_locals: bool = False
     # ... more settings
-    
+
     def to_dict(self) -> dict:
         """Convert settings to dict for RichHandler."""
 ```
@@ -347,7 +347,7 @@ class BaseFormatterConfig(ABC):
     def __init__(self, format_str: str, style: LogFormatterStyleChoices):
         self.format_str = format_str
         self.style = style
-    
+
     @abstractmethod
     def create(self) -> logging.Formatter:
         """Create a formatter instance."""
@@ -359,7 +359,7 @@ class BaseFormatterConfig(ABC):
 ```python
 class FormatterFactory:
     _registry: dict[LogFormatters, type[BaseFormatterConfig]] = {}
-    
+
     @classmethod
     def create(cls, formatter_type, format_str, style, **kwargs) -> logging.Formatter:
         """Create a formatter instance."""
@@ -375,12 +375,12 @@ class FormatterFactory:
 ```python
 class ColoredFormatter(logging.Formatter):
     """Formatter that adds ANSI colors based on log level."""
-    
+
     def format(self, record):
         """Format the log record with colors."""
 ```
 
-**Purpose**: Add ANSI colors to log output  
+**Purpose**: Add ANSI colors to log output
 **Registered As**: `LogFormatters.COLORED`
 
 ### 3. Rich Formatter (`formatters/rich.py`)
@@ -391,13 +391,13 @@ class ColoredFormatter(logging.Formatter):
 ```python
 class RichFormatter(logging.Formatter):
     """Formatter that outputs Rich markup for use with regular handlers."""
-    
+
     def format(self, record):
         """Format the log record with Rich markup, then render to plain text."""
 ```
 
-**Purpose**: Add Rich markup to log output  
-**Registered As**: `LogFormatters.RICH`  
+**Purpose**: Add Rich markup to log output
+**Registered As**: `LogFormatters.RICH`
 **Fallback**: Standard Formatter if Rich unavailable
 
 ## Rich Integration Components
@@ -575,4 +575,3 @@ The dotfiles-logging module consists of:
 - **1 singleton**: RichConsoleManager for console coordination
 
 All components work together to provide a powerful, flexible, and easy-to-use logging solution.
-

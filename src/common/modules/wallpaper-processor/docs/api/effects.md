@@ -191,4 +191,3 @@ To create a custom effect:
 6. Register in `factory.py`
 
 See [Creating Effects Guide](../guides/creating_effects.md) for details.
-

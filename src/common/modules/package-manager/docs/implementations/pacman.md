@@ -6,11 +6,11 @@ Documentation for the Pacman package manager implementation.
 
 ## Overview
 
-**Class:** `PacmanPackageManager`  
-**Executable:** `pacman`  
-**Repositories:** core, extra, community, multilib (official only)  
-**AUR Support:** ❌ No  
-**Sudo Required:** ✅ Yes  
+**Class:** `PacmanPackageManager`
+**Executable:** `pacman`
+**Repositories:** core, extra, community, multilib (official only)
+**AUR Support:** ❌ No
+**Sudo Required:** ✅ Yes
 **File:** `implementations/pacman.py` (325 lines)
 
 ---
@@ -342,16 +342,16 @@ result = pm.install(["package"])
 ```python
 class PacmanPackageManager(PackageManager):
     """Pacman package manager implementation."""
-    
+
     @property
     def manager_type(self) -> PackageManagerType:
         return PackageManagerType.PACMAN
-    
+
     def _find_executable(self) -> Path | None:
         """Find pacman executable."""
         executable = shutil.which("pacman")
         return Path(executable) if executable else None
-    
+
     # Implement all abstract methods...
 ```
 
@@ -382,4 +382,3 @@ executable = shutil.which("pacman")
 ---
 
 **Official Documentation:** https://wiki.archlinux.org/title/Pacman
-

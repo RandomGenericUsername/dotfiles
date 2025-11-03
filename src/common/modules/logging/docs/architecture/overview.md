@@ -210,7 +210,7 @@ Handlers        Formatters
     Handlers format via formatters
     ↓
     Output to console/file
-    
+
 3b. Rich feature: Use RichConsoleManager to get console
     ↓
     Render Rich component
@@ -367,4 +367,3 @@ The dotfiles-logging module uses a clean, layered architecture that:
 - Supports both simple and advanced use cases
 
 This architecture makes the module easy to understand, maintain, and extend while providing a powerful and flexible logging solution.
-

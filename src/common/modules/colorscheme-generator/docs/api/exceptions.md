@@ -1,6 +1,6 @@
 # Exceptions API Reference
 
-**Module:** `colorscheme_generator.core.exceptions`  
+**Module:** `colorscheme_generator.core.exceptions`
 **Last Updated:** 2025-10-18
 
 ---
@@ -67,7 +67,7 @@ except ColorSchemeGeneratorError as e:
 ```python
 class BackendNotAvailableError(ColorSchemeGeneratorError):
     """Raised when backend is not available."""
-    
+
     def __init__(self, backend: str, message: str | None = None):
         self.backend = backend
         default_message = f"Backend '{backend}' is not available"
@@ -125,7 +125,7 @@ except BackendNotAvailableError:
 ```python
 class ColorExtractionError(ColorSchemeGeneratorError):
     """Raised when color extraction fails."""
-    
+
     def __init__(self, backend: str, image_path: Path, message: str | None = None):
         self.backend = backend
         self.image_path = image_path
@@ -184,7 +184,7 @@ except ColorExtractionError as e:
 ```python
 class TemplateRenderError(ColorSchemeGeneratorError):
     """Raised when template rendering fails."""
-    
+
     def __init__(self, template: str, message: str | None = None):
         self.template = template
         default_message = f"Failed to render template '{template}'"
@@ -243,7 +243,7 @@ except TemplateRenderError as e:
 ```python
 class OutputWriteError(ColorSchemeGeneratorError):
     """Raised when writing output file fails."""
-    
+
     def __init__(self, path: Path, message: str | None = None):
         self.path = path
         default_message = f"Failed to write output file '{path}'"
@@ -298,7 +298,7 @@ except OutputWriteError as e:
 ```python
 class InvalidImageError(ColorSchemeGeneratorError):
     """Raised when image is invalid."""
-    
+
     def __init__(self, image_path: Path, message: str | None = None):
         self.image_path = image_path
         default_message = f"Invalid image file: {image_path}"
@@ -471,4 +471,3 @@ except ColorSchemeGeneratorError as e:
 - **[Core API](core.md)** - Core abstractions and types
 - **[Troubleshooting](../reference/troubleshooting.md)** - Common issues and solutions
 - **[Examples](../reference/examples.md)** - Error handling examples
-

@@ -1,6 +1,6 @@
 # Known Issues & Patches
 
-**Module:** `dotfiles-container-manager`  
+**Module:** `dotfiles-container-manager`
 **Version:** 0.1.0
 
 ---
@@ -71,4 +71,3 @@ if info.exit_code != 0:
 ```
 
 **Why**: Using `detach=False` blocks until completion but doesn't provide access to container ID for inspection or log retrieval if `remove=True` is set.
-

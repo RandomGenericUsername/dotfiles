@@ -1,6 +1,6 @@
 # Getting Started
 
-**Module:** `dotfiles_container_manager`  
+**Module:** `dotfiles_container_manager`
 **Purpose:** Quick start guide for using the container manager
 
 ---
@@ -419,7 +419,7 @@ If you encounter issues:
 3. **Handle exceptions:**
    ```python
    from dotfiles_container_manager import ImageBuildError
-   
+
    try:
        engine.images.build(context, "my-image")
    except ImageBuildError as e:
@@ -432,4 +432,3 @@ If you encounter issues:
 ---
 
 **Ready to dive deeper? Check out [Usage Patterns](usage_patterns.md) for advanced workflows!**
-

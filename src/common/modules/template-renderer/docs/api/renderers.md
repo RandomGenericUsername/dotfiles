@@ -254,11 +254,11 @@ def select_template(renderer, category):
     """Select template from a category."""
     all_templates = renderer.get_available_templates()
     category_templates = [t for t in all_templates if t.startswith(f"{category}/")]
-    
+
     print(f"Templates in {category}:")
     for i, template in enumerate(category_templates, 1):
         print(f"{i}. {template}")
-    
+
     choice = int(input("Select template: ")) - 1
     return category_templates[choice]
 
@@ -387,4 +387,3 @@ See [Configuration Reference](../reference/configuration.md) for details.
 - [Validators API](validators.md) - Validation utilities
 - [Exceptions API](exceptions.md) - Exception hierarchy
 - [Getting Started](../guides/getting_started.md) - Usage examples
-

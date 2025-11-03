@@ -398,5 +398,3 @@ If you still have questions, contact the team or create an issue.
 1. Read `01_DELIVERABLES.md` for complete reference
 2. Read `02_FILE_STRUCTURE.md` for file organization
 3. Start coding!
-
-

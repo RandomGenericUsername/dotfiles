@@ -115,5 +115,3 @@ code --list-extensions
 ---
 
 **All set? Continue to `02_SETUP_CHECKLIST.md`** ✅
-
-

@@ -314,4 +314,3 @@ Just:
 4. Get comprehensive documentation
 
 The AI will follow the methodology and produce consistent, high-quality results!
-

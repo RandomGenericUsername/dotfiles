@@ -19,27 +19,27 @@ from src.modules.pipeline.core.types import PipelineContext, PipelineStep
 
 class RenderTemplateStep(PipelineStep):
     """Pipeline step to render a Jinja2 template."""
-    
+
     def __init__(self, template_name, template_dir, variables, output_key, strict_mode=True):
         self.template_name = template_name
         self.template_dir = template_dir
         self.variables = variables
         self.output_key = output_key
         self.strict_mode = strict_mode
-    
+
     def run(self, context: PipelineContext) -> PipelineContext:
         # Create renderer
         renderer = Jinja2Renderer(
             self.template_dir,
             config=RenderConfig(strict_mode=self.strict_mode),
         )
-        
+
         # Render template
         rendered = renderer.render(self.template_name, self.variables)
-        
+
         # Store in context
         context.results[self.output_key] = rendered
-        
+
         return context
 ```
 
@@ -148,7 +148,7 @@ import platform
 class TemplateManager:
     def __init__(self, template_dir):
         self.renderer = Jinja2Renderer(template_dir)
-    
+
     def render_for_platform(self, base_name, variables):
         """Render template based on current platform."""
         system = platform.system().lower()
@@ -159,7 +159,7 @@ class TemplateManager:
         }
         template_name = template_map.get(system, f"{base_name}_default.j2")
         return self.renderer.render(template_name, variables)
-    
+
     def list_templates_for_category(self, category):
         """List templates in a category."""
         all_templates = self.renderer.get_available_templates()
@@ -194,7 +194,7 @@ def render_template():
     data = request.json
     template_name = data.get("template")
     variables = data.get("variables", {})
-    
+
     try:
         result = renderer.render(template_name, variables=variables)
         return jsonify({"success": True, "result": result})
@@ -249,7 +249,7 @@ def cli():
 def render(template, template_dir, vars, vars_file, output):
     """Render a template."""
     renderer = Jinja2Renderer(template_dir)
-    
+
     # Load variables
     variables = {}
     if vars:
@@ -257,10 +257,10 @@ def render(template, template_dir, vars, vars_file, output):
     elif vars_file:
         with open(vars_file) as f:
             variables = json.load(f)
-    
+
     # Render
     result = renderer.render(template, variables=variables)
-    
+
     # Output
     if output:
         Path(output).write_text(result)
@@ -368,20 +368,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.12'
-      
+
       - name: Install dependencies
         run: |
           pip install jinja2
-      
+
       - name: Generate configurations
         run: |
           python scripts/generate_configs.py
-      
+
       - name: Commit generated files
         run: |
           git config --local user.email "action@github.com"
@@ -424,4 +424,3 @@ for template in renderer.get_available_templates():
 - [Usage Patterns](usage_patterns.md) - Common patterns
 - [Best Practices](best_practices.md) - Recommended practices
 - [API Reference](../api/core.md) - Detailed API docs
-

@@ -404,4 +404,3 @@ done
 # Set processed wallpaper as background
 feh --bg-fill ~/processed/mountain.jpg
 ```
-

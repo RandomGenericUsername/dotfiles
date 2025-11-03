@@ -1,6 +1,6 @@
 # Component Relationships
 
-**Module:** `dotfiles_container_manager`  
+**Module:** `dotfiles_container_manager`
 **Purpose:** Document how components interact and depend on each other
 
 ---
@@ -372,13 +372,13 @@ class DockerImageManager:
             context.dockerfile,
             context.files,
         )
-        
+
         # Execute command
         result = run_docker_command(
             [self.command, "build", "-t", image_name, "-"],
             input_data=tar_data,
         )
-        
+
         # Parse output
         return extract_image_id(result.stdout)
 ```
@@ -391,7 +391,7 @@ class DockerEngine:
     @property
     def images(self) -> ImageManager:
         return self._images_manager
-    
+
     @property
     def containers(self) -> ContainerManager:
         return self._containers_manager
@@ -445,4 +445,3 @@ Core (types, enums, exceptions)
 ---
 
 **Next:** [Core Abstractions](../api/core_abstractions.md) | [Managers API](../api/managers.md)
-

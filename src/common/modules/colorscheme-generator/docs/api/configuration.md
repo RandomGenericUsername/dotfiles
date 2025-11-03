@@ -1,6 +1,6 @@
 # Configuration API Reference
 
-**Module:** `colorscheme_generator.config`  
+**Module:** `colorscheme_generator.config`
 **Last Updated:** 2025-10-18
 
 ---
@@ -25,12 +25,12 @@ Dynaconf-based settings loader with Pydantic validation.
 ```python
 class Settings:
     """Settings loader using Dynaconf + Pydantic validation.
-    
+
     Loads from:
     1. defaults.py (default values)
     2. settings.toml (user configuration)
     3. Environment variables
-    
+
     Validates with Pydantic (AppConfig model).
     """
 ```
@@ -43,17 +43,17 @@ class Settings:
 @classmethod
 def get(cls) -> AppConfig:
     """Get validated application configuration.
-    
+
     Process:
     1. Load settings.toml with Dynaconf
     2. Convert keys to lowercase
     3. Resolve environment variables ($HOME, etc.)
     4. Validate with Pydantic
     5. Return AppConfig instance
-    
+
     Returns:
         Validated AppConfig instance
-        
+
     Raises:
         ValidationError: If settings are invalid
     """
@@ -119,7 +119,7 @@ Pydantic model for application configuration.
 ```python
 class AppConfig(BaseModel):
     """Application configuration model.
-    
+
     Attributes:
         output: Output settings
         generation: Generation settings
@@ -139,7 +139,7 @@ class AppConfig(BaseModel):
 ```python
 class OutputSettings(BaseModel):
     """Output file settings.
-    
+
     Attributes:
         directory: Output directory path
         formats: List of output formats
@@ -159,7 +159,7 @@ settings.output.formats    # [ColorFormat.JSON, ColorFormat.CSS, ColorFormat.SHE
 ```python
 class GenerationSettings(BaseModel):
     """Color generation settings.
-    
+
     Attributes:
         default_backend: Default backend to use
         color_count: Number of colors to extract
@@ -182,7 +182,7 @@ settings.generation.saturation_adjustment  # 1.0
 ```python
 class BackendSettings(BaseModel):
     """Backend-specific settings.
-    
+
     Attributes:
         pywal: Pywal backend settings
         wallust: Wallust backend settings
@@ -227,7 +227,7 @@ settings.backends.custom.algorithm      # ColorAlgorithm.KMEANS
 ```python
 class TemplateSettings(BaseModel):
     """Template system settings.
-    
+
     Attributes:
         directory: Template directory path (relative to module root)
     """
@@ -511,4 +511,3 @@ settings = AppConfig(**dynaconf.as_dict())
 - **[Core API](core.md)** - Core abstractions and types
 - **[Getting Started](../guides/getting_started.md)** - Quick start guide
 - **[Examples](../reference/examples.md)** - Configuration examples
-

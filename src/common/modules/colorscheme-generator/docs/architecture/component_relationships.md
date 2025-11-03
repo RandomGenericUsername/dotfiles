@@ -1,6 +1,6 @@
 # Component Relationships
 
-**Module:** `colorscheme_generator`  
+**Module:** `colorscheme_generator`
 **Last Updated:** 2025-10-18
 
 ---
@@ -307,8 +307,8 @@ Files (JSON/CSS/Shell/YAML)
 
 ### Backend → ColorScheme
 
-**Protocol:** Return value  
-**Data:** ColorScheme object  
+**Protocol:** Return value
+**Data:** ColorScheme object
 **Contract:**
 - Must have background, foreground, cursor colors
 - Must have exactly 16 terminal colors
@@ -329,8 +329,8 @@ ColorScheme(
 
 ### ColorScheme → OutputManager
 
-**Protocol:** Method parameter  
-**Data:** ColorScheme object  
+**Protocol:** Method parameter
+**Data:** ColorScheme object
 **Contract:**
 - ColorScheme must be valid (Pydantic validated)
 - OutputManager doesn't modify ColorScheme
@@ -350,8 +350,8 @@ def write_outputs(self, scheme: ColorScheme, ...):
 
 ### Settings → Components
 
-**Protocol:** Constructor injection  
-**Data:** AppConfig object  
+**Protocol:** Constructor injection
+**Data:** AppConfig object
 **Contract:**
 - Settings injected at construction time
 - Components store reference to settings
@@ -368,8 +368,8 @@ class PywalGenerator:
 
 ### Factory → Backends
 
-**Protocol:** Factory method  
-**Data:** Backend enum + AppConfig  
+**Protocol:** Factory method
+**Data:** Backend enum + AppConfig
 **Contract:**
 - Factory creates backend instance
 - Factory passes settings to backend
@@ -431,14 +431,14 @@ def create(backend: Backend, settings: AppConfig) -> ColorSchemeGenerator:
 class NewBackend(ColorSchemeGenerator):
     def __init__(self, settings: AppConfig):
         self.settings = settings
-    
+
     def generate(self, image_path, config):
         # Your implementation
         return ColorScheme(...)
-    
+
     def is_available(self):
         return True
-    
+
     @property
     def backend_name(self):
         return "new_backend"
@@ -488,4 +488,3 @@ class ColorFormat(str, Enum):
 - **[API Reference](../api/)** - Detailed API documentation
 - **[Usage Patterns](../guides/usage_patterns.md)** - Common usage patterns
 - **[Examples](../reference/examples.md)** - Comprehensive examples
-

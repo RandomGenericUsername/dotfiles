@@ -1,6 +1,6 @@
 # Templates Guide
 
-**Module:** `colorscheme_generator`  
+**Module:** `colorscheme_generator`
 **Last Updated:** 2025-10-18
 
 ---
@@ -109,12 +109,12 @@ color.hsl  # (12.0, 1.0, 0.6) or None
   --background: {{ background.hex }};
   --foreground: {{ foreground.hex }};
   --cursor: {{ cursor.hex }};
-  
+
   /* Terminal colors */
   {% for i in range(16) %}
   --color{{ i }}: {{ colors[i].hex }};
   {% endfor %}
-  
+
   /* RGB values */
   --background-rgb: {{ background.rgb[0] }}, {{ background.rgb[1] }}, {{ background.rgb[2] }};
   --foreground-rgb: {{ foreground.rgb[0] }}, {{ foreground.rgb[1] }}, {{ foreground.rgb[2] }};
@@ -127,11 +127,11 @@ color.hsl  # (12.0, 1.0, 0.6) or None
   --background: #1a1a1a;
   --foreground: #ffffff;
   --cursor: #ff0000;
-  
+
   --color0: #000000;
   --color1: #ff0000;
   ...
-  
+
   --background-rgb: 26, 26, 26;
   --foreground-rgb: 255, 255, 255;
 }
@@ -377,13 +377,13 @@ return {
   background = "{{ background.hex }}",
   foreground = "{{ foreground.hex }}",
   cursor = "{{ cursor.hex }}",
-  
+
   colors = {
     {% for i in range(16) %}
     "{{ colors[i].hex }}",
     {% endfor %}
   },
-  
+
   named = {
     black = "{{ colors[0].hex }}",
     red = "{{ colors[1].hex }}",
@@ -464,4 +464,3 @@ print(output)
 - **[Usage Patterns](usage_patterns.md)** - Common usage patterns
 - **[Integration](integration.md)** - Integration examples
 - **[Examples](../reference/examples.md)** - Comprehensive examples
-

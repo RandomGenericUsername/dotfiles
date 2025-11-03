@@ -262,5 +262,3 @@ documents/IDE_SETUP/
 2. Read `../GUIDES/01_SETUP_GUIDE.md` for setup instructions
 3. Read `../GUIDES/02_TROUBLESHOOTING.md` for common issues
 4. Start coding!
-
-

@@ -452,32 +452,32 @@ for env, vars in environments.items():
 ```python
 def template_wizard():
     renderer = Jinja2Renderer("templates")
-    
+
     # List templates
     templates = renderer.get_available_templates()
     for i, template in enumerate(templates, 1):
         print(f"{i}. {template}")
-    
+
     # Select template
     choice = int(input("Select template: ")) - 1
     template_name = templates[choice]
-    
+
     # Get required variables
     required = renderer.get_template_variables(template_name)
-    
+
     # Collect variables
     variables = {}
     for var in required:
         variables[var] = input(f"Enter {var}: ")
-    
+
     # Render
     result = renderer.render(template_name, variables=variables)
-    
+
     # Save
     output = input("Output file: ")
     with open(output, "w") as f:
         f.write(result)
-    
+
     print(f"Rendered to {output}")
 
 template_wizard()
@@ -490,4 +490,3 @@ template_wizard()
 - [Usage Patterns](../guides/usage_patterns.md) - Common patterns
 - [Integration Guide](../guides/integration.md) - Integration examples
 - [API Reference](../api/core.md) - Detailed API docs
-

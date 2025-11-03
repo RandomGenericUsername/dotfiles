@@ -1,6 +1,6 @@
 # Design Patterns
 
-**Module:** `colorscheme_generator`  
+**Module:** `colorscheme_generator`
 **Last Updated:** 2025-10-18
 
 ---
@@ -27,7 +27,7 @@ The `ColorSchemeGeneratorFactory` implements the Abstract Factory pattern to cre
 ```python
 class ColorSchemeGeneratorFactory:
     """Factory for creating ColorSchemeGenerator instances."""
-    
+
     @staticmethod
     def create(backend: Backend, settings: AppConfig) -> ColorSchemeGenerator:
         """Create a specific backend instance."""
@@ -39,7 +39,7 @@ class ColorSchemeGeneratorFactory:
             return CustomGenerator(settings)
         else:
             raise ValueError(f"Unknown backend: {backend}")
-    
+
     @staticmethod
     def create_auto(settings: AppConfig) -> ColorSchemeGenerator:
         """Automatically detect and create best available backend."""
@@ -48,12 +48,12 @@ class ColorSchemeGeneratorFactory:
             (Backend.PYWAL, PywalGenerator),
             (Backend.CUSTOM, CustomGenerator),
         ]
-        
+
         for backend_type, backend_class in backends_to_try:
             generator = backend_class(settings)
             if generator.is_available():
                 return generator
-        
+
         raise BackendNotAvailableError("none", "No backends available")
 ```
 
@@ -148,24 +148,24 @@ class OutputManager:
         """Template method - defines the algorithm."""
         output_dir.mkdir(parents=True, exist_ok=True)
         output_files = {}
-        
+
         for fmt in formats:
             # Step 1: Render template (varies by format)
             content = self._render_template(scheme, fmt)
-            
+
             # Step 2: Write to file (same for all formats)
             output_path = output_dir / f"colors.{fmt.value}"
             self._write_file(output_path, content)
-            
+
             output_files[fmt.value] = output_path
-        
+
         return output_files
-    
+
     def _render_template(self, scheme, fmt):
         """Primitive operation - varies by format."""
         template = self.template_env.get_template(f"colors.{fmt.value}.j2")
         return template.render(...)
-    
+
     def _write_file(self, path, content):
         """Primitive operation - same for all formats."""
         path.write_text(content)
@@ -380,23 +380,23 @@ files = manager.write_outputs(scheme, output_dir, formats)
 ## Anti-Patterns Avoided
 
 ### 1. God Object
-❌ **Avoided:** No single class does everything  
+❌ **Avoided:** No single class does everything
 ✅ **Instead:** Separate classes for extraction, output, config, factory
 
 ### 2. Tight Coupling
-❌ **Avoided:** Backends don't know about OutputManager  
+❌ **Avoided:** Backends don't know about OutputManager
 ✅ **Instead:** Communicate through ColorScheme interface
 
 ### 3. Hard-Coded Dependencies
-❌ **Avoided:** No hard-coded paths or settings  
+❌ **Avoided:** No hard-coded paths or settings
 ✅ **Instead:** Dependency injection + configuration
 
 ### 4. Monolithic Design
-❌ **Avoided:** Not a single large class  
+❌ **Avoided:** Not a single large class
 ✅ **Instead:** Multiple focused components
 
 ### 5. Leaky Abstractions
-❌ **Avoided:** Backend details don't leak to clients  
+❌ **Avoided:** Backend details don't leak to clients
 ✅ **Instead:** Clean ABC interface hides implementation
 
 ---
@@ -406,4 +406,3 @@ files = manager.write_outputs(scheme, output_dir, formats)
 - **[Component Relationships](component_relationships.md)** - How components interact
 - **[API Reference](../api/)** - Detailed API documentation
 - **[Usage Patterns](../guides/usage_patterns.md)** - Common usage patterns
-

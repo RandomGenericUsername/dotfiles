@@ -1,6 +1,6 @@
 # Core Abstractions API
 
-**Module:** `dotfiles_container_manager.core`  
+**Module:** `dotfiles_container_manager.core`
 **Purpose:** Abstract base classes defining the container management interface
 
 ---
@@ -15,7 +15,7 @@
 
 ## ContainerEngine
 
-**Location:** `core/base.py`  
+**Location:** `core/base.py`
 **Type:** Abstract Base Class
 
 ### Description
@@ -27,98 +27,98 @@ The `ContainerEngine` is the main entry point for all container operations. It p
 ```python
 class ContainerEngine(ABC):
     """Abstract base class for container engines."""
-    
+
     def __init__(self, command: str):
         """Initialize the container engine.
-        
+
         Args:
             command: The command to use for container operations (e.g., 'docker', 'podman')
         """
         self.command = command
         self._runtime = self._detect_runtime()
-    
+
     @property
     def runtime(self) -> ContainerRuntime:
         """Get the detected container runtime."""
         return self._runtime
-    
+
     @abstractmethod
     def _detect_runtime(self) -> ContainerRuntime:
         """Detect the container runtime.
-        
+
         Returns:
             The detected container runtime
         """
         pass
-    
+
     @property
     @abstractmethod
     def images(self) -> ImageManager:
         """Get the image manager.
-        
+
         Returns:
             Manager for image operations
         """
         pass
-    
+
     @property
     @abstractmethod
     def containers(self) -> ContainerManager:
         """Get the container manager.
-        
+
         Returns:
             Manager for container operations
         """
         pass
-    
+
     @property
     @abstractmethod
     def volumes(self) -> VolumeManager:
         """Get the volume manager.
-        
+
         Returns:
             Manager for volume operations
         """
         pass
-    
+
     @property
     @abstractmethod
     def networks(self) -> NetworkManager:
         """Get the network manager.
-        
+
         Returns:
             Manager for network operations
         """
         pass
-    
+
     @abstractmethod
     def is_available(self) -> bool:
         """Check if the container runtime is available.
-        
+
         Returns:
             True if the runtime is available, False otherwise
         """
         pass
-    
+
     @abstractmethod
     def version(self) -> str:
         """Get the container runtime version.
-        
+
         Returns:
             Version string
-        
+
         Raises:
             RuntimeNotAvailableError: If runtime is not available
         """
         pass
-    
+
     @abstractmethod
     def info(self) -> dict[str, Any]:
         """Get container runtime information.
-        
+
         Returns:
             Dictionary containing runtime information
-        
+
         Raises:
             RuntimeNotAvailableError: If runtime is not available
         """
@@ -195,7 +195,7 @@ print(f"Server Version: {info.get('ServerVersion')}")
 
 ## ContainerEngineFactory
 
-**Location:** `factory.py`  
+**Location:** `factory.py`
 **Type:** Static Factory Class
 
 ### Description
@@ -207,18 +207,18 @@ The `ContainerEngineFactory` provides static methods for creating container engi
 ```python
 class ContainerEngineFactory:
     """Factory for creating container engine instances."""
-    
+
     @staticmethod
     def create(runtime: ContainerRuntime, command: str | None = None) -> ContainerEngine:
         """Create a container engine for the specified runtime.
-        
+
         Args:
             runtime: The container runtime to use
             command: Optional custom command (defaults based on runtime)
-        
+
         Returns:
             Configured container engine instance
-        
+
         Raises:
             ValueError: If runtime is not supported
             RuntimeNotAvailableError: If runtime is not available on the system
@@ -229,37 +229,37 @@ class ContainerEngineFactory:
             engine = DockerEngine(command or "podman")
         else:
             raise ValueError(f"Unsupported runtime: {runtime}")
-        
+
         if not engine.is_available():
             raise RuntimeNotAvailableError(command or runtime.value)
-        
+
         return engine
-    
+
     @staticmethod
     def create_docker(command: str = "docker") -> ContainerEngine:
         """Create a Docker engine.
-        
+
         Args:
             command: Docker command to use (default: 'docker')
-        
+
         Returns:
             Docker engine instance
-        
+
         Raises:
             RuntimeNotAvailableError: If Docker is not available
         """
         return ContainerEngineFactory.create(ContainerRuntime.DOCKER, command)
-    
+
     @staticmethod
     def create_podman(command: str = "podman") -> ContainerEngine:
         """Create a Podman engine.
-        
+
         Args:
             command: Podman command to use (default: 'podman')
-        
+
         Returns:
             Podman engine instance
-        
+
         Raises:
             RuntimeNotAvailableError: If Podman is not available
         """
@@ -399,4 +399,3 @@ print(f"Storage Driver: {info.get('Driver')}")
 ---
 
 **Next:** [Managers API](managers.md) | [Types and Enums](types_and_enums.md)
-

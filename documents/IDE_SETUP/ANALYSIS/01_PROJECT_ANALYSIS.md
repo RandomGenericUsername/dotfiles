@@ -115,5 +115,3 @@ Your `pyproject.toml` has comprehensive tool configurations:
 2. Read `03_SOLUTION_OVERVIEW.md` for what was created
 3. Read `../CONFIGURATION/01_SETTINGS_ALIGNMENT.md` for configuration details
 4. Read `../GUIDES/01_SETUP_GUIDE.md` for setup instructions
-
-

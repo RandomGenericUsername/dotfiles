@@ -1,7 +1,7 @@
 # Architecture Overview
 
-**Module:** template_renderer  
-**Purpose:** Generic, agnostic template rendering with Jinja2  
+**Module:** template_renderer
+**Purpose:** Generic, agnostic template rendering with Jinja2
 **Design:** Layered architecture with abstract base and concrete implementations
 
 ---
@@ -213,11 +213,11 @@ class TemplateRenderer(ABC):
     @abstractmethod
     def render(self, template_name, variables, **kwargs) -> str:
         pass
-    
+
     @abstractmethod
     def validate(self, template_name, variables) -> ValidationResult:
         pass
-    
+
     # ... other abstract methods
 ```
 
@@ -428,4 +428,3 @@ Potential architectural improvements:
 3. **Async Support:** Async rendering methods
 4. **Streaming:** Stream large template outputs
 5. **Template Registry:** Central template management
-

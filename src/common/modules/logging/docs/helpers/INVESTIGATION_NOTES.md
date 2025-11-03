@@ -479,4 +479,3 @@ configurator.configure(config)
 **End of Investigation Notes**
 
 *This document will be continuously updated as the investigation progresses.*
-

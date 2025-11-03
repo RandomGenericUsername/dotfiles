@@ -124,7 +124,7 @@ ManagedPathTree with registry and navigation
 @dataclass(frozen=True, slots=True)
 class ManagedPathTree(PathTree):
     _definitions: tuple[PathDefinition, ...] = field(default_factory=tuple)
-    
+
     def create(self, *, parents: bool = True, exist_ok: bool = True) -> None
     def __fspath__(self) -> str
 ```
@@ -387,20 +387,19 @@ class CustomManagedTree(ManagedPathTree):
 
 ### Immutability vs Flexibility
 
-**Choice:** Immutability  
+**Choice:** Immutability
 **Trade-off:** Cannot modify after creation, but gains thread safety and predictability
 
 ### Dynamic vs Explicit
 
-**Choice:** Support both (PathTree for dynamic, PathsBuilder for explicit)  
+**Choice:** Support both (PathTree for dynamic, PathsBuilder for explicit)
 **Trade-off:** More classes, but better separation of concerns
 
 ### Registry vs Direct
 
-**Choice:** Registry-based (ManagedPathTree stores definitions)  
+**Choice:** Registry-based (ManagedPathTree stores definitions)
 **Trade-off:** More memory, but enables sophisticated hidden directory handling
 
 ---
 
 **Next:** [Design Patterns](design_patterns.md) | [Class Hierarchy](class_hierarchy.md)
-

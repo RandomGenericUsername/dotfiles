@@ -244,7 +244,7 @@ echo "=== Black ===" && uv run black --version
 echo "=== isort ===" && uv run isort --version
 echo "=== Ruff ===" && uv run ruff --version
 echo "=== mypy ===" && uv run mypy --version
-echo "=== All tools ready! ===" 
+echo "=== All tools ready! ==="
 ```
 
 Expected output:
@@ -277,5 +277,3 @@ Your development environment is now properly configured!
 1. Read `02_TROUBLESHOOTING.md` for common issues
 2. Read `03_DEVELOPMENT_WORKFLOW.md` for how to use
 3. Start coding!
-
-

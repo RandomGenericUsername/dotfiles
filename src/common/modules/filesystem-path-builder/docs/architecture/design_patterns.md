@@ -17,12 +17,12 @@ class PathsBuilder:
     def __init__(self, base: Segment) -> None:
         self._base = Path(base).expanduser().resolve()
         self._definitions: list[PathDefinition] = []
-    
+
     def add(self, key: str, *, hidden: bool = False) -> Self:
         """Add a path definition (fluent interface)"""
         self._definitions.append(PathDefinition(key=key, hidden=hidden))
         return self
-    
+
     def build(self) -> ManagedPathTree:
         """Build the final ManagedPathTree"""
         return ManagedPathTree(
@@ -64,7 +64,7 @@ The Flyweight pattern is used to minimize memory usage by sharing path segments 
 class PathTree:
     _base: Path
     _segments: tuple[str, ...] = field(default_factory=tuple)
-    
+
     def __getattr__(self, name: str) -> "PathTree":
         """Create new PathTree with additional segment"""
         return PathTree(
@@ -111,7 +111,7 @@ The Composite pattern combines PathTree navigation with directory creation capab
 class ManagedPathTree(PathTree):
     """Combines navigation (from PathTree) with creation"""
     _definitions: tuple[PathDefinition, ...] = field(default_factory=tuple)
-    
+
     def create(self, *, parents: bool = True, exist_ok: bool = True) -> None:
         """Add creation capability"""
         for definition in self._definitions:
@@ -380,7 +380,7 @@ class PathTree:
             base=self._base,
             segments=self._segments + (name,)
         )
-    
+
     def to_path(self) -> Path:
         """Actual Path created only when needed"""
         path = self._base
@@ -461,4 +461,3 @@ managed = ManagedPathTree(...)  # Composite (extends PathTree)
 ---
 
 **Next:** [Class Hierarchy](class_hierarchy.md) | [Back to Overview](overview.md)
-

@@ -287,5 +287,3 @@ Here's the complete `.vscode/settings.json` file:
 1. Read `../GUIDES/01_SETUP_GUIDE.md` for setup instructions
 2. Read `../GUIDES/02_TROUBLESHOOTING.md` for common issues
 3. Read `../GUIDES/03_DEVELOPMENT_WORKFLOW.md` for how to use
-
-

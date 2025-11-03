@@ -209,5 +209,3 @@ $ make format
 1. Read `03_SOLUTION_OVERVIEW.md` to see what was created
 2. Read `../CONFIGURATION/01_SETTINGS_ALIGNMENT.md` for configuration details
 3. Read `../GUIDES/01_SETUP_GUIDE.md` for setup instructions
-
-

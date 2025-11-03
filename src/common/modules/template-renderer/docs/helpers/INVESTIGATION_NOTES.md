@@ -2981,4 +2981,3 @@ result = renderer.render("app.j2", variables=variables)
 ---
 
 **End of Investigation Notes**
-

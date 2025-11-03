@@ -1,7 +1,7 @@
 # Architecture Overview
 
-**Module:** `colorscheme_generator`  
-**Version:** 0.1.0  
+**Module:** `colorscheme_generator`
+**Version:** 0.1.0
 **Last Updated:** 2025-10-18
 
 ---
@@ -88,8 +88,8 @@ The `colorscheme_generator` module follows a **two-layer architecture** that sep
 ### Core Components
 
 #### 1. ColorSchemeGenerator (ABC)
-**Location:** `core/base.py`  
-**Purpose:** Abstract base class for all backends  
+**Location:** `core/base.py`
+**Purpose:** Abstract base class for all backends
 **Responsibility:** Define interface for color extraction
 
 **Key Methods:**
@@ -98,7 +98,7 @@ The `colorscheme_generator` module follows a **two-layer architecture** that sep
 - `backend_name` - Get backend identifier
 
 #### 2. Backend Implementations
-**Location:** `backends/`  
+**Location:** `backends/`
 **Purpose:** Concrete implementations of ColorSchemeGenerator
 
 **Backends:**
@@ -107,8 +107,8 @@ The `colorscheme_generator` module follows a **two-layer architecture** that sep
 - **CustomGenerator** - Uses PIL/scikit-learn for color extraction
 
 #### 3. OutputManager
-**Location:** `core/managers/output_manager.py`  
-**Purpose:** Write ColorScheme objects to files  
+**Location:** `core/managers/output_manager.py`
+**Purpose:** Write ColorScheme objects to files
 **Responsibility:** Template rendering and file I/O
 
 **Key Methods:**
@@ -117,8 +117,8 @@ The `colorscheme_generator` module follows a **two-layer architecture** that sep
 - `_write_file(path, content)` - Write to disk
 
 #### 4. ColorSchemeGeneratorFactory
-**Location:** `factory.py`  
-**Purpose:** Create backend instances  
+**Location:** `factory.py`
+**Purpose:** Create backend instances
 **Responsibility:** Backend instantiation and auto-detection
 
 **Key Methods:**
@@ -127,8 +127,8 @@ The `colorscheme_generator` module follows a **two-layer architecture** that sep
 - `list_available(settings) -> list[str]` - List available backends
 
 #### 5. Configuration System
-**Location:** `config/`  
-**Purpose:** Manage settings and configuration  
+**Location:** `config/`
+**Purpose:** Manage settings and configuration
 **Components:**
 - `Settings` - Dynaconf loader
 - `AppConfig` - Pydantic validation model
@@ -138,14 +138,14 @@ The `colorscheme_generator` module follows a **two-layer architecture** that sep
 ### Supporting Components
 
 #### 6. Type System
-**Location:** `core/types.py`  
+**Location:** `core/types.py`
 **Types:**
 - `Color` - Single color (hex, RGB, HSL)
 - `ColorScheme` - Complete color scheme (background, foreground, cursor, 16 colors)
 - `GeneratorConfig` - Runtime configuration for generation
 
 #### 7. Exception Hierarchy
-**Location:** `core/exceptions.py`  
+**Location:** `core/exceptions.py`
 **Exceptions:**
 - `ColorSchemeGeneratorError` - Base exception
 - `BackendNotAvailableError` - Backend not installed
@@ -155,8 +155,8 @@ The `colorscheme_generator` module follows a **two-layer architecture** that sep
 - `InvalidImageError` - Invalid image file
 
 #### 8. Template System
-**Location:** `templates/`  
-**Purpose:** Jinja2 templates for output formats  
+**Location:** `templates/`
+**Purpose:** Jinja2 templates for output formats
 **Templates:**
 - `colors.json.j2` - JSON format
 - `colors.sh.j2` - Shell script format
@@ -244,10 +244,10 @@ class NewBackend(ColorSchemeGenerator):
     def generate(self, image_path, config):
         # Your implementation
         return ColorScheme(...)
-    
+
     def is_available(self):
         return True
-    
+
     @property
     def backend_name(self):
         return "new_backend"
@@ -341,4 +341,3 @@ dev = ["pytest", "pytest-cov", "ruff", "mypy"]
 - **[Design Patterns](design_patterns.md)** - Detailed pattern documentation
 - **[Component Relationships](component_relationships.md)** - How components interact
 - **[API Reference](../api/)** - Detailed API documentation
-

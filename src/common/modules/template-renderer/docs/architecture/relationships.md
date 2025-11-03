@@ -463,4 +463,3 @@ Jinja2Renderer
 
 - [Architecture Overview](overview.md) - Module structure
 - [Design Patterns](design_patterns.md) - Patterns used
-

@@ -241,5 +241,3 @@ GUIDES/02_TROUBLESHOOTING.md (if issues)
 ---
 
 **Ready? Start with `00_START_HERE.md`** 🎉
-
-

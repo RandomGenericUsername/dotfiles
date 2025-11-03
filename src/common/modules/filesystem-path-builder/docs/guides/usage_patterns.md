@@ -169,19 +169,19 @@ from filesystem_path_builder import PathsBuilder
 def create_user_directories(username: str, groups: list[str]):
     """Create user-specific directory structure."""
     builder = PathsBuilder(Path(f"/home/{username}"))
-    
+
     # Add standard directories
     builder.add("documents", hidden=False)
     builder.add("downloads", hidden=False)
-    
+
     # Add group-specific directories
     for group in groups:
         builder.add(f"projects.{group}", hidden=False)
-    
+
     # Build and create
     paths = builder.build()
     paths.create()
-    
+
     return paths
 
 # Usage
@@ -206,7 +206,7 @@ from filesystem_path_builder import ManagedPathTree, PathDefinition
 
 class TempWorkspace:
     """Temporary workspace with structured directories."""
-    
+
     def __init__(self):
         self.temp_dir = Path(tempfile.mkdtemp())
         self.paths = ManagedPathTree(
@@ -218,10 +218,10 @@ class TempWorkspace:
             ]
         )
         self.paths.create()
-    
+
     def __enter__(self):
         return self.paths
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         shutil.rmtree(self.temp_dir)
 
@@ -229,10 +229,10 @@ class TempWorkspace:
 with TempWorkspace() as workspace:
     input_file = workspace.input / "data.txt"
     output_file = workspace.output / "result.txt"
-    
+
     # Do work...
     input_file.to_path().write_text("data")
-    
+
 # Automatic cleanup when exiting context
 ```
 
@@ -255,7 +255,7 @@ class Environment(Enum):
 def get_app_paths(env: Environment) -> ManagedPathTree:
     """Get application paths for specific environment."""
     base = Path(f"/var/app/{env.value}")
-    
+
     paths = ManagedPathTree(
         base=base,
         definitions=[
@@ -265,7 +265,7 @@ def get_app_paths(env: Environment) -> ManagedPathTree:
             PathDefinition(key="temp", hidden=False),
         ]
     )
-    
+
     paths.create()
     return paths
 
@@ -316,17 +316,17 @@ def discover_plugins(app_dir: Path) -> dict[str, Path]:
     """Discover plugins in application directory."""
     paths = PathTree(app_dir)
     plugins_dir = paths.plugins.to_path()
-    
+
     if not plugins_dir.exists():
         return {}
-    
+
     plugins = {}
     for plugin_dir in plugins_dir.iterdir():
         if plugin_dir.is_dir():
             plugin_file = plugin_dir / "plugin.py"
             if plugin_file.exists():
                 plugins[plugin_dir.name] = plugin_file
-    
+
     return plugins
 
 # Usage
@@ -353,12 +353,12 @@ def find_config_file(app_name: str, config_name: str) -> Path | None:
         PathTree(Path.home()) / f".{app_name}" / config_name,  # User config
         PathTree(Path("/etc")) / app_name / config_name,  # System config
     ]
-    
+
     for path_tree in search_paths:
         path = path_tree.to_path()
         if path.exists():
             return path
-    
+
     return None
 
 # Usage
@@ -382,7 +382,7 @@ from filesystem_path_builder import ManagedPathTree, PathDefinition
 def setup_migration_workspace(version_from: str, version_to: str) -> ManagedPathTree:
     """Setup workspace for data migration."""
     base = Path(f"/tmp/migration_{version_from}_to_{version_to}")
-    
+
     workspace = ManagedPathTree(
         base=base,
         definitions=[
@@ -392,7 +392,7 @@ def setup_migration_workspace(version_from: str, version_to: str) -> ManagedPath
             PathDefinition(key="logs", hidden=False),
         ]
     )
-    
+
     workspace.create()
     return workspace
 
@@ -427,11 +427,11 @@ def test_workspace(tmp_path):
         ]
     )
     workspace.create()
-    
+
     # Setup test data
     (workspace.input / "test.txt").to_path().write_text("test data")
     (workspace.expected / "result.txt").to_path().write_text("expected result")
-    
+
     return workspace
 
 def test_processing(test_workspace):
@@ -439,11 +439,11 @@ def test_processing(test_workspace):
     input_file = test_workspace.input / "test.txt"
     output_file = test_workspace.output / "result.txt"
     expected_file = test_workspace.expected / "result.txt"
-    
+
     # Process data
     data = input_file.to_path().read_text()
     output_file.to_path().write_text(data.upper())
-    
+
     # Verify
     assert output_file.to_path().exists()
 ```
@@ -488,7 +488,7 @@ class ManagedWorkspace:
         self.paths = ManagedPathTree(...)
         self.paths.create()
         return self.paths
-    
+
     def __exit__(self, *args):
         # Cleanup
         shutil.rmtree(self.paths.to_path())
@@ -548,4 +548,3 @@ for i in range(100):
 ---
 
 **Next:** [Integration Guide](integration.md) | [Best Practices](best_practices.md)
-

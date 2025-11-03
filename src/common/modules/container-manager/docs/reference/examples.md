@@ -1,6 +1,6 @@
 # Complete Examples
 
-**Module:** `dotfiles_container_manager`  
+**Module:** `dotfiles_container_manager`
 **Purpose:** Real-world usage examples and complete workflows
 
 ---
@@ -108,7 +108,7 @@ context = BuildContext(
     WORKDIR /build
     COPY main.go .
     RUN go build -o app main.go
-    
+
     # Runtime stage
     FROM alpine:latest
     WORKDIR /app
@@ -238,15 +238,15 @@ context = BuildContext(
     FROM python:3.11-slim
     ARG APP_VERSION=1.0.0
     ARG ENVIRONMENT=production
-    
+
     LABEL version=$APP_VERSION
     LABEL environment=$ENVIRONMENT
-    
+
     WORKDIR /app
     COPY app.py /app/
-    
+
     RUN echo "Building version $APP_VERSION for $ENVIRONMENT"
-    
+
     CMD ["python", "app.py"]
     """,
     files={
@@ -284,14 +284,14 @@ from dotfiles_container_manager import (
 def setup_dev_environment():
     """Set up a complete development environment."""
     engine = ContainerEngineFactory.create_docker()
-    
+
     # Create network for services
     network_id = engine.networks.create("dev-network")
-    
+
     # Create volumes for persistence
     db_volume = engine.volumes.create("dev-db-data")
     redis_volume = engine.volumes.create("dev-redis-data")
-    
+
     # Start PostgreSQL
     db_config = RunConfig(
         image="postgres:15-alpine",
@@ -307,7 +307,7 @@ def setup_dev_environment():
         detach=True,
     )
     db_container = engine.containers.run(db_config)
-    
+
     # Start Redis
     redis_config = RunConfig(
         image="redis:7-alpine",
@@ -319,7 +319,7 @@ def setup_dev_environment():
         detach=True,
     )
     redis_container = engine.containers.run(redis_config)
-    
+
     # Build and start application
     app_context = BuildContext(
         dockerfile="""
@@ -348,9 +348,9 @@ if __name__ == '__main__':
 """
         }
     )
-    
+
     app_image = engine.images.build(app_context, "dev-app")
-    
+
     app_config = RunConfig(
         image="dev-app",
         name="dev-app",
@@ -365,12 +365,12 @@ if __name__ == '__main__':
         detach=True,
     )
     app_container = engine.containers.run(app_config)
-    
+
     print("Development environment ready!")
     print("Application: http://localhost:5000")
     print("PostgreSQL: dev-postgres:5432")
     print("Redis: dev-redis:6379")
-    
+
     return {
         "engine": engine,
         "network": network_id,
@@ -381,22 +381,22 @@ if __name__ == '__main__':
 def teardown_dev_environment(env):
     """Tear down the development environment."""
     engine = env["engine"]
-    
+
     # Stop and remove containers
     for container_id in env["containers"]:
         engine.containers.stop(container_id)
         engine.containers.remove(container_id)
-    
+
     # Remove volumes
     for volume in env["volumes"]:
         engine.volumes.remove(volume)
-    
+
     # Remove network
     engine.networks.remove(env["network"])
-    
+
     # Remove image
     engine.images.remove("dev-app")
-    
+
     print("Development environment cleaned up!")
 
 # Usage
@@ -417,7 +417,7 @@ from dotfiles_container_manager import (
 def run_ci_pipeline(source_dir: str, version: str):
     """Run a complete CI/CD pipeline."""
     engine = ContainerEngineFactory.create_docker()
-    
+
     # Step 1: Build the application
     print("Step 1: Building application...")
     build_context = BuildContext(
@@ -427,7 +427,7 @@ def run_ci_pipeline(source_dir: str, version: str):
         COPY requirements.txt .
         RUN pip install --user -r requirements.txt
         COPY . .
-        
+
         FROM python:3.11-slim
         WORKDIR /app
         COPY --from=builder /root/.local /root/.local
@@ -445,9 +445,9 @@ def run_ci_pipeline(source_dir: str, version: str):
             "build.date": "2024-01-01",
         }
     )
-    
+
     app_image = engine.images.build(build_context, f"myapp:{version}")
-    
+
     # Step 2: Run tests
     print("Step 2: Running tests...")
     test_config = RunConfig(
@@ -455,18 +455,18 @@ def run_ci_pipeline(source_dir: str, version: str):
         command=["pytest", "-v"],
         detach=False,
     )
-    
+
     test_container = engine.containers.run(test_config)
     test_logs = engine.containers.logs(test_container)
-    
+
     if "FAILED" in test_logs:
         print("Tests failed!")
         engine.containers.remove(test_container)
         return False
-    
+
     print("Tests passed!")
     engine.containers.remove(test_container)
-    
+
     # Step 3: Run linting
     print("Step 3: Running linter...")
     lint_config = RunConfig(
@@ -474,20 +474,20 @@ def run_ci_pipeline(source_dir: str, version: str):
         command=["flake8", "."],
         detach=False,
     )
-    
+
     lint_container = engine.containers.run(lint_config)
     engine.containers.remove(lint_container)
-    
+
     # Step 4: Tag for registry
     print("Step 4: Tagging for registry...")
     engine.images.tag(f"myapp:{version}", f"registry.example.com/myapp:{version}")
     engine.images.tag(f"myapp:{version}", "registry.example.com/myapp:latest")
-    
+
     # Step 5: Push to registry (would require authentication)
     print("Step 5: Ready to push to registry")
     # engine.images.push(f"registry.example.com/myapp:{version}")
     # engine.images.push("registry.example.com/myapp:latest")
-    
+
     print(f"CI/CD pipeline completed successfully for version {version}!")
     return True
 
@@ -504,31 +504,31 @@ from dotfiles_container_manager import ContainerEngineFactory, RunConfig
 def monitor_container_health(container_id: str, duration: int = 60):
     """Monitor container health for a specified duration."""
     engine = ContainerEngineFactory.create_docker()
-    
+
     print(f"Monitoring container {container_id} for {duration} seconds...")
-    
+
     start_time = time.time()
     while time.time() - start_time < duration:
         try:
             # Inspect container
             info = engine.containers.inspect(container_id)
-            
+
             print(f"\nStatus: {info.state}")
             print(f"Running: {info.running}")
             print(f"Started at: {info.started_at}")
-            
+
             if not info.running:
                 print("Container stopped!")
                 logs = engine.containers.logs(container_id)
                 print(f"Last logs:\n{logs[-500:]}")  # Last 500 chars
                 break
-            
+
             time.sleep(5)
-            
+
         except Exception as e:
             print(f"Error monitoring container: {e}")
             break
-    
+
     print("Monitoring complete")
 
 # Usage
@@ -564,19 +564,19 @@ logger = logging.getLogger(__name__)
 def build_with_logging(context: BuildContext, image_name: str):
     """Build an image with comprehensive logging."""
     engine = ContainerEngineFactory.create_docker()
-    
+
     try:
         logger.info(f"Starting build for image: {image_name}")
         image_id = engine.images.build(context, image_name)
         logger.info(f"Successfully built image: {image_id}")
-        
+
         # Inspect and log details
         info = engine.images.inspect(image_name)
         logger.info(f"Image size: {info.size} bytes")
         logger.info(f"Created: {info.created}")
-        
+
         return image_id
-        
+
     except Exception as e:
         logger.error(f"Build failed: {e}")
         raise
@@ -591,4 +591,3 @@ build_with_logging(context, "test-image")
 ---
 
 **More examples available in the [Usage Patterns](../guides/usage_patterns.md) guide!**
-

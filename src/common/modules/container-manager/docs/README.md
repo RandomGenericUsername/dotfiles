@@ -1,7 +1,7 @@
 # Container Manager Documentation
 
-**Version:** 1.0  
-**Module:** `dotfiles_container_manager`  
+**Version:** 1.0
+**Module:** `dotfiles_container_manager`
 **Purpose:** Runtime-agnostic container management with Docker implementation
 
 ---
@@ -256,4 +256,3 @@ Part of the dotfiles project.
 ---
 
 **Ready to get started? Check out the [Getting Started Guide](guides/getting_started.md)!**
-

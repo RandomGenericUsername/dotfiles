@@ -200,7 +200,8 @@ def example_step_based_integration(
             f"Files copied: {final_context.results.get('files_copied', 0)}"
         )
         logger.info(
-            f"Symlinks created: {final_context.results.get('symlinks_created', 0)}"
+            "Symlinks created: "
+            f"{final_context.results.get('symlinks_created', 0)}"
         )
     else:
         logger.error("Installation failed verification")

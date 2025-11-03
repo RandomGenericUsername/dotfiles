@@ -381,5 +381,3 @@ Extensions are disabled after VSCode restart.
 1. Read `03_DEVELOPMENT_WORKFLOW.md` for how to use
 2. Read `../REFERENCE/03_FAQ.md` for frequently asked questions
 3. Contact the team if issues persist
-
-

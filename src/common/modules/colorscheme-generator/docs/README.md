@@ -251,4 +251,3 @@ This is part of a larger dotfiles system. See the main repository for contributi
 - [API Reference](api/) - Detailed API documentation
 - [Guides](guides/) - Practical usage guides
 - [Reference](reference/) - Additional reference material
-

@@ -244,4 +244,3 @@ except PresetNotFoundError as e:
 - [Pipeline API Reference](../api/pipeline.md)
 - [Creating Custom Effects](creating_effects.md)
 - [Examples](../reference/examples.md)
-

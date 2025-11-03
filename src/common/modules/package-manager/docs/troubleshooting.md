@@ -36,11 +36,11 @@ PackageManagerError: Package manager executable not found: pacman
    ```bash
    # For pacman (should be pre-installed on Arch)
    # If missing, reinstall Arch Linux
-   
+
    # For yay
    git clone https://aur.archlinux.org/yay.git
    cd yay && makepkg -si
-   
+
    # For paru
    git clone https://aur.archlinux.org/paru.git
    cd paru && makepkg -si
@@ -59,7 +59,7 @@ PackageManagerError: Package manager executable not found: pacman
    # Check what's available
    available = PackageManagerFactory.get_available_managers()
    print(f"Available: {[m.value for m in available]}")
-   
+
    # Use first available
    if available:
        pm = PackageManagerFactory.create(available[0])
@@ -447,7 +447,7 @@ PackageManagerError: No package manager available
    ```bash
    # Pacman should be pre-installed on Arch
    # If not, reinstall system
-   
+
    # Install yay or paru
    git clone https://aur.archlinux.org/paru.git
    cd paru && makepkg -si
@@ -487,7 +487,7 @@ PackageManagerError: No package manager available
    ```python
    # Good - single command
    pm.install(["pkg1", "pkg2", "pkg3"])
-   
+
    # Bad - three commands
    pm.install(["pkg1"])
    pm.install(["pkg2"])
@@ -520,7 +520,7 @@ PackageManagerError: No package manager available
    ```python
    # Cache for repeated searches
    search_cache = {}
-   
+
    def cached_search(pm, query, limit=None):
        key = (query, limit)
        if key not in search_cache:
@@ -625,4 +625,3 @@ for pkg in test_packages:
 ---
 
 **Next:** [Overview](overview.md) | [API Reference](api_reference.md)
-

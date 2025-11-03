@@ -305,4 +305,3 @@ This is part of a larger dotfiles system. See the main repository for contributi
 - [pywal](https://github.com/dylanaraps/pywal) - Generate and change color-schemes
 - [wallust](https://codeberg.org/explosion-mental/wallust) - Rust-based color scheme generator
 - [matugen](https://github.com/InioX/matugen) - Material You color generation
-

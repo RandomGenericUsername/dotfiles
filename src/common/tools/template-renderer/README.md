@@ -400,4 +400,3 @@ template-render render Dockerfile.j2 -f vars.json | docker build -t myapp -
 
 - [dotfiles-template-renderer](../../modules/template-renderer/) - The underlying template rendering module
 - [Jinja2 Documentation](https://jinja.palletsprojects.com/) - Template syntax reference
-

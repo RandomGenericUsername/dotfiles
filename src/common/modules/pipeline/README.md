@@ -24,11 +24,11 @@ class MyStep(PipelineStep):
     @property
     def step_id(self) -> str:
         return "my_step"
-    
+
     @property
     def description(self) -> str:
         return "My custom step"
-    
+
     def run(self, context: PipelineContext) -> PipelineContext:
         # Your logic here
         return context
@@ -42,4 +42,3 @@ result = pipeline.run(context)
 
 - `dotfiles-logging` - Logging infrastructure
 - `dotfiles-package-manager` - Package management (used in PipelineContext)
-

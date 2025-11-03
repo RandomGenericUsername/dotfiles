@@ -260,4 +260,3 @@ When extending the module:
 ## License
 
 Part of the dotfiles project. See project LICENSE for details.
-

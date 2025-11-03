@@ -100,4 +100,3 @@ This document serves as a **comprehensive, distro-agnostic reference** for build
 - [Waybar Documentation](https://github.com/Alexays/Waybar)
 - [Sway Notification Center](https://github.com/ErikReider/SwayNotificationCenter)
 - [PipeWire Project](https://pipewire.org/)
-

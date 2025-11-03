@@ -310,4 +310,3 @@ make format
 ## License
 
 Part of the dotfiles project.
-

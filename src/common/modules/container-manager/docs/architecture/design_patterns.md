@@ -1,6 +1,6 @@
 # Design Patterns
 
-**Module:** `dotfiles_container_manager`  
+**Module:** `dotfiles_container_manager`
 **Purpose:** Document design patterns used in the module
 
 ---
@@ -35,10 +35,10 @@ class ContainerEngineFactory:
             engine = DockerEngine(command or "podman")
         else:
             raise ValueError(f"Unsupported runtime: {runtime}")
-        
+
         if not engine.is_available():
             raise RuntimeNotAvailableError(command)
-        
+
         return engine
 ```
 
@@ -154,22 +154,22 @@ class NetworkManager:
 ```python
 class ContainerEngine(ABC):
     """Unified facade for all container operations."""
-    
+
     @property
     def images(self) -> ImageManager:
         """Access image operations."""
         pass
-    
+
     @property
     def containers(self) -> ContainerManager:
         """Access container operations."""
         pass
-    
+
     @property
     def volumes(self) -> VolumeManager:
         """Access volume operations."""
         pass
-    
+
     @property
     def networks(self) -> NetworkManager:
         """Access network operations."""
@@ -270,12 +270,12 @@ class ContainerEngine(ABC):
         """Template method - defines initialization sequence."""
         self.command = command
         self._runtime = self._detect_runtime()  # Hook method
-    
+
     @abstractmethod
     def _detect_runtime(self) -> ContainerRuntime:
         """Hook method - subclasses provide implementation."""
         pass
-    
+
     @abstractmethod
     def is_available(self) -> bool:
         """Hook method - subclasses provide implementation."""
@@ -289,7 +289,7 @@ class DockerEngine(ContainerEngine):
         """Implement hook method."""
         # Could check if it's actually Podman masquerading as Docker
         return ContainerRuntime.DOCKER
-    
+
     def is_available(self) -> bool:
         """Implement hook method."""
         try:
@@ -320,7 +320,7 @@ Inject dependencies rather than creating them internally.
 class DockerEngine(ContainerEngine):
     def __init__(self, command: str = "docker"):
         super().__init__(command)
-        
+
         # Inject command into all managers
         self._images_manager = DockerImageManager(command)
         self._containers_manager = DockerContainerManager(command)
@@ -334,7 +334,7 @@ class DockerImageManager(ImageManager):
     def __init__(self, command: str = "docker"):
         """Dependency injected via constructor."""
         self.command = command
-    
+
     def build(self, context: BuildContext, image_name: str) -> str:
         # Use injected command
         cmd = [self.command, "build", "-t", image_name, "-"]
@@ -432,4 +432,3 @@ These patterns work together to create a:
 ---
 
 **Next:** [Component Relationships](component_relationships.md) | [API Reference](../api/core_abstractions.md)
-

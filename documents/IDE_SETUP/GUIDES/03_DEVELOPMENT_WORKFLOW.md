@@ -341,5 +341,3 @@ When reviewing code:
 1. Read `../REFERENCE/03_FAQ.md` for frequently asked questions
 2. Read `../REFERENCE/01_DELIVERABLES.md` for complete reference
 3. Start coding!
-
-

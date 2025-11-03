@@ -113,5 +113,3 @@ Key mappings:
 - `pyproject.toml` `[tool.isort]` → `settings.json` `isort.args`
 - `pyproject.toml` `[tool.ruff]` → `settings.json` `ruff.*`
 - `pyproject.toml` `[tool.mypy]` → `settings.json` `mypy-type-checker.args`
-
-

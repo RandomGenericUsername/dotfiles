@@ -672,4 +672,3 @@ logger.info("Data processing complete")
 - [Configuration Guide](../guides/configuration.md) - Detailed configuration options
 - [Rich Features Guide](../guides/rich_features.md) - Comprehensive Rich features documentation
 - [Examples](../reference/examples.md) - More usage examples
-

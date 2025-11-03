@@ -1,6 +1,6 @@
 # Architecture Overview
 
-**Module:** `dotfiles_container_manager`  
+**Module:** `dotfiles_container_manager`
 **Design:** Runtime-agnostic container management
 
 ---
@@ -398,8 +398,8 @@ Extend managers with additional methods:
 
 ```python
 class CustomDockerImageManager(DockerImageManager):
-    def build_with_cache_from(self, context: BuildContext, 
-                               image_name: str, 
+    def build_with_cache_from(self, context: BuildContext,
+                               image_name: str,
                                cache_from: list[str]) -> str:
         # Custom build with cache-from support
         pass
@@ -411,12 +411,12 @@ class CustomDockerImageManager(DockerImageManager):
 
 The Container Manager architecture provides:
 
-✅ **Clean separation** between abstractions and implementations  
-✅ **Runtime agnostic** design for portability  
-✅ **Type safety** through comprehensive dataclasses  
-✅ **In-memory operations** for cleaner code  
-✅ **Extensibility** through well-defined interfaces  
-✅ **Robust error handling** with rich context  
+✅ **Clean separation** between abstractions and implementations
+✅ **Runtime agnostic** design for portability
+✅ **Type safety** through comprehensive dataclasses
+✅ **In-memory operations** for cleaner code
+✅ **Extensibility** through well-defined interfaces
+✅ **Robust error handling** with rich context
 
 This architecture makes it easy to:
 - Switch between container runtimes
@@ -428,4 +428,3 @@ This architecture makes it easy to:
 ---
 
 **Next:** [Design Patterns](design_patterns.md) | [Component Relationships](component_relationships.md)
-

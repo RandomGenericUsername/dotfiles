@@ -6,13 +6,13 @@ Documentation for the Paru AUR helper implementation.
 
 ## Overview
 
-**Class:** `ParuPackageManager`  
-**Executable:** `paru`  
-**Repositories:** Official + AUR  
-**AUR Support:** ✅ Yes  
-**Sudo Required:** ❌ No (handles internally)  
-**Language:** Rust  
-**File:** `implementations/paru.py` (331 lines)  
+**Class:** `ParuPackageManager`
+**Executable:** `paru`
+**Repositories:** Official + AUR
+**AUR Support:** ✅ Yes
+**Sudo Required:** ❌ No (handles internally)
+**Language:** Rust
+**File:** `implementations/paru.py` (331 lines)
 **Preference:** 🥇 1st choice (recommended)
 
 ---
@@ -368,16 +368,16 @@ except PackageManagerError:
 ```python
 class ParuPackageManager(PackageManager):
     """Paru AUR helper implementation."""
-    
+
     @property
     def manager_type(self) -> PackageManagerType:
         return PackageManagerType.PARU
-    
+
     def _find_executable(self) -> Path | None:
         """Find paru executable."""
         executable = shutil.which("paru")
         return Path(executable) if executable else None
-    
+
     # Implement all abstract methods...
 ```
 
@@ -489,7 +489,6 @@ paru -S paru
 
 ---
 
-**Official Repository:** https://github.com/Morganamilo/paru  
-**AUR Page:** https://aur.archlinux.org/packages/paru  
+**Official Repository:** https://github.com/Morganamilo/paru
+**AUR Page:** https://aur.archlinux.org/packages/paru
 **Documentation:** https://github.com/Morganamilo/paru/wiki
-

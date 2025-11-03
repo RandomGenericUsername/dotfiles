@@ -277,5 +277,3 @@ Complete index of all IDE setup documentation.
 ---
 
 **Ready? Start with `00_START_HERE.md`** 🚀
-
-

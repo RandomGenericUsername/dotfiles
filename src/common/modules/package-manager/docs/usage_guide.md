@@ -170,21 +170,21 @@ def ensure_installed(pm, packages):
     """Ensure packages are installed."""
     to_install = []
     already_installed = []
-    
+
     for pkg in packages:
         if pm.is_installed(pkg):
             already_installed.append(pkg)
         else:
             to_install.append(pkg)
-    
+
     if already_installed:
         print(f"Already installed: {', '.join(already_installed)}")
-    
+
     if to_install:
         print(f"Installing: {', '.join(to_install)}")
         result = pm.install(to_install)
         return result.success
-    
+
     return True
 
 # Usage
@@ -203,36 +203,36 @@ def search_and_install(pm, query):
     """Search for packages and let user choose."""
     # Search
     result = pm.search(query, limit=20)
-    
+
     if not result.packages:
         print(f"No packages found for '{query}'")
         return
-    
+
     # Display results
     print(f"\nFound {result.total_found} packages:\n")
     for i, pkg in enumerate(result.packages, 1):
         status = "[installed]" if pkg.installed else ""
         print(f"{i}. {pkg.name} {pkg.version} {status}")
         print(f"   {pkg.description}\n")
-    
+
     # Get user choice
     choice = input("Enter package number to install (or 'q' to quit): ")
     if choice.lower() == 'q':
         return
-    
+
     try:
         idx = int(choice) - 1
         pkg = result.packages[idx]
-        
+
         # Install
         print(f"\nInstalling {pkg.name}...")
         install_result = pm.install([pkg.name])
-        
+
         if install_result.success:
             print(f"✓ Successfully installed {pkg.name}")
         else:
             print(f"✗ Failed to install {pkg.name}")
-    
+
     except (ValueError, IndexError):
         print("Invalid choice")
 
@@ -252,24 +252,24 @@ def install_with_progress(pm, packages):
     total = len(packages)
     installed = []
     failed = []
-    
+
     for i, pkg in enumerate(packages, 1):
         print(f"[{i}/{total}] Installing {pkg}...")
-        
+
         result = pm.install([pkg])
-        
+
         if result.success:
             installed.append(pkg)
             print(f"  ✓ Success")
         else:
             failed.append(pkg)
             print(f"  ✗ Failed: {result.error_message}")
-    
+
     print(f"\nSummary:")
     print(f"  Installed: {len(installed)}/{total}")
     if failed:
         print(f"  Failed: {', '.join(failed)}")
-    
+
     return len(failed) == 0
 
 # Usage
@@ -286,11 +286,11 @@ Install different packages based on what's available:
 ```python
 def install_preferred(pm, preferences):
     """Install first available package from preferences.
-    
+
     Args:
         pm: Package manager instance
         preferences: List of package names in order of preference
-    
+
     Returns:
         Name of installed package, or None
     """
@@ -299,7 +299,7 @@ def install_preferred(pm, preferences):
         if pm.is_installed(pkg):
             print(f"✓ {pkg} already installed")
             return pkg
-        
+
         # Check if available
         result = pm.search(pkg, limit=1)
         if result.packages and result.packages[0].name == pkg:
@@ -308,7 +308,7 @@ def install_preferred(pm, preferences):
             if install_result.success:
                 print(f"✓ Installed {pkg}")
                 return pkg
-    
+
     print("✗ None of the preferred packages could be installed")
     return None
 
@@ -328,7 +328,7 @@ import logging
 
 class PackageManagerWrapper:
     """High-level wrapper around package manager."""
-    
+
     def __init__(self, prefer_aur=True):
         self.logger = logging.getLogger(__name__)
         try:
@@ -337,52 +337,52 @@ class PackageManagerWrapper:
         except PackageManagerError as e:
             self.logger.error(f"Failed to create package manager: {e}")
             raise
-    
+
     def ensure_installed(self, packages):
         """Ensure packages are installed."""
         to_install = [pkg for pkg in packages if not self.pm.is_installed(pkg)]
-        
+
         if not to_install:
             self.logger.info("All packages already installed")
             return True
-        
+
         self.logger.info(f"Installing: {', '.join(to_install)}")
         result = self.pm.install(to_install)
-        
+
         if result.success:
             self.logger.info(f"Installed: {', '.join(result.packages_installed)}")
             return True
         else:
             self.logger.error(f"Failed: {result.error_message}")
             return False
-    
+
     def safe_remove(self, packages, remove_deps=False):
         """Safely remove packages."""
         installed = [pkg for pkg in packages if self.pm.is_installed(pkg)]
-        
+
         if not installed:
             self.logger.info("No packages to remove")
             return True
-        
+
         self.logger.info(f"Removing: {', '.join(installed)}")
         result = self.pm.remove(installed, remove_dependencies=remove_deps)
-        
+
         return result.success
-    
+
     def find_package(self, query):
         """Find exact package name from query."""
         result = self.pm.search(query, limit=50)
-        
+
         # Look for exact match
         for pkg in result.packages:
             if pkg.name.lower() == query.lower():
                 return pkg.name
-        
+
         # Look for close match
         for pkg in result.packages:
             if query.lower() in pkg.name.lower():
                 return pkg.name
-        
+
         return None
 
 # Usage
@@ -399,37 +399,37 @@ Complete workflow for setting up a development environment:
 ```python
 def setup_dev_environment(pm):
     """Install development tools."""
-    
+
     # Define package groups
     base_tools = ["git", "base-devel"]
     python_tools = ["python", "python-pip", "python-virtualenv"]
     node_tools = ["nodejs", "npm"]
     editors = ["neovim", "vim"]
-    
+
     all_packages = base_tools + python_tools + node_tools + editors
-    
+
     print("Setting up development environment...")
     print(f"Using package manager: {pm.manager_type.value}\n")
-    
+
     # Update system first
     print("Updating package databases...")
     pm.update_system(dry_run=False)
-    
+
     # Check what's already installed
     to_install = []
     for pkg in all_packages:
         if not pm.is_installed(pkg):
             to_install.append(pkg)
-    
+
     if not to_install:
         print("✓ All packages already installed!")
         return True
-    
+
     print(f"\nPackages to install: {', '.join(to_install)}\n")
-    
+
     # Install
     result = pm.install(to_install)
-    
+
     if result.success:
         print(f"\n✓ Successfully installed all packages!")
         return True
@@ -493,18 +493,18 @@ def install_with_retry(pm, packages, max_retries=3):
     """Install packages with retry logic."""
     for attempt in range(max_retries):
         result = pm.install(packages)
-        
+
         if result.success:
             return result
-        
+
         if not result.packages_failed:
             # No specific failures, don't retry
             return result
-        
+
         # Retry only failed packages
         packages = result.packages_failed
         print(f"Retry {attempt + 1}/{max_retries} for: {packages}")
-    
+
     return result
 ```
 
@@ -516,7 +516,7 @@ def install_with_retry(pm, packages, max_retries=3):
    ```python
    # Good
    pm = PackageManagerFactory.create_auto()
-   
+
    # Bad
    from dotfiles_package_manager.implementations.pacman import PacmanPackageManager
    pm = PacmanPackageManager()
@@ -542,7 +542,7 @@ def install_with_retry(pm, packages, max_retries=3):
    ```python
    # Good - single command
    pm.install(["pkg1", "pkg2", "pkg3"])
-   
+
    # Bad - three commands
    pm.install(["pkg1"])
    pm.install(["pkg2"])
@@ -554,7 +554,7 @@ def install_with_retry(pm, packages, max_retries=3):
    # Check first
    result = pm.update_system(dry_run=True)
    print(result.output)
-   
+
    # Then apply
    if user_confirms():
        pm.update_system(dry_run=False)
@@ -607,4 +607,3 @@ if "pkg2" in result.packages_installed:
 ---
 
 **Next:** [Examples](examples.md) | [Troubleshooting](troubleshooting.md)
-

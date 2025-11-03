@@ -170,4 +170,3 @@ This investigation follows the methodology described in:
 ---
 
 **Any AI can pick up this investigation at any point by reading INTERACTIVE_PROMPT.md!**
-

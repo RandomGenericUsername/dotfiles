@@ -93,12 +93,12 @@ def validate_template_name(name):
     # Ensure no path traversal
     if ".." in name or name.startswith("/"):
         raise ValueError("Invalid template name")
-    
+
     # Ensure template exists in allowed directory
     template_path = Path(renderer.template_dir) / name
     if not template_path.resolve().is_relative_to(Path(renderer.template_dir).resolve()):
         raise ValueError("Template outside allowed directory")
-    
+
     return name
 
 template_name = validate_template_name(request.form.get("template"))
@@ -223,7 +223,7 @@ class LazyVariable:
     def __init__(self, func):
         self._func = func
         self._value = None
-    
+
     def __str__(self):
         if self._value is None:
             self._value = self._func()
@@ -303,16 +303,16 @@ from dotfiles_template_renderer import TemplateRenderer
 
 class MustacheRenderer(TemplateRenderer):
     """Mustache template renderer."""
-    
+
     def __init__(self, template_dir, config=None):
         super().__init__(template_dir, config)
         import pystache
         self.renderer = pystache.Renderer(search_dirs=[template_dir])
-    
+
     def render(self, template_name, variables=None, **kwargs):
         merged_vars = self._merge_variables(variables, kwargs)
         return self.renderer.render_path(template_name, merged_vars)
-    
+
     # Implement other abstract methods...
 ```
 
@@ -352,16 +352,16 @@ from dotfiles_template_renderer import ValidationResult
 def validate_dockerfile_variables(variables):
     """Validate Dockerfile-specific variables."""
     errors = []
-    
+
     if "base_image" in variables:
         if ":" not in variables["base_image"]:
             errors.append("base_image must include tag (e.g., python:3.12)")
-    
+
     if "port" in variables:
         port = variables["port"]
         if not isinstance(port, int) or port < 1 or port > 65535:
             errors.append("port must be between 1 and 65535")
-    
+
     return ValidationResult(
         is_valid=len(errors) == 0,
         errors=errors,
@@ -380,15 +380,15 @@ class PreprocessingRenderer(Jinja2Renderer):
     def render(self, template_name, variables=None, **kwargs):
         # Get template source
         source = self._get_template_source(template_name)
-        
+
         # Preprocess
         source = self._preprocess(source)
-        
+
         # Render preprocessed template
         template = self.env.from_string(source)
         merged_vars = self._merge_variables(variables, kwargs)
         return template.render(**merged_vars)
-    
+
     def _preprocess(self, source):
         # Example: Replace custom syntax
         source = source.replace("@@", "{{")
@@ -410,22 +410,22 @@ class HookableRenderer(Jinja2Renderer):
             "before_render": [],
             "after_render": [],
         }
-    
+
     def add_hook(self, event, func):
         self.hooks[event].append(func)
-    
+
     def render(self, template_name, variables=None, **kwargs):
         # Before render hooks
         for hook in self.hooks["before_render"]:
             hook(template_name, variables)
-        
+
         # Render
         result = super().render(template_name, variables, **kwargs)
-        
+
         # After render hooks
         for hook in self.hooks["after_render"]:
             hook(template_name, result)
-        
+
         return result
 
 # Usage
@@ -547,4 +547,3 @@ renderer = Jinja2Renderer("templates", config=RenderConfig(strict_mode=True))
 - [Security Best Practices](../guides/best_practices.md) - Security recommendations
 - [Performance Guide](../guides/best_practices.md) - Performance tips
 - [API Reference](../api/core.md) - Detailed API docs
-

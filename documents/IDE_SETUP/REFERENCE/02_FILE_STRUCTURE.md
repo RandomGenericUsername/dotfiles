@@ -249,5 +249,3 @@ GUIDES/02_TROUBLESHOOTING.md (if issues)
 1. Read `03_FAQ.md` for frequently asked questions
 2. Read `01_DELIVERABLES.md` for complete reference
 3. Start using the IDE setup!
-
-

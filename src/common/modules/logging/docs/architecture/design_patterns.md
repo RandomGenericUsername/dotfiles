@@ -16,7 +16,7 @@ The `Log` class serves as a facade over the complex logging configuration system
 ```python
 class Log:
     """Main logging API facade with simplified interface."""
-    
+
     @staticmethod
     def create_logger(
         name: str | None = None,
@@ -31,7 +31,7 @@ class Log:
                 log_level=log_level or LogLevels.INFO,
                 # ... build from kwargs
             )
-        
+
         # Delegate to configurator
         return LoggerConfigurator.configure(name, config)
 ```
@@ -62,10 +62,10 @@ Three factories: `HandlerFactory`, `FileHandlerFactory`, `FormatterFactory`
 ```python
 class HandlerFactory:
     """Factory for creating console handlers."""
-    
+
     # Registry mapping handler types to config classes
     _registry: dict[ConsoleHandlers, type[BaseHandlerConfig]] = {}
-    
+
     @classmethod
     def register(
         cls,
@@ -74,7 +74,7 @@ class HandlerFactory:
     ):
         """Register a handler config class."""
         cls._registry[handler_type] = config_class
-    
+
     @classmethod
     def create(
         cls,
@@ -84,7 +84,7 @@ class HandlerFactory:
         """Create a handler instance."""
         if handler_type not in cls._registry:
             raise ValueError(f"Unknown handler type: {handler_type}")
-        
+
         config_class = cls._registry[handler_type]
         handler_config = config_class(formatter)
         return handler_config.create()
@@ -134,10 +134,10 @@ Factories use registries to map types to config classes
 ```python
 class FormatterFactory:
     """Factory for creating formatters."""
-    
+
     # Registry is a class variable
     _registry: dict[LogFormatters, type[BaseFormatterConfig]] = {}
-    
+
     @classmethod
     def register(
         cls,
@@ -177,10 +177,10 @@ Ensure only one instance of a class exists
 ```python
 class RichConsoleManager:
     """Manages shared Rich console instances."""
-    
+
     _instance: Optional["RichConsoleManager"] = None
     _lock = threading.Lock()
-    
+
     def __new__(cls) -> "RichConsoleManager":
         """Singleton pattern with double-checked locking."""
         if cls._instance is None:
@@ -189,7 +189,7 @@ class RichConsoleManager:
                 if cls._instance is None:
                     cls._instance = super().__new__(cls)
         return cls._instance
-    
+
     def __init__(self):
         """Initialize only once."""
         if not hasattr(self, "_initialized"):
@@ -226,7 +226,7 @@ Add functionality to an object without modifying it
 ```python
 class RichLogger:
     """Enhanced logger wrapper that adds Rich features."""
-    
+
     def __init__(
         self,
         logger: logging.Logger,
@@ -235,17 +235,17 @@ class RichLogger:
         """Wrap a standard logger."""
         self._logger = logger
         self._rich_settings = rich_settings or RichFeatureSettings()
-    
+
     def __getattr__(self, name: str) -> Any:
         """Delegate all standard logging methods to wrapped logger."""
         return getattr(self._logger, name)
-    
+
     # Add Rich feature methods
     def table(self, data, **kwargs):
         """Display a table using Rich."""
         console = self._get_console()
         # ... Rich table rendering
-    
+
     def panel(self, message, **kwargs):
         """Display a panel using Rich."""
         console = self._get_console()
@@ -280,11 +280,11 @@ Define skeleton of algorithm, let subclasses override steps
 ```python
 class BaseHandlerConfig(ABC):
     """Abstract base for handler configurations."""
-    
+
     def __init__(self, formatter: logging.Formatter):
         """Common initialization."""
         self.formatter = formatter
-    
+
     @abstractmethod
     def create(self) -> logging.Handler:
         """Template method - subclasses must implement."""
@@ -292,7 +292,7 @@ class BaseHandlerConfig(ABC):
 
 class StreamHandlerConfig(BaseHandlerConfig):
     """Concrete implementation."""
-    
+
     def create(self) -> logging.StreamHandler:
         """Implement template method."""
         handler = logging.StreamHandler()
@@ -301,7 +301,7 @@ class StreamHandlerConfig(BaseHandlerConfig):
 
 class RichHandlerConfig(BaseHandlerConfig):
     """Another concrete implementation."""
-    
+
     def create(self) -> logging.Handler:
         """Implement template method with different logic."""
         if RICH_AVAILABLE:
@@ -442,7 +442,7 @@ class RichHandlerConfig(BaseHandlerConfig):
         else:
             # Graceful fallback
             handler = logging.StreamHandler()
-        
+
         handler.setFormatter(self.formatter)
         return handler
 ```
@@ -503,4 +503,3 @@ These patterns work together to create a system that is:
 - **Flexible** (Strategy, Dependency Injection)
 - **Robust** (Graceful Degradation, Singleton)
 - **Maintainable** (All patterns promote clean code)
-

@@ -439,7 +439,7 @@ variables = {
 
 ```jinja2
 {# Dockerfile template for Python applications
-   
+
    Required variables:
    - base_image: Python base image (e.g., python:3.12)
    - workdir: Working directory (e.g., /app)
@@ -458,4 +458,3 @@ WORKDIR {{ workdir }}
 - **API Reference:** See [Core API](../api/core.md) for detailed API docs
 - **Integration:** Check [Integration Guide](integration.md) for module integration
 - **Advanced Topics:** Explore [Advanced Topics](../reference/advanced.md) for security, performance, etc.
-

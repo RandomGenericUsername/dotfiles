@@ -1,8 +1,8 @@
 # Package Manager Investigation - Helper Documents
 
-**Investigation Target:** `src/common/modules/package_manager`  
-**Output Location:** `src/common/modules/package_manager/docs/`  
-**Format:** Directory structure with separate files for each concept  
+**Investigation Target:** `src/common/modules/package_manager`
+**Output Location:** `src/common/modules/package_manager/docs/`
+**Format:** Directory structure with separate files for each concept
 **Created:** 2025-10-19
 
 ---
@@ -180,6 +180,5 @@ If you're an AI picking up this investigation:
 
 ---
 
-**Status:** Investigation in progress  
+**Status:** Investigation in progress
 **Last Updated:** 2025-10-19
-

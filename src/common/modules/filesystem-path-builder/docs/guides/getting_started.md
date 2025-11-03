@@ -453,4 +453,3 @@ paths = PathTree(Path("/other"))
 | os.PathLike support | ManagedPathTree |
 | Dynamic navigation | PathTree |
 | Explicit configuration | PathsBuilder |
-

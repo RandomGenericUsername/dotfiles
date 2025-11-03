@@ -267,5 +267,3 @@ If you change `pyproject.toml`, update the corresponding VSCode settings:
 1. Read `02_TOOL_CONFIGURATION.md` for detailed tool explanations
 2. Read `03_VSCODE_REFERENCE.md` for VSCode settings reference
 3. Read `../GUIDES/01_SETUP_GUIDE.md` for setup instructions
-
-

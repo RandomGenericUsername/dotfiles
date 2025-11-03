@@ -1,6 +1,6 @@
 # Getting Started
 
-**Module:** `colorscheme_generator`  
+**Module:** `colorscheme_generator`
 **Last Updated:** 2025-10-18
 
 ---
@@ -367,17 +367,17 @@ images = [
 
 for image in images:
     image = image.expanduser()
-    
+
     # Create config with image-specific output dir
     config = GeneratorConfig.from_settings(
         settings,
         output_dir=Path(f"~/.cache/colorscheme/{image.stem}").expanduser()
     )
-    
+
     # Generate and write
     scheme = generator.generate(image, config)
     output_files = manager.write_outputs(scheme, config.output_dir, config.formats)
-    
+
     print(f"Processed {image.name}: {len(output_files)} files")
 ```
 
@@ -414,10 +414,10 @@ except BackendNotAvailableError:
 try:
     config = GeneratorConfig.from_settings(settings)
     scheme = generator.generate(Path("~/wallpapers/image.png").expanduser(), config)
-    
+
     manager = OutputManager(settings)
     output_files = manager.write_outputs(scheme, config.output_dir, config.formats)
-    
+
     print(f"Success! Generated {len(output_files)} files")
 except InvalidImageError as e:
     print(f"Invalid image: {e.image_path}")
@@ -505,4 +505,3 @@ print(f"Generated: {scheme.generated_at}")
 print(f"Background: {scheme.background.hex} (RGB: {scheme.background.rgb})")
 print(f"16 colors: {[c.hex for c in scheme.colors]}")
 ```
-

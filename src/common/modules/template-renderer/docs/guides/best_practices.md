@@ -110,7 +110,7 @@ variables = {
 **✅ Good:**
 ```jinja2
 {# Dockerfile template for Python applications
-   
+
    Required variables:
    - base_image: Python base image (e.g., python:3.12)
    - workdir: Working directory (e.g., /app)
@@ -467,4 +467,3 @@ for i in range(1000):
 - [Usage Patterns](usage_patterns.md) - Common patterns
 - [Integration Guide](integration.md) - Integration examples
 - [Troubleshooting](../reference/troubleshooting.md) - Common issues
-

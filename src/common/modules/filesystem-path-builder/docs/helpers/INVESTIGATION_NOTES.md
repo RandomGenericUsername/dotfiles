@@ -2648,4 +2648,3 @@ ruff check src/ tests/
 - Create structured documentation in `docs/` directory
 - Organize by category (architecture, API, guides, reference)
 - Generate final documentation files from investigation notes
-

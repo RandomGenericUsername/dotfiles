@@ -464,4 +464,3 @@ If you encounter an issue not covered here:
 - [Getting Started](../guides/getting_started.md)
 - [Usage Patterns](../guides/usage_patterns.md)
 - [API Reference](../api/pathtree.md)
-

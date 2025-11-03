@@ -14,7 +14,7 @@ Configuration dataclass for template rendering.
 @dataclass
 class RenderConfig:
     """Configuration for template rendering."""
-    
+
     strict_mode: bool = True
     autoescape: bool = False
     trim_blocks: bool = False
@@ -32,7 +32,7 @@ class RenderConfig:
 
 ### strict_mode
 
-**Type:** `bool`  
+**Type:** `bool`
 **Default:** `True`
 
 Controls whether to validate variables before rendering.
@@ -68,7 +68,7 @@ result = renderer.render("app.j2", variables={"name": "myapp"})
 
 ### autoescape
 
-**Type:** `bool`  
+**Type:** `bool`
 **Default:** `False`
 
 Controls HTML/XML autoescaping in templates.
@@ -104,7 +104,7 @@ result = renderer.render("page.j2", variables={"content": "<script>alert('xss')<
 
 ### trim_blocks
 
-**Type:** `bool`  
+**Type:** `bool`
 **Default:** `False`
 
 Controls whether to remove the first newline after a template tag.
@@ -141,7 +141,7 @@ config = RenderConfig(trim_blocks=True)
 
 ### lstrip_blocks
 
-**Type:** `bool`  
+**Type:** `bool`
 **Default:** `False`
 
 Controls whether to strip leading whitespace from the start of a line to the start of a block.
@@ -157,9 +157,9 @@ Controls whether to strip leading whitespace from the start of a line to the sta
 
 # With lstrip_blocks=False (default)
 # Output:
-#     
+#
 #     content
-#     
+#
 
 # With lstrip_blocks=True
 config = RenderConfig(lstrip_blocks=True)
@@ -175,7 +175,7 @@ config = RenderConfig(lstrip_blocks=True)
 
 ### keep_trailing_newline
 
-**Type:** `bool`  
+**Type:** `bool`
 **Default:** `False`
 
 Controls whether to keep the trailing newline at the end of the template.
@@ -202,7 +202,7 @@ result = renderer.render("hello.j2", variables={"name": "World"})
 
 ### undefined_behavior
 
-**Type:** `str`  
+**Type:** `str`
 **Default:** `"strict"`
 
 Controls how undefined variables are handled during rendering.
@@ -238,7 +238,7 @@ result = renderer.render("app.j2", variables={})
 
 ### custom_filters
 
-**Type:** `dict[str, Callable]`  
+**Type:** `dict[str, Callable]`
 **Default:** `{}`
 
 Custom Jinja2 filters to register.
@@ -274,7 +274,7 @@ result = renderer.render("app.j2", variables={"name": "myapp", "size": 2048})
 
 ### custom_tests
 
-**Type:** `dict[str, Callable]`  
+**Type:** `dict[str, Callable]`
 **Default:** `{}`
 
 Custom Jinja2 tests to register.
@@ -310,7 +310,7 @@ renderer = Jinja2Renderer("templates", config=config)
 
 ### custom_globals
 
-**Type:** `dict[str, Any]`  
+**Type:** `dict[str, Any]`
 **Default:** `{}`
 
 Custom global variables/functions available in all templates.
@@ -396,19 +396,19 @@ html_renderer = Jinja2Renderer("html", config=html_config)
 class ConfigBuilder:
     def __init__(self):
         self.config = RenderConfig()
-    
+
     def strict(self):
         self.config.strict_mode = True
         return self
-    
+
     def lenient(self):
         self.config.strict_mode = False
         return self
-    
+
     def with_filter(self, name, func):
         self.config.custom_filters[name] = func
         return self
-    
+
     def build(self):
         return self.config
 
@@ -425,4 +425,3 @@ config = (ConfigBuilder()
 - [Core API](../api/core.md) - RenderConfig dataclass
 - [Getting Started](../guides/getting_started.md) - Basic usage
 - [Best Practices](../guides/best_practices.md) - Configuration recommendations
-

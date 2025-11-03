@@ -1,7 +1,7 @@
 # Dotfiles Logging Module Documentation
 
-**Version:** 0.1.0  
-**Python:** 3.12+  
+**Version:** 0.1.0
+**Python:** 3.12+
 **Dependencies:** `rich>=13.0.0`
 
 ## Overview
@@ -243,4 +243,3 @@ This module follows strict design principles:
 3. **Graceful Degradation**: Always provide fallbacks
 4. **Extensibility**: Use factory pattern for new handlers/formatters
 5. **Documentation**: Document all public APIs and design decisions
-

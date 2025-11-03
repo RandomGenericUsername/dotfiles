@@ -18,17 +18,17 @@ from abc import ABC, abstractmethod
 
 class TemplateRenderer(ABC):
     """Abstract base class for template renderers."""
-    
+
     @abstractmethod
     def render(self, template_name: str, variables: dict[str, Any] | None = None, **kwargs: Any) -> str:
         """Render a template with variables."""
         pass
-    
+
     @abstractmethod
     def validate(self, template_name: str, variables: dict[str, Any] | None = None) -> ValidationResult:
         """Validate template variables."""
         pass
-    
+
     # ... other abstract methods
 ```
 
@@ -69,11 +69,11 @@ class TemplateRenderer(ABC):
         """Template method - defines workflow."""
         # Save original config
         original_config = self.config
-        
+
         # Temporarily override config if provided
         if context.config:
             self.config = context.config
-        
+
         try:
             # Call abstract method (implemented by subclass)
             return self.render(context.template_name, context.variables)
@@ -114,16 +114,16 @@ Adapt Jinja2's API to match our TemplateRenderer interface.
 ```python
 class Jinja2Renderer(TemplateRenderer):
     """Adapts Jinja2 to TemplateRenderer interface."""
-    
+
     def __init__(self, template_dir, config=None):
         super().__init__(template_dir, config)
         # Create Jinja2 environment (adaptee)
         self._env = Environment(loader=FileSystemLoader(str(self.template_dir)))
-    
+
     def render(self, template_name, variables=None, **kwargs):
         """Adapt Jinja2's render method to our interface."""
         all_variables = {**(variables or {}), **kwargs}
-        
+
         # Use Jinja2's API
         template = self._env.get_template(template_name)
         return template.render(**all_variables)
@@ -232,17 +232,17 @@ Define a family of algorithms (strategies) and make them interchangeable.
 @dataclass
 class RenderConfig:
     """Configuration strategies for rendering."""
-    
+
     # Validation strategy
     strict_mode: bool = True
-    
+
     # Escaping strategy
     autoescape: bool = False
-    
+
     # Whitespace strategy
     trim_blocks: bool = True
     lstrip_blocks: bool = True
-    
+
     # Custom behavior strategies
     custom_filters: dict[str, Any] = field(default_factory=dict)
     custom_tests: dict[str, Any] = field(default_factory=dict)
@@ -477,4 +477,3 @@ User Code
 
 - [Architecture Overview](overview.md) - Module structure
 - [Component Relationships](relationships.md) - How components interact
-

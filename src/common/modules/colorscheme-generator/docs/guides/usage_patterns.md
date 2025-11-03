@@ -1,6 +1,6 @@
 # Usage Patterns
 
-**Module:** `colorscheme_generator`  
+**Module:** `colorscheme_generator`
 **Last Updated:** 2025-10-18
 
 ---
@@ -75,7 +75,7 @@ def get_generator(backend_name: str, settings):
     except ValueError:
         available = ColorSchemeGeneratorFactory.list_available(settings)
         raise ValueError(f"Unknown backend '{backend_name}'. Available: {available}")
-    
+
     generator = ColorSchemeGeneratorFactory.create(backend, settings)
     generator.ensure_available()
     return generator
@@ -220,7 +220,7 @@ def generate_with_retry(image_path, settings):
         (Backend.CUSTOM, {"algorithm": "median_cut"}),
         (Backend.CUSTOM, {"algorithm": "octree"}),
     ]
-    
+
     for backend, options in strategies:
         try:
             generator = ColorSchemeGeneratorFactory.create(backend, settings)
@@ -232,7 +232,7 @@ def generate_with_retry(image_path, settings):
             return generator.generate(image_path, config)
         except (BackendNotAvailableError, ColorExtractionError):
             continue
-    
+
     raise RuntimeError("All strategies failed")
 ```
 
@@ -245,14 +245,14 @@ def write_outputs_gracefully(scheme, output_dir, formats, manager):
     """Write outputs, continue on individual format failures."""
     output_files = {}
     errors = {}
-    
+
     for fmt in formats:
         try:
             files = manager.write_outputs(scheme, output_dir, [fmt])
             output_files.update(files)
         except Exception as e:
             errors[fmt.value] = str(e)
-    
+
     return output_files, errors
 
 # Usage
@@ -303,7 +303,7 @@ def organize_outputs(scheme, base_dir, formats, manager):
     image_name = scheme.source_image.stem
     output_dir = base_dir / scheme.backend / image_name
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     return manager.write_outputs(scheme, output_dir, formats)
 
 # Usage
@@ -329,7 +329,7 @@ def write_timestamped_outputs(scheme, base_dir, formats, manager):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     output_dir = base_dir / timestamp
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     return manager.write_outputs(scheme, output_dir, formats)
 
 # Usage
@@ -356,7 +356,7 @@ def on_wallpaper_change(wallpaper_path: Path):
     settings = Settings.get()
     generator = ColorSchemeGeneratorFactory.create_auto(settings)
     config = GeneratorConfig.from_settings(settings)
-    
+
     try:
         scheme = generator.generate(wallpaper_path, config)
         manager = OutputManager(settings)
@@ -365,10 +365,10 @@ def on_wallpaper_change(wallpaper_path: Path):
             config.output_dir,
             config.formats
         )
-        
+
         # Reload applications
         reload_applications(output_files)
-        
+
         return scheme
     except ColorSchemeGeneratorError as e:
         print(f"Failed to generate colors: {e}")
@@ -394,32 +394,32 @@ def cli_main():
     parser.add_argument("--backend", choices=["pywal", "wallust", "custom"])
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--formats", nargs="+", choices=["json", "css", "sh", "yaml"])
-    
+
     args = parser.parse_args()
-    
+
     settings = Settings.get()
-    
+
     # Create generator
     if args.backend:
         backend = Backend(args.backend)
         generator = ColorSchemeGeneratorFactory.create(backend, settings)
     else:
         generator = ColorSchemeGeneratorFactory.create_auto(settings)
-    
+
     # Create config
     config_kwargs = {}
     if args.output_dir:
         config_kwargs["output_dir"] = args.output_dir
     if args.formats:
         config_kwargs["formats"] = [ColorFormat(f) for f in args.formats]
-    
+
     config = GeneratorConfig.from_settings(settings, **config_kwargs)
-    
+
     # Generate
     scheme = generator.generate(args.image, config)
     manager = OutputManager(settings)
     output_files = manager.write_outputs(scheme, config.output_dir, config.formats)
-    
+
     print(f"Generated {len(output_files)} files")
 ```
 
@@ -437,7 +437,7 @@ def process_image(image_path, generator, manager, settings):
         settings,
         output_dir=Path(f"~/.cache/colorschemes/{image_path.stem}")
     )
-    
+
     try:
         scheme = generator.generate(image_path, config)
         output_files = manager.write_outputs(
@@ -453,15 +453,15 @@ def batch_process(image_dir: Path, settings):
     """Process all images in directory."""
     generator = ColorSchemeGeneratorFactory.create_auto(settings)
     manager = OutputManager(settings)
-    
+
     images = list(image_dir.glob("*.png")) + list(image_dir.glob("*.jpg"))
-    
+
     with ThreadPoolExecutor(max_workers=4) as executor:
         results = executor.map(
             lambda img: process_image(img, generator, manager, settings),
             images
         )
-    
+
     for image_path, output_files, error in results:
         if error:
             print(f"Failed {image_path.name}: {error}")
@@ -504,9 +504,9 @@ colors:
     cyan:    '{scheme.colors[14].hex}'
     white:   '{scheme.colors[15].hex}'
 """
-    
+
     (app_config_dir / "alacritty_colors.yml").write_text(alacritty_config)
-    
+
     # Add more application configs...
 ```
 
@@ -517,4 +517,3 @@ colors:
 - **[Integration Guide](integration.md)** - Detailed integration examples
 - **[Templates Guide](templates.md)** - Working with templates
 - **[Examples](../reference/examples.md)** - Comprehensive examples
-

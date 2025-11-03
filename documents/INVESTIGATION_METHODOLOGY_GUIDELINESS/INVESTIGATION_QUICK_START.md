@@ -359,4 +359,3 @@ Just copy a template from this guide, customize it, and hand it to any AI tool!
 ---
 
 **Pro Tip:** Keep both documents in your `helpers/` directory as reference for future investigations.
-

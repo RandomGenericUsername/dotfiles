@@ -343,4 +343,3 @@ except TemplateRenderError as e:
     if e.original_error:
         print(f"Original: {e.original_error}")
 ```
-

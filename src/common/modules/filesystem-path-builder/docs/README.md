@@ -1,8 +1,8 @@
 # filesystem-path-builder Documentation
 
-**Version:** 0.1.0  
-**Python:** >=3.12  
-**Dependencies:** None (stdlib only)  
+**Version:** 0.1.0
+**Python:** >=3.12
+**Dependencies:** None (stdlib only)
 **License:** MIT
 
 ---
@@ -242,7 +242,6 @@ MIT License - See LICENSE file for details.
 
 ---
 
-**Last Updated:** 2025-10-29  
-**Documentation Version:** 1.0  
+**Last Updated:** 2025-10-29
+**Documentation Version:** 1.0
 **Module Version:** 0.1.0
-

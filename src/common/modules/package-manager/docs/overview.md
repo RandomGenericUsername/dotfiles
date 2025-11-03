@@ -291,4 +291,3 @@ if not result.success:
 **Module:** `dotfiles_package_manager`
 **Documentation Version:** 1.0
 **Last Updated:** 2025-10-19
-

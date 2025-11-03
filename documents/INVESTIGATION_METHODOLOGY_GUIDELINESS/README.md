@@ -246,4 +246,3 @@ If something is unclear:
 ---
 
 **This methodology is reusable for ANY codebase investigation!** 🎉
-

@@ -58,16 +58,16 @@ The module exports a clean public API through `__init__.py`:
 from dotfiles_package_manager import (
     # Factory
     PackageManagerFactory,
-    
+
     # Base class (for type hints)
     PackageManager,
-    
+
     # Types
     PackageManagerType,
     PackageInfo,
     InstallResult,
     SearchResult,
-    
+
     # Exceptions
     PackageManagerError,
     PackageNotFoundError,
@@ -88,19 +88,19 @@ The `PackageManagerFactory` class implements the Abstract Factory pattern to cre
 ```python
 class PackageManagerFactory:
     """Factory for creating package manager instances."""
-    
+
     # Registry of available managers
     _MANAGERS = {
         PackageManagerType.PACMAN: PacmanPackageManager,
         PackageManagerType.YAY: YayPackageManager,
         PackageManagerType.PARU: ParuPackageManager,
     }
-    
+
     @classmethod
     def create_auto(cls, prefer_aur_helper: bool = True) -> PackageManager:
         """Auto-detect and create best available manager."""
         # Detection logic...
-    
+
     @classmethod
     def create(cls, manager_type: PackageManagerType) -> PackageManager:
         """Create specific manager instance."""
@@ -122,7 +122,7 @@ The `PackageManager` abstract base class defines the template for all package ma
 ```python
 class PackageManager(ABC):
     """Abstract base class for package managers."""
-    
+
     def _run_command(
         self,
         command: list[str],
@@ -134,7 +134,7 @@ class PackageManager(ABC):
         """Template method for running commands."""
         # Common command execution logic
         return subprocess.run(command, ...)
-    
+
     @abstractmethod
     def install(self, packages: list[str], ...) -> InstallResult:
         """Subclasses implement specific install logic."""
@@ -380,11 +380,11 @@ class AptPackageManager(PackageManager):
     @property
     def manager_type(self) -> PackageManagerType:
         return PackageManagerType.APT
-    
+
     def _find_executable(self) -> Path | None:
         executable = shutil.which("apt")
         return Path(executable) if executable else None
-    
+
     # Implement all abstract methods...
 ```
 
@@ -417,7 +417,7 @@ Implementations can add custom methods beyond the base interface:
 ```python
 class ParuPackageManager(PackageManager):
     # Standard methods...
-    
+
     def review_aur_package(self, package: str):
         """Paru-specific: Review AUR package before install."""
         # Custom functionality
@@ -427,4 +427,3 @@ class ParuPackageManager(PackageManager):
 ---
 
 **Next:** [API Reference](api_reference.md) | [Usage Guide](usage_guide.md)
-

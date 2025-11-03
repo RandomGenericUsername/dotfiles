@@ -30,7 +30,7 @@ Exception (Python stdlib)
 ```python
 class TemplateError(Exception):
     """Base exception for all template errors."""
-    
+
     def __init__(self, message: str, template_name: str | None = None):
         self.message = message
         self.template_name = template_name
@@ -66,7 +66,7 @@ except TemplateError as e:
 ```python
 class TemplateNotFoundError(TemplateError):
     """Template file not found."""
-    
+
     def __init__(self, template_name: str, template_dir: Path | None = None):
         self.template_name = template_name
         self.template_dir = template_dir
@@ -90,11 +90,11 @@ try:
 except TemplateNotFoundError as e:
     print(f"Template not found: {e.template_name}")
     print(f"Searched in: {e.template_dir}")
-    
+
     # List available templates
     available = renderer.get_available_templates()
     print(f"Available templates: {available}")
-    
+
     # Use fallback
     result = renderer.render("default.j2", variables={...})
 ```
@@ -120,7 +120,7 @@ except TemplateNotFoundError as e:
 ```python
 class TemplateRenderError(TemplateError):
     """Template rendering failed."""
-    
+
     def __init__(
         self,
         message: str,
@@ -145,7 +145,7 @@ try:
 except TemplateRenderError as e:
     print(f"Rendering failed: {e.message}")
     print(f"Template: {e.template_name}")
-    
+
     if e.original_error:
         print(f"Original error: {e.original_error}")
         import traceback
@@ -174,7 +174,7 @@ except TemplateRenderError as e:
 ```python
 class ValidationError(TemplateError):
     """Template validation failed."""
-    
+
     def __init__(self, message: str, template_name: str | None = None):
         super().__init__(message, template_name)
 ```
@@ -203,7 +203,7 @@ except ValidationError as e:
 ```python
 class MissingVariableError(ValidationError):
     """Required variables are missing."""
-    
+
     def __init__(
         self,
         missing_variables: list[str],
@@ -227,12 +227,12 @@ try:
     result = renderer.render("app.j2", variables={"name": "myapp"})
 except MissingVariableError as e:
     print(f"Missing variables: {e.missing_variables}")
-    
+
     # Collect missing variables
     for var in e.missing_variables:
         value = input(f"Enter {var}: ")
         variables[var] = value
-    
+
     # Retry with complete variables
     result = renderer.render("app.j2", variables=variables)
 ```
@@ -271,7 +271,7 @@ result = renderer.render("app.j2", variables=variables)
 ```python
 class InvalidVariableError(ValidationError):
     """Variable has invalid value."""
-    
+
     def __init__(
         self,
         variable_name: str,
@@ -299,7 +299,7 @@ try:
 except InvalidVariableError as e:
     print(f"Invalid variable: {e.variable_name}")
     print(f"Reason: {e.reason}")
-    
+
     # Fix the variable
     variables[e.variable_name] = 8080
     result = renderer.render("app.j2", variables=variables)
@@ -401,4 +401,3 @@ except TemplateError as e:
 - [Core API](core.md) - TemplateRenderer base class
 - [Renderers API](renderers.md) - When exceptions are raised
 - [Troubleshooting](../reference/troubleshooting.md) - Common issues and solutions
-

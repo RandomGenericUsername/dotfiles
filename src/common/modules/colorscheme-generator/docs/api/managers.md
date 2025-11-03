@@ -1,6 +1,6 @@
 # Managers API Reference
 
-**Module:** `colorscheme_generator.core.managers`  
+**Module:** `colorscheme_generator.core.managers`
 **Last Updated:** 2025-10-18
 
 ---
@@ -23,12 +23,12 @@ Manages writing ColorScheme objects to files in various formats.
 ```python
 class OutputManager:
     """Manages output file generation from ColorScheme objects.
-    
+
     Responsibilities:
     - Load and render Jinja2 templates
     - Write rendered content to files
     - Manage output directory structure
-    
+
     Does NOT:
     - Extract colors from images (that's backends' job)
     - Modify ColorScheme objects
@@ -40,10 +40,10 @@ class OutputManager:
 ```python
 def __init__(self, settings: AppConfig):
     """Initialize OutputManager.
-    
+
     Args:
         settings: Application configuration
-        
+
     Sets up:
     - Jinja2 environment with template directory
     - Template loader
@@ -72,7 +72,7 @@ def write_outputs(
     formats: list[ColorFormat]
 ) -> dict[str, Path]:
     """Write ColorScheme to files in specified formats.
-    
+
     Process:
     1. Create output directory if it doesn't exist
     2. For each format:
@@ -81,15 +81,15 @@ def write_outputs(
        c. Add to output_files dict
     3. Update scheme.output_files
     4. Return output_files dict
-    
+
     Args:
         scheme: ColorScheme to write
         output_dir: Directory to write files to
         formats: List of output formats
-        
+
     Returns:
         Dictionary mapping format name to output file path
-        
+
     Raises:
         TemplateRenderError: If template rendering fails
         OutputWriteError: If file writing fails
@@ -121,14 +121,14 @@ print(output_files)
 ```python
 def _render_template(self, scheme: ColorScheme, fmt: ColorFormat) -> str:
     """Render template for specific format.
-    
+
     Args:
         scheme: ColorScheme to render
         fmt: Output format
-        
+
     Returns:
         Rendered template content
-        
+
     Raises:
         TemplateRenderError: If template rendering fails
     """
@@ -165,11 +165,11 @@ print(content)
 ```python
 def _write_file(self, path: Path, content: str) -> None:
     """Write content to file.
-    
+
     Args:
         path: File path to write to
         content: Content to write
-        
+
     Raises:
         OutputWriteError: If file writing fails
     """
@@ -332,7 +332,7 @@ All templates receive the same context:
   --background: {{ background.hex }};
   --foreground: {{ foreground.hex }};
   --cursor: {{ cursor.hex }};
-  
+
   {% for i in range(16) %}
   --color{{ i }}: {{ colors[i].hex }};
   {% endfor %}
@@ -345,7 +345,7 @@ All templates receive the same context:
   --background: #1a1a1a;
   --foreground: #ffffff;
   --cursor: #ff0000;
-  
+
   --color0: #000000;
   --color1: #ff0000;
   ...
@@ -463,4 +463,3 @@ output_files = manager.write_outputs(
 - **[Configuration API](configuration.md)** - Configuration system
 - **[Templates Guide](../guides/templates.md)** - Working with templates
 - **[Examples](../reference/examples.md)** - Comprehensive examples
-

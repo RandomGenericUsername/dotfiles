@@ -1,6 +1,6 @@
 # Comprehensive Examples
 
-**Module:** `colorscheme_generator`  
+**Module:** `colorscheme_generator`
 **Last Updated:** 2025-10-18
 
 ---
@@ -64,15 +64,15 @@ try:
     settings = Settings.get()
     generator = ColorSchemeGeneratorFactory.create_auto(settings)
     config = GeneratorConfig.from_settings(settings)
-    
+
     scheme = generator.generate(
         Path("~/wallpapers/sunset.png").expanduser(),
         config
     )
-    
+
     manager = OutputManager(settings)
     output_files = manager.write_outputs(scheme, config.output_dir, config.formats)
-    
+
     print(f"Success! Background: {scheme.background.hex}")
 except ColorSchemeGeneratorError as e:
     print(f"Error: {e}")
@@ -162,10 +162,10 @@ for algo in algorithms:
         backend=Backend.CUSTOM,
         backend_options={"algorithm": algo}
     )
-    
+
     generator = ColorSchemeGeneratorFactory.create(Backend.CUSTOM, settings)
     scheme = generator.generate(image_path, config)
-    
+
     print(f"{algo}: Background={scheme.background.hex}")
 ```
 
@@ -294,20 +294,20 @@ def on_wallpaper_change(wallpaper_path: Path):
     settings = Settings.get()
     generator = ColorSchemeGeneratorFactory.create_auto(settings)
     config = GeneratorConfig.from_settings(settings)
-    
+
     scheme = generator.generate(wallpaper_path, config)
-    
+
     manager = OutputManager(settings)
     output_files = manager.write_outputs(
         scheme,
         config.output_dir,
         config.formats
     )
-    
+
     # Reload applications
     reload_terminal()
     reload_window_manager()
-    
+
     return scheme
 
 # Usage
@@ -352,28 +352,28 @@ def batch_process_images(image_dir: Path, settings):
     """Process all images in directory."""
     generator = ColorSchemeGeneratorFactory.create_auto(settings)
     manager = OutputManager(settings)
-    
+
     images = list(image_dir.glob("*.png")) + list(image_dir.glob("*.jpg"))
     results = []
-    
+
     for image in images:
         try:
             config = GeneratorConfig.from_settings(
                 settings,
                 output_dir=Path(f"~/.cache/colorschemes/{image.stem}").expanduser()
             )
-            
+
             scheme = generator.generate(image, config)
             output_files = manager.write_outputs(
                 scheme,
                 config.output_dir,
                 config.formats
             )
-            
+
             results.append((image.name, "success", len(output_files)))
         except Exception as e:
             results.append((image.name, "error", str(e)))
-    
+
     return results
 
 # Usage
@@ -401,16 +401,16 @@ def process_single_image(image_path):
     settings = Settings.get()
     generator = ColorSchemeGeneratorFactory.create_auto(settings)
     config = GeneratorConfig.from_settings(settings)
-    
+
     scheme = generator.generate(image_path, config)
-    
+
     manager = OutputManager(settings)
     output_files = manager.write_outputs(
         scheme,
         config.output_dir,
         config.formats
     )
-    
+
     return image_path.name, len(output_files)
 
 # Parallel processing
@@ -429,29 +429,29 @@ for name, count in results:
 def adjust_colors(scheme, saturation_factor=1.2, brightness_factor=1.1):
     """Adjust colors in scheme."""
     import colorsys
-    
+
     def adjust_color(color):
         # Convert to HSL
         r, g, b = [x / 255.0 for x in color.rgb]
         h, l, s = colorsys.rgb_to_hls(r, g, b)
-        
+
         # Adjust
         s = min(1.0, s * saturation_factor)
         l = min(1.0, l * brightness_factor)
-        
+
         # Convert back
         r, g, b = colorsys.hls_to_rgb(h, l, s)
         rgb = tuple(int(x * 255) for x in (r, g, b))
         hex_color = f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}"
-        
+
         return Color(hex=hex_color, rgb=rgb)
-    
+
     # Adjust all colors
     scheme.background = adjust_color(scheme.background)
     scheme.foreground = adjust_color(scheme.foreground)
     scheme.cursor = adjust_color(scheme.cursor)
     scheme.colors = [adjust_color(c) for c in scheme.colors]
-    
+
     return scheme
 
 # Usage
@@ -466,16 +466,16 @@ def compare_backends(image_path, settings):
     """Compare color schemes from different backends."""
     backends = [Backend.PYWAL, Backend.WALLUST, Backend.CUSTOM]
     results = {}
-    
+
     for backend in backends:
         try:
             generator = ColorSchemeGeneratorFactory.create(backend, settings)
             if not generator.is_available():
                 continue
-            
+
             config = GeneratorConfig.from_settings(settings)
             scheme = generator.generate(image_path, config)
-            
+
             results[backend.value] = {
                 "background": scheme.background.hex,
                 "foreground": scheme.foreground.hex,
@@ -483,7 +483,7 @@ def compare_backends(image_path, settings):
             }
         except Exception as e:
             results[backend.value] = {"error": str(e)}
-    
+
     return results
 
 # Usage
@@ -508,4 +508,3 @@ for backend, data in comparison.items():
 - **[Troubleshooting](troubleshooting.md)** - Common issues and solutions
 - **[Advanced Topics](advanced_topics.md)** - Advanced usage
 - **[API Reference](../api/)** - Detailed API documentation
-

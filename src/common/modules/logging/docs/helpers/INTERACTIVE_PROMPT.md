@@ -159,4 +159,3 @@ Examine the logging module directory structure and document:
 ---
 
 **Ready to work?** Follow the instructions above and begin with Task 1.1!
-

@@ -4,8 +4,8 @@
 
 `PathTree` is an immutable, frozen dataclass that provides dynamic, attribute-based navigation through directory structures without performing filesystem I/O during navigation.
 
-**Module:** `filesystem_path_builder.pathtree`  
-**Type:** Frozen dataclass with slots  
+**Module:** `filesystem_path_builder.pathtree`
+**Type:** Frozen dataclass with slots
 **Inheritance:** None (base class)
 
 ---
@@ -291,7 +291,7 @@ if paths.config.is_dir():
 
 The base directory path.
 
-**Type:** Path  
+**Type:** Path
 **Access:** Read-only (frozen dataclass)
 
 **Example:**
@@ -307,7 +307,7 @@ print(paths._base)  # PosixPath('/home/user')
 
 The path segments accumulated during navigation.
 
-**Type:** tuple[str, ...]  
+**Type:** tuple[str, ...]
 **Access:** Read-only (frozen dataclass)
 
 **Example:**
@@ -452,4 +452,3 @@ for t in threads:
 ---
 
 **Next:** [PathsBuilder API](builder.md) | [ManagedPathTree API](managed_pathtree.md)
-
