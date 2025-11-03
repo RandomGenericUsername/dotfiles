@@ -46,10 +46,10 @@ CLI_SETTINGS_DEFAULTS: dict[str, Any] = {
 # ============================================================================
 
 PACKAGE_MANAGER_DEFAULTS: dict[str, bool] = {
-    "prefer_third_party": True,  # Prefer paru/yay on Arch for AUR access
-    "update_system": True,  # Update system packages before installing new packages
-    "remove_dependencies": True,  # Remove unused dependencies when uninstalling
-    "dry_run": False,  # Only check for updates without applying them (dry run mode)
+    "prefer_third_party": True,  # Prefer paru/yay on Arch for AUR
+    "update_system": True,  # Update system packages before installing
+    "remove_dependencies": True,  # Remove unused dependencies
+    "dry_run": False,  # Only check for updates (dry run mode)
 }
 
 # ============================================================================

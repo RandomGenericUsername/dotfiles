@@ -34,7 +34,8 @@ def validate_boolean_string(value: str | bool) -> bool:
         else:
             valid_options = "true, false, 1, 0, yes, no, on, off"
             raise ValueError(
-                f"Invalid boolean value '{value}'. Valid options are: {valid_options}"
+                f"Invalid boolean value '{value}'. "
+                f"Valid options are: {valid_options}"
             )
 
     raise ValueError(f"Cannot convert {type(value).__name__} to boolean")
@@ -118,7 +119,9 @@ class PathsConfig(BaseModel):
     # )
     install: Any = Field(
         default=directories.install,
-        description="Installation paths (ManagedPathTree with create() method)",
+        description=(
+            "Installation paths (ManagedPathTree with create() method)"
+        ),
     )
     host: PathTree = Field(
         default=directories.host,
@@ -151,7 +154,9 @@ class DirectoryDeletionSafetySettings(BaseModel):
             list[str],
             defaults.DIRECTORY_DELETION_DEFAULTS["protected_directories"],
         ).copy(),
-        description="List of protected directories that should never be deleted",
+        description=(
+            "List of protected directories that should never be deleted"
+        ),
     )
 
     dangerous_keywords: list[str] = Field(
@@ -202,17 +207,23 @@ class PackageManagerSettings(BaseModel):
 
     update_system: bool = Field(
         default=defaults.PACKAGE_MANAGER_DEFAULTS["update_system"],
-        description="Whether to update system packages before installing new ones",
+        description=(
+            "Whether to update system packages before installing new ones"
+        ),
     )
 
     remove_dependencies: bool = Field(
         default=defaults.PACKAGE_MANAGER_DEFAULTS["remove_dependencies"],
-        description="Whether to remove unused dependencies when removing packages",
+        description=(
+            "Whether to remove unused dependencies when removing packages"
+        ),
     )
 
     dry_run: bool = Field(
         default=defaults.PACKAGE_MANAGER_DEFAULTS["dry_run"],
-        description="Only check for updates without applying them (dry run mode)",
+        description=(
+            "Only check for updates without applying them (dry run mode)"
+        ),
     )
 
 
@@ -244,7 +255,8 @@ class PackageConfigFile(BaseModel):
 
         Example:
             Input: "src/dotfiles/config-files/starship/starship.toml"
-            Output: "/home/user/Development/new/src/dotfiles/config-files/starship/starship.toml"
+            Output: "/home/user/Development/new/src/dotfiles/
+                config-files/starship/starship.toml"
         """
         path = Path(v)
         if not path.is_absolute():
@@ -311,7 +323,9 @@ class Feature(BaseModel):
         nodejs = { version = "20.9.0" }
 
     This maps to:
-        features["python"] = Feature(version="3.12.0", pip_packages=["ipython", "black"])
+        features["python"] = Feature(
+            version="3.12.0", pip_packages=["ipython", "black"]
+        )
         features["nodejs"] = Feature(version="20.9.0")
     """
 
@@ -323,7 +337,8 @@ class Feature(BaseModel):
 
 
 class PackageConfigDict(dict[str, PackageConfig]):
-    """Dictionary that supports both dict['key'] and dict.key attribute access."""
+    """Dictionary that supports both dict['key'] and dict.key attribute
+    access."""
 
     def __getattr__(self, name: str) -> PackageConfig:
         """Allow attribute access to package configs."""
@@ -574,10 +589,13 @@ class AppConfig(BaseModel):
     4. defaults.toml (cli/config)
 
     Structure:
-    - cli_settings: User-configurable settings (install dir, backup dir, type, etc.)
-    - project: Project/CLI configuration (paths, templates, container manager, etc.)
+    - cli_settings: User-configurable settings (install dir, backup dir,
+        type, etc.)
+    - project: Project/CLI configuration (paths, templates, container
+        manager, etc.)
       - project.paths.source: This project's source files
-      - project.paths.installation: Target installation paths (where dotfiles go)
+      - project.paths.installation: Target installation paths (where
+          dotfiles go)
       - project.paths.host: User's system directories
       - project.paths.runtime: Logs, cache, etc.
     """

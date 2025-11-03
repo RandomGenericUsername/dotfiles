@@ -1,4 +1,5 @@
-"""Rich console management for shared console access across logging and Rich features."""
+"""Rich console management for shared console access across logging and
+Rich features."""
 
 import threading
 from typing import Optional

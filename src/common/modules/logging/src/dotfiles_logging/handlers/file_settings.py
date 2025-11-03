@@ -1,7 +1,6 @@
 """File handler settings models."""
 
 from dataclasses import dataclass
-from typing import Union
 
 
 @dataclass
@@ -71,8 +70,8 @@ class TimedRotatingFileHandlerSettings:
 
 
 # Union type for all file handler settings
-BaseFileHandlerSettings = Union[
-    FileHandlerSettings,
-    RotatingFileHandlerSettings,
-    TimedRotatingFileHandlerSettings,
-]
+BaseFileHandlerSettings = (
+    FileHandlerSettings
+    | RotatingFileHandlerSettings
+    | TimedRotatingFileHandlerSettings
+)

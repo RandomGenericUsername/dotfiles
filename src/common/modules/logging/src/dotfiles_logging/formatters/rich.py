@@ -13,7 +13,6 @@ from .base import (
 
 try:
     from rich.console import Console
-    from rich.text import Text
 
     RICH_AVAILABLE = True
 except ImportError:
@@ -49,7 +48,8 @@ class RichFormatter(logging.Formatter):
         }
 
     def format(self, record):
-        """Format the log record with Rich markup, then render to plain text."""
+        """Format the log record with Rich markup, then render to plain
+        text."""
         if not RICH_AVAILABLE:
             # Fallback to standard formatting if Rich not available
             return super().format(record)
@@ -61,7 +61,7 @@ class RichFormatter(logging.Formatter):
         # we can auto-add colors to the level name
         if (
             "[" not in log_message
-            or f'[{self.level_colors.get(record.levelname, "")}]'
+            or f"[{self.level_colors.get(record.levelname, '')}]"
             not in log_message
         ):
             # Auto-colorize level name if not already colored in format string
@@ -91,13 +91,14 @@ class RichFormatterConfig(BaseFormatterConfig):
         format_str: str,
         style: LogFormatterStyleChoices,
         level_colors: dict[str, str] | None = None,
-        **kwargs,  # Accept but ignore extra kwargs
+        **_kwargs,  # Accept but ignore extra kwargs
     ):
         """
         Initialize Rich formatter configuration.
 
         Args:
-            format_str: Format string for log messages (can include Rich markup)
+            format_str: Format string for log messages (can include Rich
+                markup)
             style: Format style (%, {, $)
             level_colors: Custom color mapping for log levels
             **kwargs: Extra arguments (ignored)

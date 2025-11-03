@@ -4,8 +4,6 @@ from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
 try:
-    from datetime import datetime
-
     from rich.console import Console
     from rich.highlighter import Highlighter
     from rich.text import Text
@@ -73,7 +71,8 @@ class RichHandlerSettings:
     """Number of extra lines of context around error in tracebacks."""
 
     tracebacks_theme: str | None = None
-    """Syntax highlighting theme for tracebacks (e.g., 'monokai', 'github-dark')."""
+    """Syntax highlighting theme for tracebacks (e.g., 'monokai',
+    'github-dark')."""
 
     tracebacks_word_wrap: bool = True
     """Whether to word wrap long lines in tracebacks."""
@@ -105,7 +104,8 @@ class RichHandlerSettings:
         Returns:
             Dictionary of settings compatible with RichHandler
         """
-        # Convert dataclass to dict, excluding None values for optional parameters
+        # Convert dataclass to dict, excluding None values for optional
+        # parameters
         result = {}
 
         for field_name, field_value in self.__dict__.items():

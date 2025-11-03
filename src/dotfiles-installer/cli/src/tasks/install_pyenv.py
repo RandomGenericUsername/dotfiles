@@ -50,7 +50,8 @@ def check_pyenv_installed(pyenv_dir: Path) -> bool:
             [
                 "bash",
                 "-c",
-                f'export PYENV_ROOT="{pyenv_dir}" && "$PYENV_ROOT/bin/pyenv" --version',
+                f'export PYENV_ROOT="{pyenv_dir}" && '
+                f'"$PYENV_ROOT/bin/pyenv" --version',
             ],
             capture_output=True,
             text=True,
@@ -69,9 +70,10 @@ def install_pyenv(
     """
     Install pyenv using the official installation script.
 
-    Downloads and executes the pyenv installation script with custom directory.
-    Sets PYENV_ROOT environment variable to override default installation location.
-    The script installs the latest version of pyenv automatically.
+    Downloads and executes the pyenv installation script with custom
+    directory. Sets PYENV_ROOT environment variable to override default
+    installation location. The script installs the latest version of
+    pyenv automatically.
 
     Args:
         pyenv_dir: Directory where pyenv should be installed
@@ -83,19 +85,22 @@ def install_pyenv(
     # Ensure parent directory exists
     pyenv_dir.parent.mkdir(parents=True, exist_ok=True)
 
-    # Remove directory if it exists but doesn't contain a valid pyenv installation
-    # This handles the case where CreateDirectoriesStep creates an empty directory
+    # Remove directory if it exists but doesn't contain a valid pyenv
+    # installation. This handles the case where CreateDirectoriesStep
+    # creates an empty directory
     if pyenv_dir.exists() and not check_pyenv_installed(pyenv_dir):
         try:
             shutil.rmtree(pyenv_dir)
         except OSError as e:
             raise PyenvInstallError(
-                f"Failed to remove existing empty pyenv directory at {pyenv_dir}: {e}"
+                f"Failed to remove existing empty pyenv directory at "
+                f"{pyenv_dir}: {e}"
             ) from e
 
     try:
-        # Download and execute the installation script with custom PYENV_ROOT
-        # The pyenv-installer script respects the PYENV_ROOT environment variable
+        # Download and execute the installation script with custom
+        # PYENV_ROOT. The pyenv-installer script respects the PYENV_ROOT
+        # environment variable
         install_url = "https://pyenv.run"
 
         subprocess.run(
@@ -113,8 +118,8 @@ def install_pyenv(
         # Verify installation succeeded
         if not check_pyenv_installed(pyenv_dir):
             raise PyenvInstallError(
-                f"Pyenv installation completed but pyenv binary not found in {pyenv_dir}. "
-                "Installation may have failed."
+                f"Pyenv installation completed but pyenv binary not found "
+                f"in {pyenv_dir}. Installation may have failed."
             )
 
     except subprocess.TimeoutExpired as e:
@@ -157,7 +162,8 @@ def get_pyenv_version(pyenv_dir: Path) -> str | None:
             [
                 "bash",
                 "-c",
-                f'export PYENV_ROOT="{pyenv_dir}" && "$PYENV_ROOT/bin/pyenv" --version',
+                f'export PYENV_ROOT="{pyenv_dir}" && '
+                f'"$PYENV_ROOT/bin/pyenv" --version',
             ],
             capture_output=True,
             text=True,

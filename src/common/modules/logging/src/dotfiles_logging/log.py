@@ -54,7 +54,9 @@ class Log:
         name: str | None = None,
         config: LogConfig | None = None,
         log_level: LogLevels | None = None,
-        formatter_style: LogFormatterStyleChoices = LogFormatterStyleChoices.PERCENT,
+        formatter_style: LogFormatterStyleChoices = (
+            LogFormatterStyleChoices.PERCENT
+        ),
         format: str = "%(asctime)s | %(levelname)-8s | %(message)s",
         formatter_type: LogFormatters = LogFormatters.DEFAULT,
         colors: type[ColoredFormatterColors] | None = None,
@@ -68,14 +70,16 @@ class Log:
 
         Args:
             name: Logger name
-            config: LogConfig object with all settings (if provided, individual parameters override config values)
+            config: LogConfig object with all settings (if provided,
+                individual parameters override config values)
             log_level: Log level (required if config is not provided)
             formatter_style: Format style (%, {, $)
             format: Format string for log messages
             formatter_type: Type of formatter to use
             colors: Color scheme for colored formatter
             console_handler_type: Type of console handler to use
-            handler_config: RichHandlerSettings instance for Rich handler configuration
+            handler_config: RichHandlerSettings instance for Rich handler
+                configuration
             file_handlers: List of file handler specifications
 
         Returns:
@@ -90,12 +94,15 @@ class Log:
             logger = Log.create_logger("app", config=config)
 
             # Using config with parameter overrides
-            logger = Log.create_logger("app", config=config, log_level=LogLevels.INFO)  # overrides config.log_level
+            logger = Log.create_logger(
+                "app", config=config, log_level=LogLevels.INFO
+            )  # overrides config.log_level
         """
         logger = logging.getLogger(name)
         configurator = LoggerConfigurator(logger)
 
-        # If config is provided, use it as base and allow individual parameters to override
+        # If config is provided, use it as base and allow individual
+        # parameters to override
         if config is not None:
             final_config = LogConfig(
                 name=name,  # Always use the provided name parameter
@@ -185,15 +192,18 @@ class Log:
 
         Args:
             name: Logger name
-            config: LogConfig object with new settings (if provided, individual parameters override config values)
+            config: LogConfig object with new settings (if provided,
+                individual parameters override config values)
             log_level: New log level (None to keep existing)
             formatter_style: New format style (None to keep existing)
             format: New format string (None to keep existing)
             formatter_type: New formatter type (None to keep existing)
             colors: New color scheme (None to keep existing)
             console_handler_type: New handler type (None to keep existing)
-            handler_config: New RichHandlerSettings instance (None to keep existing)
-            file_handlers: New file handler specifications (None to keep existing)
+            handler_config: New RichHandlerSettings instance (None to keep
+                existing)
+            file_handlers: New file handler specifications (None to keep
+                existing)
 
         Returns:
             Updated logger instance
@@ -210,11 +220,14 @@ class Log:
             logger = Log.update("app", config=config)
 
             # Using config with parameter overrides
-            logger = Log.update("app", config=config, log_level=LogLevels.INFO)  # overrides config.log_level
+            logger = Log.update(
+                "app", config=config, log_level=LogLevels.INFO
+            )  # overrides config.log_level
         """
         if name not in Log._configurators:
             raise ValueError(
-                f"Logger '{name}' not found. Create it first with create_logger()"
+                f"Logger '{name}' not found. Create it first with "
+                f"create_logger()"
             )
 
         configurator = Log._configurators[name]

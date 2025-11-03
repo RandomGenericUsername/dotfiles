@@ -65,8 +65,9 @@ def install_nvm(
     """
     Install NVM using the official installation script.
 
-    Downloads and executes the NVM installation script with custom directory.
-    Sets NVM_DIR environment variable to override default installation location.
+    Downloads and executes the NVM installation script with custom
+    directory. Sets NVM_DIR environment variable to override default
+    installation location.
 
     Args:
         nvm_dir: Directory where NVM should be installed
@@ -117,8 +118,8 @@ def install_nvm(
         # Verify installation succeeded
         if not check_nvm_installed(nvm_dir):
             raise NvmInstallError(
-                f"NVM installation completed but nvm.sh not found in {nvm_dir}. "
-                "Installation may have failed."
+                f"NVM installation completed but nvm.sh not found in "
+                f"{nvm_dir}. Installation may have failed."
             )
 
     except subprocess.TimeoutExpired as e:

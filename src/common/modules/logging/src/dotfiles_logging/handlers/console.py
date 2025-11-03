@@ -38,8 +38,10 @@ class RichHandlerConfig(BaseHandlerConfig):
         Initialize Rich handler configuration.
 
         Args:
-            formatter: Formatter to attach (may be ignored by Rich's native formatting)
-            settings: RichHandlerSettings instance (None creates default settings)
+            formatter: Formatter to attach (may be ignored by Rich's
+                native formatting)
+            settings: RichHandlerSettings instance (None creates default
+                settings)
             logger_name: Name of the logger (for console sharing)
         """
         super().__init__(formatter)
@@ -52,7 +54,8 @@ class RichHandlerConfig(BaseHandlerConfig):
             self.settings = RichHandlerSettings()
         else:
             raise TypeError(
-                f"settings must be RichHandlerSettings or None, got {type(settings)}"
+                f"settings must be RichHandlerSettings or None, got "
+                f"{type(settings)}"
             )
 
     def create(self) -> logging.Handler:
@@ -79,8 +82,9 @@ class RichHandlerConfig(BaseHandlerConfig):
             # Graceful fallback to standard handler
             handler = logging.StreamHandler()
 
-        # Note: RichHandler does its own formatting, so we create a minimal formatter
-        # that just returns the message to avoid double formatting
+        # Note: RichHandler does its own formatting, so we create a
+        # minimal formatter that just returns the message to avoid double
+        # formatting
         if RICH_AVAILABLE:
             # Create a minimal formatter that just returns the message
             minimal_formatter = logging.Formatter("%(message)s")

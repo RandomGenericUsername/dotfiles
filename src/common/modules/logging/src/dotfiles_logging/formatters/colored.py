@@ -82,7 +82,7 @@ class DefaultFormatterConfig(BaseFormatterConfig):
         self,
         format_str: str,
         style: LogFormatterStyleChoices,
-        **kwargs,  # Accept but ignore extra kwargs like 'colors'
+        **_kwargs,  # Accept but ignore extra kwargs like 'colors'
     ):
         """
         Initialize default formatter configuration.

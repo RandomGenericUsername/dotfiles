@@ -109,10 +109,14 @@ class RichLogger:
         Args:
             data: Table data as list of rows or dict of columns
             title: Optional table title
-            show_header: Whether to show table header (uses settings default if None)
-            show_lines: Whether to show lines between rows (uses settings default if None)
-            show_edge: Whether to show table border (uses settings default if None)
-            expand: Whether to expand to fill width (uses settings default if None)
+            show_header: Whether to show table header (uses settings
+                default if None)
+            show_lines: Whether to show lines between rows (uses settings
+                default if None)
+            show_edge: Whether to show table border (uses settings default
+                if None)
+            expand: Whether to expand to fill width (uses settings default
+                if None)
             **kwargs: Additional arguments passed to Rich Table
         """
         console = self._get_console()
@@ -204,8 +208,10 @@ class RichLogger:
             subtitle: Optional panel subtitle
             border_style: Border color/style (uses settings default if None)
             box_style: Box type ('rounded', 'square', 'double', etc.)
-            expand: Whether to expand to fill width (uses settings default if None)
-            padding: Padding as (vertical, horizontal) (uses settings default if None)
+            expand: Whether to expand to fill width (uses settings default
+                if None)
+            padding: Padding as (vertical, horizontal) (uses settings
+                default if None)
             **kwargs: Additional arguments passed to Rich Panel
         """
         console = self._get_console()
@@ -402,8 +408,10 @@ class RichLogger:
         Args:
             data: Tree data as nested dict or root label string
             title: Optional tree title (used as root if data is dict)
-            guide_style: Style for tree guide lines (uses settings default if None)
-            expanded: Whether nodes should be expanded (uses settings default if None)
+            guide_style: Style for tree guide lines (uses settings default
+                if None)
+            expanded: Whether nodes should be expanded (uses settings
+                default if None)
             **kwargs: Additional arguments passed to Rich Tree
 
         Examples:
@@ -510,10 +518,14 @@ class RichLogger:
         Display content in multiple columns.
 
         Args:
-            *renderables: Content to display in columns (can be strings, panels, tables, etc.)
-            equal: Whether columns should have equal width (uses settings default if None)
-            expand: Whether columns should expand to fill width (uses settings default if None)
-            padding: Padding as (vertical, horizontal) (uses settings default if None)
+            *renderables: Content to display in columns (can be strings,
+                panels, tables, etc.)
+            equal: Whether columns should have equal width (uses settings
+                default if None)
+            expand: Whether columns should expand to fill width (uses
+                settings default if None)
+            padding: Padding as (vertical, horizontal) (uses settings
+                default if None)
             **kwargs: Additional arguments passed to Rich Columns
 
         Examples:
@@ -576,11 +588,16 @@ class RichLogger:
 
         Args:
             code: Code string to highlight
-            lexer: Language lexer (e.g., 'python', 'bash', 'javascript', 'json')
-            theme: Syntax highlighting theme (uses settings default if None)
-            line_numbers: Whether to show line numbers (uses settings default if None)
-            word_wrap: Whether to enable word wrap (uses settings default if None)
-            background_color: Background color (uses settings default if None)
+            lexer: Language lexer (e.g., 'python', 'bash', 'javascript',
+                'json')
+            theme: Syntax highlighting theme (uses settings default if
+                None)
+            line_numbers: Whether to show line numbers (uses settings
+                default if None)
+            word_wrap: Whether to enable word wrap (uses settings default
+                if None)
+            background_color: Background color (uses settings default if
+                None)
             title: Optional title for the code block
             **kwargs: Additional arguments passed to Rich Syntax
 
@@ -589,7 +606,10 @@ class RichLogger:
             logger.syntax('print("Hello, World!")', lexer="python")
 
             # Bash script with line numbers
-            logger.syntax(script_content, lexer="bash", line_numbers=True, title="install.sh")
+            logger.syntax(
+                script_content, lexer="bash", line_numbers=True,
+                title="install.sh"
+            )
 
             # JSON with custom theme
             logger.syntax(json_str, lexer="json", theme="github-dark")
@@ -649,14 +669,19 @@ class RichLogger:
 
         Args:
             markdown_text: Markdown text to render
-            code_theme: Theme for code blocks (uses settings default if None)
-            hyperlinks: Whether to enable hyperlinks (uses settings default if None)
-            inline_code_lexer: Lexer for inline code (uses settings default if None)
+            code_theme: Theme for code blocks (uses settings default if
+                None)
+            hyperlinks: Whether to enable hyperlinks (uses settings default
+                if None)
+            inline_code_lexer: Lexer for inline code (uses settings default
+                if None)
             **kwargs: Additional arguments passed to Rich Markdown
 
         Examples:
             # Simple markdown
-            logger.markdown("# Installation Complete\\n\\nEverything is ready!")
+            logger.markdown(
+                "# Installation Complete\\n\\nEverything is ready!"
+            )
 
             # Complex markdown with code
             logger.markdown('''
@@ -723,14 +748,18 @@ class RichLogger:
         Args:
             data: JSON data (dict, list, or JSON string)
             indent: Indentation level (uses settings default if None)
-            highlight: Whether to enable syntax highlighting (uses settings default if None)
+            highlight: Whether to enable syntax highlighting (uses settings
+                default if None)
             sort_keys: Whether to sort keys (uses settings default if None)
             title: Optional title for the JSON display
             **kwargs: Additional arguments passed to Rich JSON
 
         Examples:
             # Dictionary data
-            config = {"name": "dotfiles", "version": "1.0", "files": ["zshrc", "vimrc"]}
+            config = {
+                "name": "dotfiles", "version": "1.0",
+                "files": ["zshrc", "vimrc"]
+            }
             logger.json(config, title="Configuration")
 
             # JSON string
@@ -807,9 +836,12 @@ class RichLogger:
 
         Args:
             renderable: Content to display and update (table, panel, etc.)
-            refresh_per_second: Refresh rate (uses settings default if None)
-            vertical_overflow: Overflow handling (uses settings default if None)
-            auto_refresh: Whether to auto-refresh (uses settings default if None)
+            refresh_per_second: Refresh rate (uses settings default if
+                None)
+            vertical_overflow: Overflow handling (uses settings default if
+                None)
+            auto_refresh: Whether to auto-refresh (uses settings default if
+                None)
             **kwargs: Additional arguments passed to Rich Live
 
         Yields:
@@ -881,8 +913,10 @@ class RichLogger:
             data: Dictionary mapping labels to values
             title: Optional chart title
             width: Width of bars in characters (uses settings default if None)
-            character: Character to use for bars (uses settings default if None)
-            show_values: Whether to show numeric values (uses settings default if None)
+            character: Character to use for bars (uses settings default if
+                None)
+            show_values: Whether to show numeric values (uses settings
+                default if None)
             **kwargs: Additional arguments passed to Rich Table
 
         Examples:
@@ -965,7 +999,8 @@ class RichLogger:
             style: Text style (e.g., "bold red", "italic blue")
             justify: Text justification (uses settings default if None)
             overflow: Overflow handling (uses settings default if None)
-            no_wrap: Whether to disable wrapping (uses settings default if None)
+            no_wrap: Whether to disable wrapping (uses settings default if
+                None)
             **kwargs: Additional arguments passed to Rich Text
 
         Examples:
@@ -973,7 +1008,9 @@ class RichLogger:
             logger.text("Success!", style="bold green")
 
             # Centered text
-            logger.text("Installation Complete", justify="center", style="bold")
+            logger.text(
+                "Installation Complete", justify="center", style="bold"
+            )
 
             # Text with overflow handling
             logger.text(long_text, overflow="ellipsis", no_wrap=True)
@@ -1071,8 +1108,10 @@ class RichLogger:
             question: Question to ask the user
             choices: List of valid choices (None for free text input)
             default: Default value if user presses Enter
-            show_default: Whether to show default value (uses settings default if None)
-            show_choices: Whether to show available choices (uses settings default if None)
+            show_default: Whether to show default value (uses settings
+                default if None)
+            show_choices: Whether to show available choices (uses settings
+                default if None)
             **kwargs: Additional arguments passed to Rich Prompt
 
         Returns:
@@ -1090,7 +1129,9 @@ class RichLogger:
             )
 
             # Custom prompt
-            path = logger.prompt("Install directory", default="/home/user/.config")
+            path = logger.prompt(
+                "Install directory", default="/home/user/.config"
+            )
         """
         console = self._get_console()
         if not console:
@@ -1184,8 +1225,10 @@ class RichLogger:
             title: Optional title for the inspection
             methods: Whether to show methods (uses settings default if None)
             help: Whether to show help text (uses settings default if None)
-            private: Whether to show private attributes (uses settings default if None)
-            dunder: Whether to show dunder methods (uses settings default if None)
+            private: Whether to show private attributes (uses settings
+                default if None)
+            dunder: Whether to show dunder methods (uses settings default
+                if None)
             sort: Whether to sort attributes (uses settings default if None)
             **kwargs: Additional arguments passed to Rich inspect
 
@@ -1250,10 +1293,14 @@ class RichLogger:
 
         Args:
             obj: Object to pretty print
-            indent_guides: Whether to show indent guides (uses settings default if None)
-            max_length: Maximum length for sequences (uses settings default if None)
-            max_string: Maximum string length (uses settings default if None)
-            max_depth: Maximum depth for nested objects (uses settings default if None)
+            indent_guides: Whether to show indent guides (uses settings
+                default if None)
+            max_length: Maximum length for sequences (uses settings default
+                if None)
+            max_string: Maximum string length (uses settings default if
+                None)
+            max_depth: Maximum depth for nested objects (uses settings
+                default if None)
             title: Optional title for the pretty print display
             **kwargs: Additional arguments passed to Rich Pretty
 
@@ -1265,7 +1312,9 @@ class RichLogger:
             logger.pretty(large_object, max_depth=3, max_length=10)
 
             # Custom formatting
-            logger.pretty(obj, indent_guides=True, max_string=50, title="Debug Data")
+            logger.pretty(
+                obj, indent_guides=True, max_string=50, title="Debug Data"
+            )
         """
         console = self._get_console()
         if not console:
@@ -1313,7 +1362,7 @@ class RichLogger:
 class _DummyProgress:
     """Dummy progress object for fallback when Rich is not available."""
 
-    def add_task(self, description: str, **kwargs) -> int:
+    def add_task(self, _description: str, **_kwargs) -> int:
         """Add a dummy task."""
         return 0
 

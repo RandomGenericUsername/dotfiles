@@ -525,9 +525,13 @@ def render_zsh_config(context: PipelineContext) -> PipelineContext:
     plugin_paths = {}
     if zsh_config.plugin_paths is not None:
         plugin_paths = {
-            "ZSH_SYNTAX_HIGHLIGHTING": zsh_config.plugin_paths.syntax_highlighting,
-            "ZSH_AUTOSUGGESTIONS": zsh_config.plugin_paths.autosuggestions,
-            "ZSH_HISTORY_SUBSTRING_SEARCH": zsh_config.plugin_paths.history_substring_search,
+            "ZSH_SYNTAX_HIGHLIGHTING": (
+                zsh_config.plugin_paths.syntax_highlighting
+            ),
+            "ZSH_AUTOSUGGESTIONS": (zsh_config.plugin_paths.autosuggestions),
+            "ZSH_HISTORY_SUBSTRING_SEARCH": (
+                zsh_config.plugin_paths.history_substring_search
+            ),
             "FZF_KEY_BINDINGS": zsh_config.plugin_paths.fzf_key_bindings,
             "FZF_COMPLETION": zsh_config.plugin_paths.fzf_completion,
         }
@@ -538,9 +542,18 @@ def render_zsh_config(context: PipelineContext) -> PipelineContext:
             "No plugin_paths configured for zsh, using Arch defaults"
         )
         plugin_paths = {
-            "ZSH_SYNTAX_HIGHLIGHTING": "/usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh",
-            "ZSH_AUTOSUGGESTIONS": "/usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh",
-            "ZSH_HISTORY_SUBSTRING_SEARCH": "/usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh",
+            "ZSH_SYNTAX_HIGHLIGHTING": (
+                "/usr/share/zsh/plugins/zsh-syntax-highlighting/"
+                "zsh-syntax-highlighting.zsh"
+            ),
+            "ZSH_AUTOSUGGESTIONS": (
+                "/usr/share/zsh/plugins/zsh-autosuggestions/"
+                "zsh-autosuggestions.zsh"
+            ),
+            "ZSH_HISTORY_SUBSTRING_SEARCH": (
+                "/usr/share/zsh/plugins/zsh-history-substring-search/"
+                "zsh-history-substring-search.zsh"
+            ),
             "FZF_KEY_BINDINGS": "/usr/share/fzf/key-bindings.zsh",
             "FZF_COMPLETION": "/usr/share/fzf/completion.zsh",
         }
@@ -783,8 +796,8 @@ def install_nodejs_runtime(
     # Check if NVM was successfully installed
     if not context.results.get("nvm_installed", False):
         error_msg = (
-            "Cannot install Node.js because NVM installation failed or was skipped. "
-            "Please ensure NVM is installed first."
+            "Cannot install Node.js because NVM installation failed or "
+            "was skipped. Please ensure NVM is installed first."
         )
         logger.error(error_msg)
         error = NodejsInstallError(error_msg)
@@ -967,8 +980,8 @@ def install_python_runtime(
     # Check if pyenv was successfully installed
     if not context.results.get("pyenv_installed", False):
         error_msg = (
-            "Cannot install Python because pyenv installation failed or was skipped. "
-            "Please ensure pyenv is installed first."
+            "Cannot install Python because pyenv installation failed or "
+            "was skipped. Please ensure pyenv is installed first."
         )
         logger.error(error_msg)
         error = PythonInstallError(error_msg)
@@ -1107,9 +1120,8 @@ def install_pip_packages_runtime(
             timeout=timeout,
         )
 
-        logger.debug(
-            f"Successfully installed pip packages: {', '.join(packages_to_install)}"
-        )
+        packages_str = ", ".join(packages_to_install)
+        logger.debug(f"Successfully installed pip packages: {packages_str}")
 
         context.results["pip_packages_installed"] = True
         context.results["pip_packages_list"] = pip_packages

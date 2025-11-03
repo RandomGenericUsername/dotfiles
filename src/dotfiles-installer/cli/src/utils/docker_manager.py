@@ -121,9 +121,10 @@ class DockerImageBuilder:
             )
             return result
         except subprocess.TimeoutExpired as e:
+            cmd_str = " ".join(command)
             raise DockerError(
-                f"Docker command timed out after {timeout}s: {' '.join(command)}",
-                command=" ".join(command),
+                f"Docker command timed out after {timeout}s: {cmd_str}",
+                command=cmd_str,
             ) from e
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.decode() if e.stderr else "Unknown error"
@@ -188,7 +189,8 @@ class DockerImageBuilder:
         Args:
             dockerfile_content: Content of the Dockerfile
             image_name: Name/tag for the built image
-            context_files: Optional dict of filename -> file content for build context
+            context_files: Optional dict of filename -> file content for
+                build context
             build_args: Optional build arguments
             timeout: Build timeout in seconds
 

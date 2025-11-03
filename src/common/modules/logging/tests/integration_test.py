@@ -61,7 +61,8 @@ def test_all_rich_features():
     # Test columns
     logger.rule("Multi-Column Layout Test")
 
-    # Create panels directly for columns (since panel() method prints immediately)
+    # Create panels directly for columns (since panel() method prints
+    # immediately)
     from rich.panel import Panel
 
     system_panel = Panel(

@@ -83,7 +83,8 @@ def install_pip_packages(
     Args:
         pyenv_dir: Directory where pyenv is installed
         packages: List of package names to install
-        upgrade: Whether to upgrade packages if already installed (default: False)
+        upgrade: Whether to upgrade packages if already installed
+            (default: False)
         timeout: Installation timeout in seconds (default: 600)
 
     Raises:
@@ -146,9 +147,11 @@ def install_pip_packages(
         ]
 
         if failed_packages:
+            failed_str = ", ".join(failed_packages)
             raise PipPackageInstallError(
-                f"Package installation completed but verification failed for: "
-                f"{', '.join(failed_packages)}. Packages may not be properly installed."
+                f"Package installation completed but verification failed "
+                f"for: {failed_str}. Packages may not be properly "
+                f"installed."
             )
 
     except subprocess.TimeoutExpired as e:

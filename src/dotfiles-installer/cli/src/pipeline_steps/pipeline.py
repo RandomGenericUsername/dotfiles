@@ -30,7 +30,8 @@ class PrintInstallationMessageStep(PipelineStep):
         install_root = context.app_config.project.paths.install.path
         subprocess.run(["clear"])
         context.logger_instance.panel(
-            f"Starting installation in [bold green]'{install_root}'[/bold green]"
+            f"Starting installation in [bold green]"
+            f"'{install_root}'[/bold green]"
         )
         return context
 
@@ -373,7 +374,8 @@ class InstallPipPackagesStep(PipelineStep):
 
     @property
     def critical(self) -> bool:
-        """Pip package installation is not critical - allow pipeline to continue."""
+        """Pip package installation is not critical - allow pipeline to
+        continue."""
         return False
 
     def run(self, context: PipelineContext) -> PipelineContext:

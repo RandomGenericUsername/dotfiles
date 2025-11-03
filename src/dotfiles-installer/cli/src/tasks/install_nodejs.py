@@ -33,7 +33,8 @@ def check_nodejs_installed(nvm_dir: Path, version: str | None = None) -> bool:
 
     Args:
         nvm_dir: Directory where NVM is installed
-        version: Specific version to check (optional, checks any version if None)
+        version: Specific version to check (optional, checks any version
+            if None)
 
     Returns:
         True if Node.js is installed, False otherwise
@@ -51,7 +52,8 @@ def check_nodejs_installed(nvm_dir: Path, version: str | None = None) -> bool:
                 [
                     "bash",
                     "-c",
-                    f'source "{nvm_script}" && nvm ls {version} 2>/dev/null | grep -q "v{version}"',
+                    f'source "{nvm_script}" && nvm ls {version} 2>/dev/null '
+                    f'| grep -q "v{version}"',
                 ],
                 capture_output=True,
                 text=True,

@@ -36,7 +36,8 @@ def check_python_installed(
 
     Args:
         pyenv_dir: Directory where pyenv is installed
-        version: Specific version to check (optional, checks any version if None)
+        version: Specific version to check (optional, checks any version
+            if None)
 
     Returns:
         True if Python is installed, False otherwise

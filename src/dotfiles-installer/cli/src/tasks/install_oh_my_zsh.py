@@ -51,8 +51,9 @@ def install_oh_my_zsh(
     """
     Install Oh My Zsh using the official installation script.
 
-    Downloads and executes the Oh My Zsh installation script with custom directory.
-    Sets ZSH environment variable to override default installation location.
+    Downloads and executes the Oh My Zsh installation script with custom
+    directory. Sets ZSH environment variable to override default
+    installation location.
 
     Args:
         oh_my_zsh_dir: Directory where Oh My Zsh should be installed
@@ -69,7 +70,8 @@ def install_oh_my_zsh(
     # Ensure parent directory exists
     oh_my_zsh_dir.parent.mkdir(parents=True, exist_ok=True)
 
-    # Remove empty oh-my-zsh directory if it exists (created by PathsBuilder.create())
+    # Remove empty oh-my-zsh directory if it exists (created by
+    # PathsBuilder.create())
     # The Oh My Zsh installer will fail if the directory already exists
     if oh_my_zsh_dir.exists() and not any(oh_my_zsh_dir.iterdir()):
         oh_my_zsh_dir.rmdir()
@@ -105,8 +107,8 @@ def install_oh_my_zsh(
         # Verify installation succeeded
         if not check_oh_my_zsh_installed(oh_my_zsh_dir):
             raise OhMyZshInstallError(
-                f"Oh My Zsh installation completed but oh-my-zsh.sh not found in {oh_my_zsh_dir}. "
-                "Installation may have failed."
+                f"Oh My Zsh installation completed but oh-my-zsh.sh not "
+                f"found in {oh_my_zsh_dir}. Installation may have failed."
             )
 
     except subprocess.TimeoutExpired as e:
@@ -116,10 +118,11 @@ def install_oh_my_zsh(
         ) from e
 
     except subprocess.CalledProcessError as e:
+        stdout_preview = e.stdout[:200] if e.stdout else "empty"
         error_msg = (
             e.stderr
             if e.stderr
-            else f"Unknown error (stdout: {e.stdout[:200] if e.stdout else 'empty'})"
+            else f"Unknown error (stdout: {stdout_preview})"
         )
         raise OhMyZshInstallError(
             f"Oh My Zsh installation failed: {error_msg}",

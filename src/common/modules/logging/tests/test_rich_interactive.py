@@ -169,9 +169,7 @@ class TestRichInteractiveFeatures(unittest.TestCase):
 
     def test_rich_unavailable_fallbacks(self):
         """Test all methods handle Rich unavailable gracefully."""
-        with patch(
-            "dotfiles_logging.rich.rich_logger.RICH_AVAILABLE", False
-        ):
+        with patch("dotfiles_logging.rich.rich_logger.RICH_AVAILABLE", False):
             # These should all complete without errors
             self.rich_logger.tree({"test": "data"})
             self.rich_logger.columns("col1", "col2")

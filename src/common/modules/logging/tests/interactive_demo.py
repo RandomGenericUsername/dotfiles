@@ -30,7 +30,8 @@ def interactive_demo():
 
     logger.panel(
         "Welcome to the Interactive Rich Features Demo!\n\n"
-        "This demo will show you the interactive features of the logging module.",
+        "This demo will show you the interactive features of the logging "
+        "module.",
         title="Interactive Demo",
         border_style="blue",
     )

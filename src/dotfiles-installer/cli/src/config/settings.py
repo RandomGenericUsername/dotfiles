@@ -61,7 +61,7 @@ class SettingsModel:
 
         Args:
             settings_files: List of configuration files to load.
-                           If None, will call _get_settings_files() to get them.
+                If None, will call _get_settings_files() to get them.
         """
         if settings_files is None:
             settings_files = _get_settings_files()

@@ -34,7 +34,8 @@ class RichFeatureSettings:
     """Default border color/style for panels."""
 
     panel_box_style: str = "rounded"
-    """Default box style for panels ('rounded', 'square', 'double', 'heavy', 'ascii')."""
+    """Default box style for panels ('rounded', 'square', 'double',
+    'heavy', 'ascii')."""
 
     panel_expand: bool = True
     """Whether panels should expand to fill available width by default."""
@@ -128,7 +129,8 @@ class RichFeatureSettings:
     """Refresh rate for live displays (times per second)."""
 
     live_vertical_overflow: str = "ellipsis"
-    """How to handle vertical overflow in live displays ('crop', 'ellipsis', 'visible')."""
+    """How to handle vertical overflow in live displays ('crop',
+    'ellipsis', 'visible')."""
 
     live_auto_refresh: bool = True
     """Whether live displays should auto-refresh."""
@@ -244,7 +246,8 @@ class RichFeatureSettings:
 
         if self.live_vertical_overflow not in {"crop", "ellipsis", "visible"}:
             raise ValueError(
-                f"Invalid live_vertical_overflow: {self.live_vertical_overflow}. "
+                f"Invalid live_vertical_overflow: "
+                f"{self.live_vertical_overflow}. "
                 "Must be one of: crop, ellipsis, visible"
             )
 

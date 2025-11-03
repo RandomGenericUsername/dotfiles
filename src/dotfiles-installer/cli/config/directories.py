@@ -18,7 +18,8 @@ def get_distro_packages_path() -> Path:
     the appropriate distribution configuration directory.
 
     Returns:
-        Path to the appropriate system.toml file based on detected package manager
+        Path to the appropriate system.toml file based on detected
+        package manager
 
     Raises:
         FileNotFoundError: If distro config file doesn't exist
@@ -86,12 +87,14 @@ host = _host_builder.build()
 # Installation Paths (Where dotfiles will be installed on user's system)
 # ============================================================================
 
-# NOTE: This is a PLACEHOLDER that is ALWAYS replaced by AppConfig.model_post_init()
+# NOTE: This is a PLACEHOLDER that is ALWAYS replaced by
+# AppConfig.model_post_init()
 # The actual installation root comes from:
 #   1. CLI arguments (--install-dir)
 #   2. User settings.toml (installation_directory)
 #   3. Project defaults.toml (installation_directory)
-# This placeholder exists only to satisfy initial imports before AppConfig is created.
+# This placeholder exists only to satisfy initial imports before
+# AppConfig is created.
 # DO NOT rely on this value - it will be replaced!
 
 _PLACEHOLDER_INSTALL_ROOT = Path.home() / ".tmp" / "dotfiles-placeholder"
@@ -132,7 +135,8 @@ _install_builder.add_path("dotfiles.config")
 install_builder = _install_builder
 
 # Export ManagedPathTree (combines navigation and create())
-# WARNING: This is a PLACEHOLDER and will be replaced by AppConfig.model_post_init()
+# WARNING: This is a PLACEHOLDER and will be replaced by
+# AppConfig.model_post_init()
 # Always access via: app_config.project.paths.install
 # The install object provides:
 #   - install.create() - Create all registered directories

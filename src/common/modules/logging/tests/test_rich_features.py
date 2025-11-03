@@ -168,7 +168,7 @@ class TestRichFeatures(unittest.TestCase):
     def test_rich_feature_settings_validation(self):
         """Test RichFeatureSettings validation."""
         # Test valid settings
-        settings = RichFeatureSettings(
+        RichFeatureSettings(
             json_indent=4, bar_chart_width=30, live_refresh_per_second=5
         )
         # Should not raise an exception
