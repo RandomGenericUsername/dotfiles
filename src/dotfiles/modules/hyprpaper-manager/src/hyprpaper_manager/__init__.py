@@ -7,6 +7,7 @@ from hyprpaper_manager.core.exceptions import (
     MonitorNotFoundError,
     WallpaperNotFoundError,
     WallpaperNotLoadedError,
+    WallpaperTooLargeError,
 )
 from hyprpaper_manager.core.types import (
     HyprpaperStatus,
@@ -35,4 +36,5 @@ __all__ = [
     "MonitorNotFoundError",
     "WallpaperNotFoundError",
     "WallpaperNotLoadedError",
+    "WallpaperTooLargeError",
 ]

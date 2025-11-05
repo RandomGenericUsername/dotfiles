@@ -9,27 +9,30 @@ from hyprpaper_manager import HyprpaperManager
 
 manager = HyprpaperManager()
 
+# Simple usage - set() handles everything automatically
+manager.set("mountain.jpg")  # Auto-preloads, sets, manages pool
+
 # Just a name - searches in configured wallpaper directories
-manager.set_wallpaper("mountain.jpg")
-manager.set_wallpaper("mountain")  # Auto-detects extension
+manager.set("mountain.jpg")
+manager.set("mountain")  # Auto-detects extension
 
 # Absolute path - uses directly
-manager.set_wallpaper("/home/user/Pictures/beach.png")
+manager.set("/home/user/Pictures/beach.png")
 
 # Relative path - resolves from current directory
-manager.set_wallpaper("./wallpapers/forest.jpg")
+manager.set("./wallpapers/forest.jpg")
 
 # Set wallpaper for specific monitor
-manager.set_wallpaper("beach.png", monitor="DP-1")
+manager.set("beach.png", monitor="DP-1")
 
 # Set wallpaper for focused monitor
 from hyprpaper_manager.core.types import MonitorSelector
-manager.set_wallpaper("forest.jpg", monitor=MonitorSelector.FOCUSED)
+manager.set("forest.jpg", monitor=MonitorSelector.FOCUSED)
 ```
 
 ### Smart Path Resolution
 
-The `set_wallpaper` method intelligently resolves paths:
+The `set()` method intelligently resolves paths:
 
 ```python
 from hyprpaper_manager import HyprpaperManager
@@ -38,15 +41,15 @@ manager = HyprpaperManager()
 
 # 1. Just a name → searches in configured dirs
 #    (e.g., ~/Pictures/wallpapers, ~/wallpapers)
-manager.set_wallpaper("mountain.jpg")
+manager.set("mountain.jpg")
 
 # 2. Absolute path → uses directly
-manager.set_wallpaper("/home/user/Downloads/wallpaper.png")
-manager.set_wallpaper("~/Pictures/custom/beach.jpg")  # ~ is expanded
+manager.set("/home/user/Downloads/wallpaper.png")
+manager.set("~/Pictures/custom/beach.jpg")  # ~ is expanded
 
 # 3. Relative path → resolves from current directory
-manager.set_wallpaper("./my-wallpapers/forest.jpg")
-manager.set_wallpaper("../shared/pattern.png")
+manager.set("./my-wallpapers/forest.jpg")
+manager.set("../shared/pattern.png")
 ```
 
 ### Different Display Modes
@@ -58,13 +61,13 @@ from hyprpaper_manager.core.types import WallpaperMode
 manager = HyprpaperManager()
 
 # Cover mode (default)
-manager.set_wallpaper("wallpaper.jpg", mode=WallpaperMode.COVER)
+manager.set("wallpaper.jpg", mode=WallpaperMode.COVER)
 
 # Contain mode
-manager.set_wallpaper("wallpaper.jpg", mode=WallpaperMode.CONTAIN)
+manager.set("wallpaper.jpg", mode=WallpaperMode.CONTAIN)
 
 # Tile mode
-manager.set_wallpaper("pattern.png", mode=WallpaperMode.TILE)
+manager.set("pattern.png", mode=WallpaperMode.TILE)
 ```
 
 ### Random Wallpapers
@@ -80,6 +83,102 @@ print(f"Set random wallpaper: {wallpaper}")
 
 # Set random wallpaper for specific monitor
 wallpaper = manager.set_random_wallpaper(monitor="DP-1")
+```
+
+## Pool Management
+
+### Simple Usage (Automatic Pool Management)
+
+The `set()` method automatically manages the wallpaper pool:
+
+```python
+from hyprpaper_manager import HyprpaperManager
+
+manager = HyprpaperManager()
+
+# Just set wallpapers - pool is managed automatically
+manager.set("wp1.jpg")  # Auto-preloads, sets, manages pool
+manager.set("wp2.jpg")  # Auto-preloads, sets, manages pool
+manager.set("wp3.jpg")  # Auto-preloads, sets, manages pool
+
+# Pool automatically cleans up when over size limit
+# Unused wallpapers are removed first, then oldest (LRU)
+```
+
+### Power User (Explicit Preloading)
+
+Preload wallpapers for instant switching:
+
+```python
+from hyprpaper_manager import HyprpaperManager
+
+manager = HyprpaperManager()
+
+# Preload multiple wallpapers into pool
+manager.preload_batch(["wp1.jpg", "wp2.jpg", "wp3.jpg"])
+
+# Now switching is instant (already in memory)
+manager.set("wp1.jpg")  # Fast!
+manager.set("wp2.jpg")  # Fast!
+manager.set("wp3.jpg")  # Fast!
+```
+
+### Pool Status
+
+Check pool status and memory usage:
+
+```python
+from hyprpaper_manager import HyprpaperManager
+
+manager = HyprpaperManager()
+
+# Preload some wallpapers
+manager.preload_batch(["wp1.jpg", "wp2.jpg", "wp3.jpg"])
+
+# Check pool status
+status = manager.get_pool_status()
+
+print(f"Pool: {status['total_size_mb']}MB / {status['max_size_mb']}MB")
+print(f"Usage: {status['usage_percent']}%")
+print(f"Wallpapers: {len(status['preloaded_wallpapers'])}")
+
+# Show details for each wallpaper
+for wp in status['preloaded_wallpapers']:
+    print(f"  {wp['path']}: {wp['size_mb']}MB (displayed: {wp['displayed']})")
+```
+
+### Manual Pool Cleanup
+
+```python
+from hyprpaper_manager import HyprpaperManager
+
+manager = HyprpaperManager()
+
+# Remove wallpapers not currently displayed
+removed = manager.unload_unused()
+print(f"Removed {len(removed)} unused wallpapers")
+
+# Clear entire pool
+removed = manager.unload_all()
+print(f"Removed {len(removed)} wallpapers")
+```
+
+### Size Protection
+
+The pool automatically rejects wallpapers that are too large:
+
+```python
+from hyprpaper_manager import HyprpaperManager, WallpaperTooLargeError
+
+manager = HyprpaperManager()
+
+# Config: max_preload_pool_mb = 100, multiplier = 2.0
+# Max single wallpaper = 100 * 2.0 = 200MB
+
+try:
+    manager.set("huge_wallpaper.jpg")  # 250MB
+except WallpaperTooLargeError as e:
+    print(f"Wallpaper too large: {e.wallpaper_size_mb}MB > {e.max_allowed_mb}MB")
 ```
 
 ## Status and Information

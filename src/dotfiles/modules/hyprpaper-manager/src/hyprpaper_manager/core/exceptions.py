@@ -50,3 +50,24 @@ class WallpaperNotLoadedError(HyprpaperError):
     """Raised when trying to use unloaded wallpaper."""
 
     pass
+
+
+class WallpaperTooLargeError(HyprpaperError):
+    """Raised when wallpaper exceeds maximum allowed size."""
+
+    def __init__(
+        self,
+        message: str,
+        wallpaper_size_mb: float | None = None,
+        max_allowed_mb: float | None = None,
+    ):
+        """Initialize wallpaper too large error.
+
+        Args:
+            message: Error message
+            wallpaper_size_mb: Size of wallpaper in MB (optional)
+            max_allowed_mb: Maximum allowed size in MB (optional)
+        """
+        self.wallpaper_size_mb = wallpaper_size_mb
+        self.max_allowed_mb = max_allowed_mb
+        super().__init__(message)

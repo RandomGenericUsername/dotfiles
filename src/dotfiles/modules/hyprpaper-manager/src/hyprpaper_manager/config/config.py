@@ -15,9 +15,7 @@ class HyprpaperConfig(BaseModel):
     )
 
     # IPC settings
-    ipc_enabled: bool = Field(
-        default=True, description="Enable IPC control"
-    )
+    ipc_enabled: bool = Field(default=True, description="Enable IPC control")
 
     # Splash settings
     splash_enabled: bool = Field(
@@ -44,9 +42,22 @@ class HyprpaperConfig(BaseModel):
         default=True, description="Automatically unload unused wallpapers"
     )
 
-    preload_on_set: bool = Field(
-        default=False,
-        description="Preload wallpapers before setting (vs using reload)",
+    auto_create_config: bool = Field(
+        default=True,
+        description="Automatically create config file if it doesn't exist",
+    )
+
+    # Memory management
+    max_preload_pool_mb: int = Field(
+        default=100,
+        description="Maximum memory (MB) for preloaded wallpapers pool",
+        gt=0,
+    )
+
+    max_wallpaper_size_multiplier: float = Field(
+        default=2.0,
+        description="Max single wallpaper size = pool_size * multiplier",
+        gt=0,
     )
 
     @field_validator("wallpaper_dirs", mode="before")

@@ -15,5 +15,7 @@ HYPRPAPER_DEFAULTS: dict[str, Any] = {
         Path.home() / "wallpapers",
     ],
     "auto_unload_unused": True,
-    "preload_on_set": False,
+    "auto_create_config": True,
+    "max_preload_pool_mb": 100,
+    "max_wallpaper_size_multiplier": 2.0,
 }

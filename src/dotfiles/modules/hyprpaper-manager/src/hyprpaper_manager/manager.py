@@ -1,7 +1,7 @@
 """Main hyprpaper manager."""
 
 from pathlib import Path
-from typing import Literal
+from typing import Any
 
 from hyprpaper_manager.config.config import HyprpaperConfig
 from hyprpaper_manager.config.settings import get_default_config
@@ -27,9 +27,34 @@ class HyprpaperManager:
             config: Configuration (uses defaults if None)
         """
         self.config = config or get_default_config().hyprpaper
+
+        # Ensure config file exists if auto_create_config is enabled
+        from hyprpaper_manager.config.manager import ConfigManager
+
+        config_mgr = ConfigManager(self.config)
+        config_mgr.ensure_config_exists()
+
+        # Initialize components
+        from hyprpaper_manager.pool import WallpaperPool
+
         self.ipc = HyprpaperIPC()
         self.monitors = MonitorManager()
         self.wallpapers = WallpaperFinder(self.config)
+        self.pool = WallpaperPool(self.config)
+
+    # Helper methods
+
+    def _get_wallpaper_size_mb(self, wallpaper: Path) -> float:
+        """Get wallpaper file size in MB.
+
+        Args:
+            wallpaper: Path to wallpaper
+
+        Returns:
+            Size in MB
+        """
+        size_bytes = wallpaper.stat().st_size
+        return size_bytes / (1024 * 1024)
 
     # Status methods
 
@@ -63,13 +88,16 @@ class HyprpaperManager:
 
     # Wallpaper operations
 
-    def set_wallpaper(
+    def set(
         self,
         wallpaper: Path | str,
         monitor: str | MonitorSelector = MonitorSelector.ALL,
         mode: WallpaperMode = WallpaperMode.COVER,
     ) -> None:
         """Set wallpaper for monitor(s).
+
+        Smart method that auto-preloads wallpaper if needed, then sets it.
+        Manages pool size automatically.
 
         Args:
             wallpaper: Wallpaper path or name
@@ -78,6 +106,7 @@ class HyprpaperManager:
 
         Raises:
             WallpaperNotFoundError: If wallpaper not found
+            WallpaperTooLargeError: If wallpaper exceeds size limits
             HyprpaperNotRunningError: If hyprpaper not running
             HyprpaperIPCError: If IPC command fails
         """
@@ -92,6 +121,16 @@ class HyprpaperManager:
                 f"Wallpaper not found: {wallpaper_path}"
             )
 
+        # Get wallpaper size and validate
+        size_mb = self._get_wallpaper_size_mb(wallpaper_path)
+
+        # Add to pool (validates size limits)
+        self.pool.add(wallpaper_path, size_mb)
+
+        # Preload if not already loaded
+        if not self.pool.contains(wallpaper_path):
+            self.ipc.preload(wallpaper_path)
+
         # Resolve monitor(s)
         if monitor == MonitorSelector.ALL:
             monitor_name = ""
@@ -102,18 +141,31 @@ class HyprpaperManager:
 
         # Set wallpaper
         mode_str = mode.value if mode != WallpaperMode.COVER else None
+        self.ipc.wallpaper(monitor_name, wallpaper_path, mode_str)
 
-        if self.config.preload_on_set:
-            # Traditional: preload then set
-            self.ipc.preload(wallpaper_path)
-            self.ipc.wallpaper(monitor_name, wallpaper_path, mode_str)
-        else:
-            # Fast: use reload
-            self.ipc.reload(monitor_name, wallpaper_path, mode_str)
+        # Mark as displayed in pool
+        self.pool.mark_displayed(wallpaper_path, monitor_name or "all")
 
-        # Auto cleanup
-        if self.config.auto_unload_unused:
-            self.ipc.unload("unused")
+        # Cleanup pool if over limit
+        removed = self.pool.cleanup()
+        for wp in removed:
+            self.ipc.unload(wp)
+
+    # Alias for backwards compatibility
+    def set_wallpaper(
+        self,
+        wallpaper: Path | str,
+        monitor: str | MonitorSelector = MonitorSelector.ALL,
+        mode: WallpaperMode = WallpaperMode.COVER,
+    ) -> None:
+        """Set wallpaper for monitor(s). Alias for set().
+
+        Args:
+            wallpaper: Wallpaper path or name
+            monitor: Monitor name, "all", or "focused"
+            mode: Display mode (cover, contain, tile)
+        """
+        self.set(wallpaper, monitor, mode)
 
     def set_random_wallpaper(
         self,
@@ -147,8 +199,52 @@ class HyprpaperManager:
         self.set_wallpaper(wallpaper, monitor, mode)
         return wallpaper
 
+    def preload(self, wallpaper: Path | str) -> None:
+        """Preload wallpaper into memory (explicit preload for pool).
+
+        Args:
+            wallpaper: Wallpaper path or name
+
+        Raises:
+            WallpaperNotFoundError: If wallpaper not found
+            WallpaperTooLargeError: If wallpaper exceeds size limits
+            HyprpaperNotRunningError: If hyprpaper not running
+            HyprpaperIPCError: If IPC command fails
+        """
+        # Resolve wallpaper path
+        if isinstance(wallpaper, str):
+            wallpaper_path = self.wallpapers.find_wallpaper(wallpaper)
+        else:
+            wallpaper_path = wallpaper
+
+        if not wallpaper_path.exists():
+            raise WallpaperNotFoundError(
+                f"Wallpaper not found: {wallpaper_path}"
+            )
+
+        # Get size and add to pool
+        size_mb = self._get_wallpaper_size_mb(wallpaper_path)
+        self.pool.add(wallpaper_path, size_mb)
+
+        # Preload via IPC
+        self.ipc.preload(wallpaper_path)
+
+        # Cleanup pool if needed
+        removed = self.pool.cleanup()
+        for wp in removed:
+            self.ipc.unload(wp)
+
+    # Alias for backwards compatibility
     def preload_wallpaper(self, wallpaper: Path | str) -> None:
-        """Preload wallpaper into memory.
+        """Preload wallpaper into memory. Alias for preload().
+
+        Args:
+            wallpaper: Wallpaper path or name
+        """
+        self.preload(wallpaper)
+
+    def unload(self, wallpaper: Path | str) -> None:
+        """Unload wallpaper from memory.
 
         Args:
             wallpaper: Wallpaper path or name
@@ -158,29 +254,104 @@ class HyprpaperManager:
             HyprpaperNotRunningError: If hyprpaper not running
             HyprpaperIPCError: If IPC command fails
         """
+        # Resolve wallpaper path
         if isinstance(wallpaper, str):
-            wallpaper = self.wallpapers.find_wallpaper(wallpaper)
-        self.ipc.preload(wallpaper)
+            wallpaper_path = self.wallpapers.find_wallpaper(wallpaper)
+        else:
+            wallpaper_path = wallpaper
 
-    def unload_wallpaper(
-        self, wallpaper: Path | str | Literal["all", "unused"]
-    ) -> None:
-        """Unload wallpaper(s) from memory.
+        # Remove from pool
+        self.pool.remove(wallpaper_path)
+
+        # Unload via IPC
+        self.ipc.unload(wallpaper_path)
+
+    # Alias for backwards compatibility
+    def unload_wallpaper(self, wallpaper: Path | str) -> None:
+        """Unload wallpaper from memory. Alias for unload().
 
         Args:
-            wallpaper: Wallpaper path/name, "all", or "unused"
+            wallpaper: Wallpaper path or name
+        """
+        self.unload(wallpaper)
+
+    def unload_unused(self) -> list[Path]:
+        """Unload wallpapers not currently displayed.
+
+        Returns:
+            List of wallpaper paths that were unloaded
 
         Raises:
-            WallpaperNotFoundError: If wallpaper not found
             HyprpaperNotRunningError: If hyprpaper not running
             HyprpaperIPCError: If IPC command fails
         """
-        if isinstance(wallpaper, str) and wallpaper not in (
-            "all",
-            "unused",
-        ):
-            wallpaper = self.wallpapers.find_wallpaper(wallpaper)
-        self.ipc.unload(wallpaper)
+        unused = self.pool.get_unused_wallpapers()
+        for wp in unused:
+            self.ipc.unload(wp)
+            self.pool.remove(wp)
+        return unused
+
+    def unload_all(self) -> list[Path]:
+        """Unload all wallpapers from memory.
+
+        Returns:
+            List of wallpaper paths that were unloaded
+
+        Raises:
+            HyprpaperNotRunningError: If hyprpaper not running
+            HyprpaperIPCError: If IPC command fails
+        """
+        all_wallpapers = self.pool.clear()
+        for wp in all_wallpapers:
+            self.ipc.unload(wp)
+        return all_wallpapers
+
+    # Batch operations
+
+    def preload_batch(self, wallpapers: list[Path | str]) -> None:
+        """Preload multiple wallpapers.
+
+        Args:
+            wallpapers: List of wallpaper paths or names
+
+        Raises:
+            WallpaperNotFoundError: If any wallpaper not found
+            WallpaperTooLargeError: If any wallpaper exceeds size limits
+            HyprpaperNotRunningError: If hyprpaper not running
+            HyprpaperIPCError: If IPC command fails
+        """
+        for wallpaper in wallpapers:
+            self.preload(wallpaper)
+
+    def unload_batch(self, wallpapers: list[Path | str]) -> None:
+        """Unload multiple wallpapers.
+
+        Args:
+            wallpapers: List of wallpaper paths or names
+
+        Raises:
+            WallpaperNotFoundError: If any wallpaper not found
+            HyprpaperNotRunningError: If hyprpaper not running
+            HyprpaperIPCError: If IPC command fails
+        """
+        for wallpaper in wallpapers:
+            self.unload(wallpaper)
+
+    # Pool management
+
+    def get_pool_status(self) -> dict[str, Any]:
+        """Get wallpaper pool status.
+
+        Returns:
+            Dictionary with pool information including:
+            - preloaded_wallpapers: List of preloaded wallpapers with details
+            - total_size_mb: Total size of pool in MB
+            - max_size_mb: Maximum pool size in MB
+            - usage_percent: Pool usage percentage
+            - max_single_wallpaper_mb: Maximum allowed single wallpaper size
+            - is_over_limit: Whether pool exceeds size limit
+        """
+        return self.pool.get_status()
 
     # Monitor operations
 

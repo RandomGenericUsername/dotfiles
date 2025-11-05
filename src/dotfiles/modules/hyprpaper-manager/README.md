@@ -8,6 +8,8 @@ Python API and CLI for managing hyprpaper wallpapers with full IPC control.
 - 🔌 **IPC Control**: Complete hyprctl wrapper with timeout/error handling
 - 🖥️ **Monitor Management**: Query and manage multiple monitors
 - 🔍 **Smart Path Resolution**: Automatically resolves absolute paths, relative paths, or searches configured directories
+- 🧠 **Smart Pool Management**: Automatic memory management with configurable size limits
+- 🛡️ **Size Protection**: Prevents loading wallpapers that exceed size limits
 - 🎲 **Random Wallpapers**: Built-in random selection with exclusion
 - ⚙️ **Configuration**: Dynaconf-based config with sensible defaults
 - 🖥️ **CLI Tool**: Rich-based CLI for interactive use
@@ -25,6 +27,15 @@ make install
 
 ## Quick Start
 
+### First Time Setup
+
+The manager will automatically create `~/.config/hypr/hyprpaper.conf` if it doesn't exist (controlled by `auto_create_config` setting, enabled by default).
+
+Then start hyprpaper:
+```bash
+hyprpaper &
+```
+
 ### Python API
 
 ```python
@@ -38,35 +49,36 @@ manager = HyprpaperManager()
 if not manager.is_running():
     print("hyprpaper is not running!")
 
+# Simple usage - set() handles everything automatically
+manager.set("mountain.jpg")  # Auto-preloads, sets, manages pool
+
 # Smart path resolution:
 # 1. Just a name → searches in configured dirs
-manager.set_wallpaper("mountain.jpg")
+manager.set("mountain.jpg")
 
 # 2. Absolute path → uses directly
-manager.set_wallpaper("/home/user/Pictures/beach.png", monitor="DP-1")
+manager.set("/home/user/Pictures/beach.png", monitor="DP-1")
 
 # 3. Relative path → resolves from current directory
-manager.set_wallpaper("./wallpapers/forest.jpg")
+manager.set("./wallpapers/forest.jpg")
 
-# Set wallpaper for focused monitor
-manager.set_wallpaper("forest.jpg", monitor=MonitorSelector.FOCUSED)
+# Power user - preload pool for instant switching
+manager.preload_batch(["wp1.jpg", "wp2.jpg", "wp3.jpg"])
+manager.set("wp1.jpg")  # Instant! Already preloaded
+manager.set("wp2.jpg")  # Instant! Already preloaded
 
-# Set with different mode
-manager.set_wallpaper("pattern.png", mode=WallpaperMode.TILE)
+# Check pool status
+status = manager.get_pool_status()
+print(f"Pool: {status['total_size_mb']}MB / {status['max_size_mb']}MB")
+print(f"Usage: {status['usage_percent']}%")
 
 # Set random wallpaper
 wallpaper = manager.set_random_wallpaper()
 print(f"Set random wallpaper: {wallpaper}")
 
-# Get status
-status = manager.get_status()
-print(f"Loaded: {status.loaded_wallpapers}")
-print(f"Active: {status.active_wallpapers}")
-
-# List available wallpapers
-wallpapers = manager.list_wallpapers()
-for wp in wallpapers:
-    print(wp)
+# Manual pool management
+manager.unload_unused()  # Remove wallpapers not displayed
+manager.unload_all()  # Clear entire pool
 
 # Get monitors
 monitors = manager.get_monitors()
@@ -121,7 +133,27 @@ wallpaper_dirs = [
 
 # Behavior
 auto_unload_unused = true
-preload_on_set = false  # Use fast reload by default
+auto_create_config = true
+
+# Memory management
+max_preload_pool_mb = 100  # Maximum memory for preloaded wallpapers pool
+max_wallpaper_size_multiplier = 2.0  # Max single wallpaper = pool_size * multiplier
+```
+
+### Pool Management
+
+The pool management system automatically handles memory:
+
+- **`max_preload_pool_mb`**: Maximum memory (MB) for the wallpaper pool (default: 100MB)
+- **`max_wallpaper_size_multiplier`**: Maximum single wallpaper size = pool_size × multiplier (default: 2.0)
+  - Example: 100MB pool × 2.0 = 200MB max single wallpaper
+- **`auto_unload_unused`**: Automatically unload wallpapers not displayed (default: true)
+
+**Cleanup Strategy:**
+1. Remove unused wallpapers first (not displayed on any monitor)
+2. Remove oldest wallpapers (LRU order)
+3. Never remove currently displayed wallpapers
+
 ```
 
 ## Development

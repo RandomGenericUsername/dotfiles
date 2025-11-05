@@ -18,4 +18,8 @@ wallpaper_dirs = [
 
 # Behavior
 auto_unload_unused = true
-preload_on_set = false  # Use fast reload by default
+auto_create_config = true  # Automatically create config file if missing
+
+# Memory management
+max_preload_pool_mb = 100  # Maximum memory (MB) for preloaded wallpapers pool
+max_wallpaper_size_multiplier = 2.0  # Max single wallpaper size = pool_size * multiplier
