@@ -1,75 +1,8 @@
 from pathlib import Path
 
-from dotfiles_package_manager import PackageManagerFactory, PackageManagerType
 from filesystem_path_builder import PathsBuilder
+
 from src.config.project_root import get_project_root
-
-# ============================================================================
-# Distribution-Specific Package Configuration Helper
-# ============================================================================
-
-
-def get_distro_packages_path() -> Path:
-    """
-    Detect package manager and return path to distro-specific system.toml.
-
-    This function auto-detects the system's package manager and maps it to
-    the appropriate distribution configuration directory.
-
-    Returns:
-        Path to the appropriate system.toml file based on detected
-        package manager
-
-    Raises:
-        FileNotFoundError: If distro config file doesn't exist
-
-    Example:
-        >>> path = get_distro_packages_path()
-        >>> # On Arch with paru: .../config/packages/arch/system.toml
-        >>> # On Debian with apt: .../config/packages/debian/system.toml
-    """
-    # Map package manager type to distribution directory
-    distro_map = {
-        # Arch Linux family
-        PackageManagerType.PACMAN: "arch",
-        PackageManagerType.YAY: "arch",
-        PackageManagerType.PARU: "arch",
-        # Debian/Ubuntu family
-        PackageManagerType.APT: "debian",
-        PackageManagerType.APT_GET: "debian",
-        # RedHat/Fedora family
-        PackageManagerType.DNF: "redhat",
-        PackageManagerType.YUM: "redhat",
-    }
-
-    try:
-        # Auto-detect package manager
-        pm = PackageManagerFactory.create_auto(prefer_third_party=True)
-        distro = distro_map.get(pm.manager_type, "arch")
-    except Exception:
-        # Fallback to arch if detection fails
-        distro = "arch"
-
-    # Construct path to distro-specific config
-    # Use get_project_root() which is set in main.py at application startup
-    project_root = get_project_root()
-    packages_dir = (
-        project_root
-        / "src"
-        / "dotfiles-installer"
-        / "cli"
-        / "config"
-        / "packages"
-    )
-    distro_config_path: Path = packages_dir / distro / "system.toml"
-
-    if not distro_config_path.exists():
-        raise FileNotFoundError(
-            f"Distribution config not found: {distro_config_path}"
-        )
-
-    return distro_config_path
-
 
 # ============================================================================
 # Host Paths (User's system directories)
@@ -118,7 +51,8 @@ _install_builder.add_path("scripts")
 # =====================Second level directories ======================= #
 # ----------------------------- Dotfiles ------------------------------ #
 _install_builder.add_path("dotfiles.starship")
-_install_builder.add_path("dotfiles.zsh", hidden=True)
+_install_builder.add_path("dotfiles.zsh")
+_install_builder.add_path("dotfiles.wallpapers")
 
 # ----------------------------- Dependencies ------------------------------ #
 _install_builder.add_path("dependencies.nvm")
@@ -149,13 +83,22 @@ install = _install_builder.build()
 # Source Paths (Project source files)
 # ============================================================================
 
-# Uncomment when needed:
-# source = PathTree.from_str(get_project_root() / "src")
+#
+SRC_ROOT = get_project_root() / "src"
+src_builder = PathsBuilder(SRC_ROOT)
 
+src_builder.add_path("common")
+src_builder.add_path("dotfiles")
+src_builder.add_path("dotfiles-installer")
 
-# ============================================================================
-# Runtime Paths (Logs, cache, temporary files)
-# ============================================================================
+src_builder.add_path("common.modules")
+src_builder.add_path("common.tools")
 
-# Uncomment when needed:
-# runtime = PathTree.from_str(Path.home() / ".local/share/dotfiles")
+src_builder.add_path("dotfiles.assets")
+src_builder.add_path("dotfiles.config-files")
+src_builder.add_path("dotfiles.modules")
+src_builder.add_path("dotfiles.scripts")
+
+src_builder.add_path("dotfiles.assets.wallpapers")
+
+src = src_builder.build()

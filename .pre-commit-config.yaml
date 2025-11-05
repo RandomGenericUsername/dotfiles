@@ -1,4 +1,9 @@
+# Pre-commit configuration for monorepo
+# Uses local hooks that call Makefile targets in each project
+# This ensures pyproject.toml is the single source of truth for all tool configurations
+
 repos:
+  # Basic file checks (repo-wide)
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -6,31 +11,215 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-toml
-      - id: check-ast
       - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: detect-private-key
 
-  - repo: https://github.com/psf/black
-    rev: 25.9.0
+  # Local hooks that run Makefile targets for each project
+  # Only runs for files in the specific project directory
+  - repo: local
     hooks:
-      - id: black
-        args: [--line-length=79]
+      # ============================================================
+      # CLI Project: src/dotfiles-installer/cli
+      # ============================================================
+      - id: format-cli
+        name: Format CLI (black + isort)
+        entry: bash -c 'cd src/dotfiles-installer/cli && make format'
+        language: system
+        files: ^src/dotfiles-installer/cli/
+        pass_filenames: false
 
-  - repo: https://github.com/pycqa/isort
-    rev: 7.0.0
-    hooks:
-      - id: isort
-        args: [--profile=black, --line-length=79]
+      - id: lint-cli
+        name: Lint CLI (ruff)
+        entry: bash -c 'cd src/dotfiles-installer/cli && make lint'
+        language: system
+        files: ^src/dotfiles-installer/cli/
+        pass_filenames: false
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.2
-    hooks:
-      - id: ruff
-        args: [--fix, --extend-ignore=I]
+      # ============================================================
+      # Module: logging
+      # ============================================================
+      - id: format-logging
+        name: Format logging (black + isort)
+        entry: bash -c 'cd src/common/modules/logging && make format'
+        language: system
+        files: ^src/common/modules/logging/
+        pass_filenames: false
 
-  # Note: mypy is disabled at root level due to monorepo structure
-  # Each project has its own mypy configuration that runs via `make type-check`
-  # - repo: https://github.com/pre-commit/mirrors-mypy
-  #   rev: v1.18.2
-  #   hooks:
-  #     - id: mypy
-  #       args: [--ignore-missing-imports, --explicit-package-bases]
+      - id: lint-logging
+        name: Lint logging (ruff)
+        entry: bash -c 'cd src/common/modules/logging && make lint'
+        language: system
+        files: ^src/common/modules/logging/
+        pass_filenames: false
+
+      # ============================================================
+      # Module: container-manager
+      # ============================================================
+      - id: format-container-manager
+        name: Format container-manager (black + isort)
+        entry: bash -c 'cd src/common/modules/container-manager && make format'
+        language: system
+        files: ^src/common/modules/container-manager/
+        pass_filenames: false
+
+      - id: lint-container-manager
+        name: Lint container-manager (ruff)
+        entry: bash -c 'cd src/common/modules/container-manager && make lint'
+        language: system
+        files: ^src/common/modules/container-manager/
+        pass_filenames: false
+
+      # ============================================================
+      # Module: filesystem-path-builder
+      # ============================================================
+      - id: format-filesystem-path-builder
+        name: Format filesystem-path-builder (black + isort)
+        entry: bash -c 'cd src/common/modules/filesystem-path-builder && make format'
+        language: system
+        files: ^src/common/modules/filesystem-path-builder/
+        pass_filenames: false
+
+      - id: lint-filesystem-path-builder
+        name: Lint filesystem-path-builder (ruff)
+        entry: bash -c 'cd src/common/modules/filesystem-path-builder && make lint'
+        language: system
+        files: ^src/common/modules/filesystem-path-builder/
+        pass_filenames: false
+
+      # ============================================================
+      # Module: package-manager
+      # ============================================================
+      - id: format-package-manager
+        name: Format package-manager (black + isort)
+        entry: bash -c 'cd src/common/modules/package-manager && make format'
+        language: system
+        files: ^src/common/modules/package-manager/
+        pass_filenames: false
+
+      - id: lint-package-manager
+        name: Lint package-manager (ruff)
+        entry: bash -c 'cd src/common/modules/package-manager && make lint'
+        language: system
+        files: ^src/common/modules/package-manager/
+        pass_filenames: false
+
+      # ============================================================
+      # Module: pipeline
+      # ============================================================
+      - id: format-pipeline
+        name: Format pipeline (black + isort)
+        entry: bash -c 'cd src/common/modules/pipeline && make format'
+        language: system
+        files: ^src/common/modules/pipeline/
+        pass_filenames: false
+
+      - id: lint-pipeline
+        name: Lint pipeline (ruff)
+        entry: bash -c 'cd src/common/modules/pipeline && make lint'
+        language: system
+        files: ^src/common/modules/pipeline/
+        pass_filenames: false
+
+      # ============================================================
+      # Module: template-renderer
+      # ============================================================
+      - id: format-template-renderer-module
+        name: Format template-renderer module (black + isort)
+        entry: bash -c 'cd src/common/modules/template-renderer && make format'
+        language: system
+        files: ^src/common/modules/template-renderer/
+        pass_filenames: false
+
+      - id: lint-template-renderer-module
+        name: Lint template-renderer module (ruff)
+        entry: bash -c 'cd src/common/modules/template-renderer && make lint'
+        language: system
+        files: ^src/common/modules/template-renderer/
+        pass_filenames: false
+
+      # ============================================================
+      # Module: colorscheme-generator
+      # ============================================================
+      - id: format-colorscheme-generator
+        name: Format colorscheme-generator (black + isort)
+        entry: bash -c 'cd src/common/modules/colorscheme-generator && make format'
+        language: system
+        files: ^src/common/modules/colorscheme-generator/
+        pass_filenames: false
+
+      - id: lint-colorscheme-generator
+        name: Lint colorscheme-generator (ruff)
+        entry: bash -c 'cd src/common/modules/colorscheme-generator && make lint'
+        language: system
+        files: ^src/common/modules/colorscheme-generator/
+        pass_filenames: false
+
+      # ============================================================
+      # Module: wallpaper-processor
+      # ============================================================
+      - id: format-wallpaper-processor
+        name: Format wallpaper-processor (black + isort)
+        entry: bash -c 'cd src/common/modules/wallpaper-processor && make format'
+        language: system
+        files: ^src/common/modules/wallpaper-processor/
+        pass_filenames: false
+
+      - id: lint-wallpaper-processor
+        name: Lint wallpaper-processor (ruff)
+        entry: bash -c 'cd src/common/modules/wallpaper-processor && make lint'
+        language: system
+        files: ^src/common/modules/wallpaper-processor/
+        pass_filenames: false
+
+      # ============================================================
+      # Tool: colorscheme-orchestrator
+      # ============================================================
+      - id: format-colorscheme-orchestrator
+        name: Format colorscheme-orchestrator (black + isort)
+        entry: bash -c 'cd src/common/tools/colorscheme-orchestrator && make format'
+        language: system
+        files: ^src/common/tools/colorscheme-orchestrator/
+        pass_filenames: false
+
+      - id: lint-colorscheme-orchestrator
+        name: Lint colorscheme-orchestrator (ruff)
+        entry: bash -c 'cd src/common/tools/colorscheme-orchestrator && make lint'
+        language: system
+        files: ^src/common/tools/colorscheme-orchestrator/
+        pass_filenames: false
+
+      # ============================================================
+      # Tool: template-renderer
+      # ============================================================
+      - id: format-template-renderer-tool
+        name: Format template-renderer tool (black + isort)
+        entry: bash -c 'cd src/common/tools/template-renderer && make format'
+        language: system
+        files: ^src/common/tools/template-renderer/
+        pass_filenames: false
+
+      - id: lint-template-renderer-tool
+        name: Lint template-renderer tool (ruff)
+        entry: bash -c 'cd src/common/tools/template-renderer && make lint'
+        language: system
+        files: ^src/common/tools/template-renderer/
+        pass_filenames: false
+
+      # ============================================================
+      # Tool: wallpaper-orchestrator
+      # ============================================================
+      - id: format-wallpaper-orchestrator
+        name: Format wallpaper-orchestrator (black + isort)
+        entry: bash -c 'cd src/common/tools/wallpaper-orchestrator && make format'
+        language: system
+        files: ^src/common/tools/wallpaper-orchestrator/
+        pass_filenames: false
+
+      - id: lint-wallpaper-orchestrator
+        name: Lint wallpaper-orchestrator (ruff)
+        entry: bash -c 'cd src/common/tools/wallpaper-orchestrator && make lint'
+        language: system
+        files: ^src/common/tools/wallpaper-orchestrator/
+        pass_filenames: false

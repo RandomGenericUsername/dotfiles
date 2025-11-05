@@ -25,6 +25,10 @@ packages = [
     "exa",   # Modern replacement for ls (may need EPEL or Copr)
     "bat",   # Cat with syntax highlighting (may need EPEL or Copr)
     "wlogout",  # Logout menu for Hyprland
+    # Hyprland dependencies
+    "hyprland",
+    "hyprland-devel",
+    "hyprpaper"
 ]
 
 # RedHat/Fedora-specific zsh plugin paths

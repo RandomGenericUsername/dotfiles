@@ -113,11 +113,11 @@ class PathsConfig(BaseModel):
         "arbitrary_types_allowed": True,  # Allow PathTree and ManagedPathTree
     }
 
-    # source: PathTree = Field(
-    #    default=directories.source,
-    #    description="Source paths (relative to project root)",
-    # )
-    install: Any = Field(
+    source: PathTree = Field(
+        default=directories.src,
+        description="Source paths (relative to project root)",
+    )
+    install: PathTree = Field(
         default=directories.install,
         description=(
             "Installation paths (ManagedPathTree with create() method)"

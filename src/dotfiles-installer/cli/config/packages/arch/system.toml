@@ -22,6 +22,10 @@ packages = [
     "exa",   # Modern replacement for ls
     "bat",   # Cat with syntax highlighting
     "wlogout",  # Logout menu for Hyprland
+
+    # Hyprland dependencies
+    "hyprland",
+    "hyprpaper"
 ]
 
 # Arch-specific zsh plugin paths

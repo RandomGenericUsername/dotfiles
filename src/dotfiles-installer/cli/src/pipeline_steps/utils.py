@@ -8,6 +8,7 @@ from dotfiles_package_manager.core.base import (
 from dotfiles_package_manager.core.factory import PackageManagerFactory
 from dotfiles_pipeline import PipelineContext
 from dotfiles_template_renderer import Jinja2Renderer, RenderConfig
+
 from src.config.enums import InstallType
 from src.exceptions import InstallationConfirmationDeclinedException
 from src.tasks.install_starship import (
@@ -502,7 +503,7 @@ def render_zsh_config(context: PipelineContext) -> PipelineContext:
     template_name: str = template_path.name
 
     zshrc_path: Path = (
-        context.app_config.project.paths.install.dotfiles.zsh.file(".zshrc")
+        context.app_config.project.paths.install.dotfiles.zsh.file("zshrc")
     )
     oh_my_zsh_path: Path = (
         context.app_config.project.paths.install.dotfiles.oh_my_zsh.path
@@ -1134,4 +1135,38 @@ def install_pip_packages_runtime(
         if critical:
             raise
 
+    return context
+
+
+def extract_wallpapers(context: PipelineContext) -> PipelineContext:
+    """Extract wallpapers from the archive.
+
+    Args:
+        context: The pipeline context
+
+    Returns:
+        Updated pipeline context with extraction results
+    """
+    import tarfile
+
+    logger: RichLogger = context.logger_instance
+    wallpaper_dir: Path = (
+        context.app_config.project.paths.install.dotfiles.wallpapers.path
+    )
+    wallpapers: Path = (
+        context.app_config.project.paths.source.dotfiles.assets.wallpapers.file(
+            "wallpapers.tar.gz"
+        )
+    )
+    logger.debug(f"Extracting wallpapers to path: {wallpaper_dir}")
+    logger.debug(f"Wallpapers archive path: {wallpapers}")
+    try:
+        with tarfile.open(wallpapers, "r:gz") as tar:
+            tar.extractall(path=wallpaper_dir)
+        logger.debug("Wallpapers extracted successfully")
+        context.results["wallpapers_extracted"] = True
+    except Exception as e:
+        logger.error(f"Failed to extract wallpapers: {e}")
+        context.errors.append(e)
+        context.results["wallpapers_extracted"] = False
     return context

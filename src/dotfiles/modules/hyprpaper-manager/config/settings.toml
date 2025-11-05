@@ -1,0 +1,21 @@
+[hyprpaper]
+# Config file location
+config_file = "~/.config/hypr/hyprpaper.conf"
+
+# IPC settings
+ipc_enabled = true
+
+# Splash settings
+splash_enabled = false
+splash_offset = 2.0
+splash_color = "55ffffff"
+
+# Wallpaper directories
+wallpaper_dirs = [
+    "~/Pictures/wallpapers",
+    "~/wallpapers",
+]
+
+# Behavior
+auto_unload_unused = true
+preload_on_set = false  # Use fast reload by default

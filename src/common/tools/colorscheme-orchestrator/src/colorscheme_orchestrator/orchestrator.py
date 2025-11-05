@@ -3,6 +3,12 @@
 from pathlib import Path
 from typing import Any
 
+from dotfiles_container_manager import (
+    ContainerEngine,
+    ContainerEngineFactory,
+    ContainerRuntime,
+)
+
 from colorscheme_orchestrator.config import OrchestratorConfig, load_settings
 from colorscheme_orchestrator.containers import (
     BackendRegistry,
@@ -12,11 +18,6 @@ from colorscheme_orchestrator.containers import (
 from colorscheme_orchestrator.exceptions import (
     ImageNotFoundError,
     InvalidBackendError,
-)
-from dotfiles_container_manager import (
-    ContainerEngine,
-    ContainerEngineFactory,
-    ContainerRuntime,
 )
 
 

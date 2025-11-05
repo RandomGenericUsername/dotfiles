@@ -2,6 +2,7 @@ from pathlib import Path
 
 from dotfiles_pipeline import PipelineStep
 from dotfiles_pipeline.core.types import PipelineContext
+
 from src.pipeline_steps.utils import (
     detect_and_initialize_package_manager,
     handle_previous_installation,
@@ -382,3 +383,30 @@ class InstallPipPackagesStep(PipelineStep):
         from src.pipeline_steps.utils import install_pip_packages_runtime
 
         return install_pip_packages_runtime(context)
+
+
+class ExtractWallpapersStep(PipelineStep):
+    """Pipeline step to extract wallpapers."""
+
+    @property
+    def step_id(self) -> str:
+        return "extract_wallpapers"
+
+    @property
+    def description(self) -> str:
+        return "Extract wallpapers"
+
+    @property
+    def timeout(self) -> float | None:
+        """Step timeout in seconds."""
+        return 300.0
+
+    @property
+    def critical(self) -> bool:
+        return True
+
+    def run(self, context: PipelineContext) -> PipelineContext:
+        """Extract wallpapers."""
+        from src.pipeline_steps.utils import extract_wallpapers
+
+        return extract_wallpapers(context)

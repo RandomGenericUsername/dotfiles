@@ -2,9 +2,10 @@
 
 from pathlib import Path
 
+from dotfiles_container_manager import BuildContext, ContainerEngine
+
 from colorscheme_orchestrator.containers.registry import BackendRegistry
 from colorscheme_orchestrator.exceptions import ImageBuildError
-from dotfiles_container_manager import BuildContext, ContainerEngine
 
 
 class ContainerBuilder:

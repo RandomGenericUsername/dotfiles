@@ -3,6 +3,9 @@
 from pathlib import Path
 
 import typer
+from rich.console import Console
+from rich.table import Table
+
 from colorscheme_orchestrator import ColorSchemeOrchestrator
 from colorscheme_orchestrator.config import load_settings
 from colorscheme_orchestrator.exceptions import (
@@ -11,8 +14,6 @@ from colorscheme_orchestrator.exceptions import (
     OrchestratorError,
 )
 from colorscheme_orchestrator.logging import get_logger
-from rich.console import Console
-from rich.table import Table
 
 # Create Typer app
 app = typer.Typer(

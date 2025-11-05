@@ -66,6 +66,75 @@ def set_project_root(root: Path) -> None:
     _PROJECT_ROOT = root
 
 
+def get_distro_packages_path() -> Path:
+    """
+    Detect package manager and return path to distro-specific system.toml.
+
+    This function auto-detects the system's package manager and maps it to
+    the appropriate distribution configuration directory.
+
+    Returns:
+        Path to the appropriate system.toml file based on detected
+        package manager
+
+    Raises:
+        FileNotFoundError: If distro config file doesn't exist
+
+    Example:
+        >>> path = get_distro_packages_path()
+        >>> # On Arch with paru: .../config/packages/arch/system.toml
+        >>> # On Debian with apt: .../config/packages/debian/system.toml
+    """
+
+    from dotfiles_package_manager import (
+        PackageManagerFactory,
+        PackageManagerType,
+    )
+
+    # Map package manager type to distribution directory
+    distro_map = {
+        # Arch Linux family
+        PackageManagerType.PACMAN: "arch",
+        PackageManagerType.YAY: "arch",
+        PackageManagerType.PARU: "arch",
+        # Debian/Ubuntu family
+        PackageManagerType.APT: "debian",
+        PackageManagerType.APT_GET: "debian",
+        # RedHat/Fedora family
+        PackageManagerType.DNF: "redhat",
+        PackageManagerType.YUM: "redhat",
+    }
+
+    try:
+        # Auto-detect package manager
+        pm = PackageManagerFactory.create_auto(prefer_third_party=True)
+        print(pm.manager_type.value)
+        distro = distro_map.get(pm.manager_type, "arch")
+    except Exception:
+        # Fallback to arch if detection fails
+        distro = "arch"
+
+    # Construct path to distro-specific config
+    # Use get_project_root() which is set in main.py at application startup
+    project_root = get_project_root()
+    packages_dir = (
+        project_root
+        / "src"
+        / "dotfiles-installer"
+        / "cli"
+        / "config"
+        / "packages"
+    )
+    distro_config_path: Path = packages_dir / distro / "system.toml"
+
+    if not distro_config_path.exists():
+        raise FileNotFoundError(
+            f"Distribution config not found: {distro_config_path}"
+        )
+
+    return distro_config_path
+
+
 def get_project_root() -> Path:
     """Get the project root path.
 

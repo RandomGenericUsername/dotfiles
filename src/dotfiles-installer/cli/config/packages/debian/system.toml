@@ -23,6 +23,10 @@ packages = [
     "exa",   # Modern replacement for ls
     "bat",   # Cat with syntax highlighting (package name is 'bat' on Debian 11+)
     "wlogout",  # Logout menu for Hyprland
+
+    # Hyprland dependencies
+    "hyprland",
+    "hyprpaper"
 ]
 
 # Debian/Ubuntu-specific zsh plugin paths

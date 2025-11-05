@@ -4,6 +4,7 @@ from typing import Any
 
 from dynaconf import Dynaconf
 from pydantic import ValidationError
+
 from src.config.config import AppConfig as PydanticAppConfig
 from src.config.enums import InstallType
 from src.config.project_root import get_project_path
@@ -32,7 +33,7 @@ def _get_settings_files() -> list[str]:
     SETTINGS_FILE = get_project_path("settings.toml")
 
     # Get distro-specific packages config
-    from config.directories import get_distro_packages_path
+    from src.config.project_root import get_distro_packages_path
 
     try:
         DISTRO_PACKAGES = get_distro_packages_path()
