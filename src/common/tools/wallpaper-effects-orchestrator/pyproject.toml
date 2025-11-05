@@ -1,7 +1,7 @@
 [project]
-name = "wallpaper-orchestrator"
+name = "wallpaper-effects-orchestrator"
 version = "0.1.0"
-description = "CLI tool for orchestrating containerized wallpaper processing"
+description = "CLI tool for orchestrating containerized wallpaper effects processing"
 requires-python = ">=3.12"
 readme = "README.md"
 dependencies = [
@@ -23,7 +23,7 @@ dev = [
 ]
 
 [project.scripts]
-wallpaper-process = "wallpaper_orchestrator.cli:app"
+wallpaper-effects-process = "wallpaper_orchestrator.cli:app"
 
 [build-system]
 requires = ["hatchling"]

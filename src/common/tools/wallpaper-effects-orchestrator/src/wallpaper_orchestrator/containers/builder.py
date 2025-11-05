@@ -1,4 +1,4 @@
-"""Container builder for wallpaper-processor images."""
+"""Container builder for wallpaper-effects-processor images."""
 
 from __future__ import annotations
 
@@ -6,11 +6,12 @@ from collections.abc import Callable
 from pathlib import Path
 
 from dotfiles_container_manager import BuildContext, ImageManager
+
 from wallpaper_orchestrator.config import ContainerConfig
 
 
 class ContainerBuilder:
-    """Builds wallpaper-processor container images."""
+    """Builds wallpaper-effects-processor container images."""
 
     def __init__(self, image_manager: ImageManager, config: ContainerConfig):
         """Initialize builder.
@@ -119,9 +120,12 @@ class ContainerBuilder:
         ).parent.parent.parent.parent.parent.parent.parent.parent
         modules_dir = workspace_root / "src" / "common" / "modules"
 
-        # Add wallpaper-processor module
+        # Add wallpaper-effects-processor module
         processor_src = (
-            modules_dir / "wallpaper-processor" / "src" / "wallpaper_processor"
+            modules_dir
+            / "wallpaper-effects-processor"
+            / "src"
+            / "wallpaper_processor"
         )
         if processor_src.exists():
             self._add_directory_to_context(

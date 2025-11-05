@@ -1,6 +1,6 @@
-# Wallpaper Orchestrator
+# Wallpaper Effects Orchestrator
 
-Container-based CLI tool for applying effects to wallpapers using the wallpaper-processor module.
+Container-based CLI tool for applying effects to wallpapers using the wallpaper-effects-processor module.
 
 ## Features
 
@@ -16,15 +16,15 @@ Container-based CLI tool for applying effects to wallpapers using the wallpaper-
 ## Installation
 
 ```bash
-cd src/common/tools/wallpaper-orchestrator
+cd src/common/tools/wallpaper-effects-orchestrator
 make install
 ```
 
 This will:
 1. Install container-manager module
-2. Install wallpaper-processor module
+2. Install wallpaper-effects-processor module
 3. Install dotfiles-logging module
-4. Install wallpaper-orchestrator tool
+4. Install wallpaper-effects-orchestrator tool
 
 ## Quick Start
 
@@ -32,10 +32,10 @@ This will:
 
 ```bash
 # Use preset
-wallpaper-process process -i wallpaper.jpg -o output.jpg --preset dark_blur
+wallpaper-effects-process process -i wallpaper.jpg -o output.jpg --preset dark_blur
 
 # Custom effects
-wallpaper-process process -i wallpaper.jpg -o output.jpg \
+wallpaper-effects-process process -i wallpaper.jpg -o output.jpg \
   -e blur --sigma 6 \
   -e brightness --adjustment -15
 ```
@@ -44,7 +44,7 @@ wallpaper-process process -i wallpaper.jpg -o output.jpg \
 
 ```bash
 # Generate all effect variants
-wallpaper-process variants -i wallpaper.jpg -o ~/variants/
+wallpaper-effects-process variants -i wallpaper.jpg -o ~/variants/
 
 # Creates:
 # ~/variants/wallpaper/blur.png
@@ -60,20 +60,20 @@ wallpaper-process variants -i wallpaper.jpg -o ~/variants/
 
 ```bash
 # Process directory
-wallpaper-process batch --batch-dir ~/wallpapers/ --output-dir ~/processed/
+wallpaper-effects-process batch --batch-dir ~/wallpapers/ --output-dir ~/processed/
 
 # Parallel processing
-wallpaper-process batch --batch-dir ~/wallpapers/ --output-dir ~/processed/ --parallel 4
+wallpaper-effects-process batch --batch-dir ~/wallpapers/ --output-dir ~/processed/ --parallel 4
 ```
 
 ### List Available Options
 
 ```bash
 # List effects
-wallpaper-process list
+wallpaper-effects-process list
 
 # List presets
-wallpaper-process presets
+wallpaper-effects-process presets
 ```
 
 ## Available Effects
@@ -126,7 +126,7 @@ Or via environment variable:
 
 ```bash
 export CONTAINER_RUNTIME=podman
-wallpaper-process -i input.jpg -o output.jpg --preset dark_blur
+wallpaper-effects-process -i input.jpg -o output.jpg --preset dark_blur
 ```
 
 ### Processing Options
@@ -140,7 +140,7 @@ quality = 95
 
 ### Custom Presets
 
-Create `~/.config/wallpaper-orchestrator/presets.toml`:
+Create `~/.config/wallpaper-effects-orchestrator/presets.toml`:
 
 ```toml
 [presets.my_custom]
@@ -156,7 +156,7 @@ effects = [
 ### Basic Usage
 
 ```bash
-wallpaper-process [OPTIONS] COMMAND [ARGS]
+wallpaper-effects-process [OPTIONS] COMMAND [ARGS]
 ```
 
 ### Commands
@@ -209,7 +209,7 @@ wallpaper-process [OPTIONS] COMMAND [ARGS]
 ### Single Image with Custom Effects
 
 ```bash
-wallpaper-process process -i wallpaper.jpg -o output.jpg \
+wallpaper-effects-process process -i wallpaper.jpg -o output.jpg \
   -e blur --sigma 8 \
   -e brightness --adjustment -20 \
   -e vignette --strength 15
@@ -218,7 +218,7 @@ wallpaper-process process -i wallpaper.jpg -o output.jpg \
 ### Generate All Effect Variants
 
 ```bash
-wallpaper-process variants -i wallpaper.jpg -o ~/variants/
+wallpaper-effects-process variants -i wallpaper.jpg -o ~/variants/
 
 # Creates directory structure:
 # ~/variants/wallpaper/
@@ -234,7 +234,7 @@ wallpaper-process variants -i wallpaper.jpg -o ~/variants/
 ### Batch Processing with Preset
 
 ```bash
-wallpaper-process batch \
+wallpaper-effects-process batch \
   --batch-dir ~/wallpapers/ \
   --output-dir ~/processed/ \
   --preset dark_blur \
@@ -244,7 +244,7 @@ wallpaper-process batch \
 ### Custom Output Format and Quality
 
 ```bash
-wallpaper-process process -i wallpaper.jpg -o output.webp \
+wallpaper-effects-process process -i wallpaper.jpg -o output.webp \
   --preset aesthetic \
   --format webp \
   --quality 90
@@ -253,7 +253,7 @@ wallpaper-process process -i wallpaper.jpg -o output.webp \
 ### With Metadata
 
 ```bash
-wallpaper-process process -i wallpaper.jpg -o output.jpg \
+wallpaper-effects-process process -i wallpaper.jpg -o output.jpg \
   --preset lockscreen \
   --metadata
 ```
@@ -267,21 +267,21 @@ This creates:
 ### Build Container Image
 
 ```bash
-wallpaper-process build
+wallpaper-effects-process build
 ```
 
 ### Clean Container Resources
 
 ```bash
-wallpaper-process clean
+wallpaper-effects-process clean
 ```
 
 ## Architecture
 
 ```
-wallpaper-orchestrator/
+wallpaper-effects-orchestrator/
 ├── Container Registry    # Manages container images
-├── Container Builder     # Builds wallpaper-processor container
+├── Container Builder     # Builds wallpaper-effects-processor container
 ├── Container Runner      # Executes processing in containers
 ├── Orchestrator          # Coordinates processing workflow
 └── CLI                   # User interface

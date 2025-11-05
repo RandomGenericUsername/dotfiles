@@ -6,12 +6,13 @@ from pathlib import Path
 import typer
 from rich.console import Console
 from rich.table import Table
+
 from wallpaper_orchestrator.config import get_default_config
 from wallpaper_orchestrator.orchestrator import WallpaperOrchestrator
 
 app = typer.Typer(
-    name="wallpaper-process",
-    help="Container-based wallpaper processing tool",
+    name="wallpaper-effects-process",
+    help="Container-based wallpaper effects processing tool",
     add_completion=False,
 )
 

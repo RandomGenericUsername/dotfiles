@@ -1,17 +1,17 @@
-# Wallpaper Orchestrator Usage Guide
+# Wallpaper Effects Orchestrator Usage Guide
 
 ## Installation
 
 ```bash
-cd src/common/tools/wallpaper-orchestrator
+cd src/common/tools/wallpaper-effects-orchestrator
 make install
 ```
 
 This installs:
 - container-manager module
-- wallpaper-processor module
+- wallpaper-effects-processor module
 - dotfiles-logging module
-- wallpaper-orchestrator CLI tool
+- wallpaper-effects-orchestrator CLI tool
 
 ## Basic Usage
 
@@ -20,7 +20,7 @@ This installs:
 Process a single image with a preset:
 
 ```bash
-wallpaper-process process \
+wallpaper-effects-process process \
   -i ~/wallpapers/mountain.jpg \
   -o ~/processed/mountain.jpg \
   --preset dark_blur
@@ -29,7 +29,7 @@ wallpaper-process process \
 Process with custom effects:
 
 ```bash
-wallpaper-process process \
+wallpaper-effects-process process \
   -i ~/wallpapers/mountain.jpg \
   -o ~/processed/mountain.jpg \
   -e blur --sigma 8 \
@@ -41,7 +41,7 @@ wallpaper-process process \
 Generate all effect variants for a single image:
 
 ```bash
-wallpaper-process variants \
+wallpaper-effects-process variants \
   -i ~/wallpapers/mountain.jpg \
   -o ~/variants/
 
@@ -60,7 +60,7 @@ wallpaper-process variants \
 Process all images in a directory:
 
 ```bash
-wallpaper-process batch \
+wallpaper-effects-process batch \
   --batch-dir ~/wallpapers/ \
   --output-dir ~/processed/ \
   --preset aesthetic
@@ -69,7 +69,7 @@ wallpaper-process batch \
 Parallel batch processing:
 
 ```bash
-wallpaper-process batch \
+wallpaper-effects-process batch \
   --batch-dir ~/wallpapers/ \
   --output-dir ~/processed/ \
   --preset lockscreen \
@@ -81,13 +81,13 @@ wallpaper-process batch \
 List effects:
 
 ```bash
-wallpaper-process list
+wallpaper-effects-process list
 ```
 
 List presets:
 
 ```bash
-wallpaper-process presets
+wallpaper-effects-process presets
 ```
 
 ## Command Reference
@@ -123,24 +123,24 @@ wallpaper-process presets
 
 ```bash
 # Use preset
-wallpaper-process process -i input.jpg -o output.jpg --preset dark_blur
+wallpaper-effects-process process -i input.jpg -o output.jpg --preset dark_blur
 
 # Custom blur
-wallpaper-process process -i input.jpg -o output.jpg -e blur --sigma 10
+wallpaper-effects-process process -i input.jpg -o output.jpg -e blur --sigma 10
 
 # Multiple effects
-wallpaper-process process -i input.jpg -o output.jpg \
+wallpaper-effects-process process -i input.jpg -o output.jpg \
   -e blur --sigma 6 \
   -e brightness --adjustment -15 \
   -e vignette --strength 20
 
 # With metadata
-wallpaper-process process -i input.jpg -o output.jpg \
+wallpaper-effects-process process -i input.jpg -o output.jpg \
   --preset lockscreen \
   --metadata
 
 # Use podman
-wallpaper-process process -i input.jpg -o output.jpg \
+wallpaper-effects-process process -i input.jpg -o output.jpg \
   --preset aesthetic \
   --runtime podman
 ```
@@ -157,7 +157,7 @@ Generate all effect variants for an input image.
 
 ```bash
 # Generate all variants
-wallpaper-process variants \
+wallpaper-effects-process variants \
   -i ~/wallpapers/mountain.jpg \
   -o ~/variants/
 
@@ -198,20 +198,20 @@ wallpaper-process variants \
 
 ```bash
 # Basic batch
-wallpaper-process batch \
+wallpaper-effects-process batch \
   --batch-dir ~/wallpapers/ \
   --output-dir ~/processed/ \
   --preset dark_blur
 
 # Parallel processing
-wallpaper-process batch \
+wallpaper-effects-process batch \
   --batch-dir ~/wallpapers/ \
   --output-dir ~/processed/ \
   --preset aesthetic \
   --parallel 4
 
 # Skip existing files
-wallpaper-process batch \
+wallpaper-effects-process batch \
   --batch-dir ~/wallpapers/ \
   --output-dir ~/processed/ \
   --preset lockscreen \
@@ -223,7 +223,7 @@ wallpaper-process batch \
 Shows all available effects with descriptions and parameters.
 
 ```bash
-wallpaper-process list
+wallpaper-effects-process list
 ```
 
 ### `presets` - List Available Presets
@@ -231,12 +231,12 @@ wallpaper-process list
 Shows all available presets with descriptions.
 
 ```bash
-wallpaper-process presets
+wallpaper-effects-process presets
 ```
 
 ### `build` - Build Container Image
 
-Builds the wallpaper-processor container image.
+Builds the wallpaper-effects-processor container image.
 
 **Options:**
 - `--no-cache` - Build without cache
@@ -246,18 +246,18 @@ Builds the wallpaper-processor container image.
 
 ```bash
 # Build image
-wallpaper-process build
+wallpaper-effects-process build
 
 # Build without cache
-wallpaper-process build --no-cache
+wallpaper-effects-process build --no-cache
 
 # Build with podman
-wallpaper-process build --runtime podman
+wallpaper-effects-process build --runtime podman
 ```
 
 ### `clean` - Clean Container Resources
 
-Removes wallpaper-processor container images.
+Removes wallpaper-effects-processor container images.
 
 **Options:**
 - `--runtime {docker,podman}` - Container runtime
@@ -266,10 +266,10 @@ Removes wallpaper-processor container images.
 
 ```bash
 # Clean resources
-wallpaper-process clean
+wallpaper-effects-process clean
 
 # Clean with podman
-wallpaper-process clean --runtime podman
+wallpaper-effects-process clean --runtime podman
 ```
 
 ## Configuration
@@ -281,7 +281,7 @@ Edit `config/settings.toml`:
 ```toml
 [container]
 runtime = "docker"  # or "podman"
-image_name = "wallpaper-processor"
+image_name = "wallpaper-effects-processor"
 image_tag = "latest"
 
 [processing]
@@ -297,7 +297,7 @@ continue_on_error = true
 
 ### Custom Presets
 
-Create `~/.config/wallpaper-orchestrator/presets.toml`:
+Create `~/.config/wallpaper-effects-orchestrator/presets.toml`:
 
 ```toml
 [presets.my_custom]
@@ -323,7 +323,7 @@ export WALLPAPER_PROCESSING__MODE=file
 # Set quality
 export WALLPAPER_PROCESSING__QUALITY=90
 
-wallpaper-process process -i input.jpg -o output.jpg --preset dark_blur
+wallpaper-effects-process process -i input.jpg -o output.jpg --preset dark_blur
 ```
 
 ## Troubleshooting
@@ -340,7 +340,7 @@ docker --version
 podman --version
 
 # Specify runtime explicitly
-wallpaper-process process -i input.jpg -o output.jpg \
+wallpaper-effects-process process -i input.jpg -o output.jpg \
   --preset dark_blur \
   --runtime podman
 ```
@@ -350,7 +350,7 @@ wallpaper-process process -i input.jpg -o output.jpg \
 Rebuild without cache:
 
 ```bash
-wallpaper-process build --no-cache
+wallpaper-effects-process build --no-cache
 ```
 
 ### Permission Errors
@@ -367,7 +367,7 @@ chmod 755 ~/processed
 Use parallel processing for batches:
 
 ```bash
-wallpaper-process batch \
+wallpaper-effects-process batch \
   --batch-dir ~/wallpapers/ \
   --output-dir ~/processed/ \
   --preset dark_blur \
@@ -379,7 +379,7 @@ wallpaper-process batch \
 ### Custom Output Format
 
 ```bash
-wallpaper-process process -i input.jpg -o output.webp \
+wallpaper-effects-process process -i input.jpg -o output.webp \
   --preset aesthetic \
   --quality 90
 ```
@@ -387,7 +387,7 @@ wallpaper-process process -i input.jpg -o output.webp \
 ### File-Based Processing (Memory Efficient)
 
 ```bash
-wallpaper-process process -i large-image.jpg -o output.jpg \
+wallpaper-effects-process process -i large-image.jpg -o output.jpg \
   --preset lockscreen \
   --mode file
 ```
@@ -397,7 +397,7 @@ wallpaper-process process -i large-image.jpg -o output.jpg \
 ```bash
 # Process all wallpapers and set as background
 for img in ~/wallpapers/*.jpg; do
-  wallpaper-process process -i "$img" -o ~/processed/$(basename "$img") \
+  wallpaper-effects-process process -i "$img" -o ~/processed/$(basename "$img") \
     --preset dark_blur
 done
 

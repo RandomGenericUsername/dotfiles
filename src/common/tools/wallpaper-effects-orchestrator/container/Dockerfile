@@ -1,4 +1,4 @@
-# Wallpaper Processor Container
+# Wallpaper Effects Processor Container
 # Contains all dependencies for processing wallpapers with effects
 
 FROM python:3.12-slim

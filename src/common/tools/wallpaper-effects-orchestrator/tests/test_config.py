@@ -1,6 +1,7 @@
 """Tests for configuration."""
 
 import pytest
+
 from wallpaper_orchestrator.config import (
     AppConfig,
     ContainerConfig,
@@ -17,7 +18,7 @@ class TestContainerConfig:
         config = ContainerConfig()
 
         assert config.runtime == "docker"
-        assert config.image_name == "wallpaper-processor"
+        assert config.image_name == "wallpaper-effects-processor"
         assert config.image_tag == "latest"
         assert config.build_no_cache is False
         assert config.build_pull is True

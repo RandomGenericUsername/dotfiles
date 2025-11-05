@@ -12,7 +12,7 @@ class ContainerConfig(BaseModel):
 
     runtime: str = Field(default="docker", description="Container runtime")
     image_name: str = Field(
-        default="wallpaper-processor", description="Image name"
+        default="wallpaper-effects-processor", description="Image name"
     )
     image_tag: str = Field(default="latest", description="Image tag")
     build_no_cache: bool = Field(
@@ -92,7 +92,9 @@ def load_settings() -> Dynaconf:
     """
     # Get config directory
     config_dir = Path(__file__).parent.parent / "config"
-    user_config_dir = Path.home() / ".config" / "wallpaper-orchestrator"
+    user_config_dir = (
+        Path.home() / ".config" / "wallpaper-effects-orchestrator"
+    )
 
     # Settings files to load
     settings_files = [str(config_dir / "settings.toml")]

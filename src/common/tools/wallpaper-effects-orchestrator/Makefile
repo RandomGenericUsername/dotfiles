@@ -1,6 +1,6 @@
 MAKEFLAGS += --no-print-directory
 
-# Standard Makefile for wallpaper-orchestrator
+# Standard Makefile for wallpaper-effects-orchestrator
 # Provides consistent development workflows
 
 .PHONY: help sync-check ensure-sync dev-shell format lint type-check test test-cov clean install build pre-commit-install pre-commit-run all-checks

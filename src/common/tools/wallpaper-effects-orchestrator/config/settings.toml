@@ -1,11 +1,11 @@
-# Wallpaper Orchestrator Configuration
+# Wallpaper Effects Orchestrator Configuration
 
 [container]
 # Container runtime: "docker" or "podman"
 runtime = "docker"
 
 # Container image name
-image_name = "wallpaper-processor"
+image_name = "wallpaper-effects-processor"
 image_tag = "latest"
 
 # Build options

@@ -1,4 +1,4 @@
-"""Container registry for managing wallpaper-processor images."""
+"""Container registry for managing wallpaper-effects-processor images."""
 
 import contextlib
 
@@ -9,11 +9,12 @@ from dotfiles_container_manager import (
     ImageManager,
     ImageNotFoundError,
 )
+
 from wallpaper_orchestrator.config import ContainerConfig
 
 
 class ContainerRegistry:
-    """Manages wallpaper-processor container images."""
+    """Manages wallpaper-effects-processor container images."""
 
     def __init__(self, config: ContainerConfig):
         """Initialize registry.
@@ -30,7 +31,7 @@ class ContainerRegistry:
         """Get full image name with tag.
 
         Returns:
-            Image name with tag (e.g., "wallpaper-processor:latest")
+            Image name with tag (e.g., "wallpaper-effects-processor:latest")
         """
         return f"{self.config.image_name}:{self.config.image_tag}"
 
@@ -67,7 +68,7 @@ class ContainerRegistry:
             self.image_manager.remove(self.get_image_name(), force=force)
 
     def list_images(self) -> list[ImageInfo]:
-        """List all wallpaper-processor images.
+        """List all wallpaper-effects-processor images.
 
         Returns:
             List of ImageInfo objects
@@ -83,7 +84,7 @@ class ContainerRegistry:
         ]
 
     def prune_images(self) -> None:
-        """Remove unused wallpaper-processor images."""
+        """Remove unused wallpaper-effects-processor images."""
         images = self.list_images()
         current_image = self.get_image_name()
 
