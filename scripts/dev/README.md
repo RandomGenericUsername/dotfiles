@@ -109,11 +109,11 @@ src/
 │   │   ├── package-manager/
 │   │   ├── pipeline/
 │   │   ├── template-renderer/
-│   │   └── wallpaper-processor/
+│   │   └── wallpaper-effects-processor/
 │   └── tools/                       # Standalone CLI tools
 │       ├── colorscheme-orchestrator/
 │       ├── template-renderer/
-│       └── wallpaper-orchestrator/
+│       └── wallpaper-effects-orchestrator/
 ```
 
 ## Standard Configuration
