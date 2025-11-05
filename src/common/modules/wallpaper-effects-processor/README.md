@@ -1,4 +1,4 @@
-# Wallpaper Processor
+# Wallpaper Effects Processor
 
 Apply effects to wallpapers using ImageMagick and PIL backends with a clean, extensible architecture.
 
@@ -20,14 +20,14 @@ This module is used as a path dependency within the dotfiles project:
 ```toml
 [project]
 dependencies = [
-    "wallpaper-processor @ file://../../common/modules/wallpaper-processor",
+    "wallpaper-effects-processor @ file://../../common/modules/wallpaper-effects-processor",
 ]
 ```
 
 Or install directly:
 
 ```bash
-# From the wallpaper-processor directory
+# From the wallpaper-effects-processor directory
 make install
 ```
 
@@ -85,21 +85,21 @@ pipeline.apply(
 
 ```bash
 # Single effect
-wallpaper-process process -i input.jpg -o output.jpg -e blur --sigma 8
+wallpaper-effects-process process -i input.jpg -o output.jpg -e blur --sigma 8
 
 # Multiple effects
-wallpaper-process process -i input.jpg -o output.jpg \
+wallpaper-effects-process process -i input.jpg -o output.jpg \
   -e blur --sigma 6 \
   -e brightness --adjustment -15
 
 # Use preset
-wallpaper-process process -i input.jpg -o output.jpg --preset dark_blur
+wallpaper-effects-process process -i input.jpg -o output.jpg --preset dark_blur
 
 # Use preset with overrides
-wallpaper-process process -i input.jpg -o output.jpg --preset dark_blur --sigma 10
+wallpaper-effects-process process -i input.jpg -o output.jpg --preset dark_blur --sigma 10
 
 # Generate all effect variants
-wallpaper-process variants -i input.jpg -o /tmp/wallpapers
+wallpaper-effects-process variants -i input.jpg -o /tmp/wallpapers
 # Creates: /tmp/wallpapers/input/blur.png, /tmp/wallpapers/input/grayscale.png, etc.
 ```
 
@@ -124,7 +124,7 @@ Presets are defined in `config/settings.toml`:
 - **`lockscreen`**: Heavy blur for lockscreen backgrounds
 - **`minimal_dark`**: Subtle darkening with slight blur
 
-You can add custom presets in `~/.config/wallpaper-processor/presets.toml`.
+You can add custom presets in `~/.config/wallpaper-effects-processor/presets.toml`.
 
 ## Configuration
 
@@ -156,7 +156,7 @@ effects = [
 ## Architecture
 
 ```
-wallpaper-processor/
+wallpaper-effects-processor/
 ├── config/
 │   └── settings.toml          # Presets and defaults
 ├── src/wallpaper_processor/

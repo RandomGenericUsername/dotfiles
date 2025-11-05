@@ -1,4 +1,4 @@
-# Getting Started with Wallpaper Processor
+# Getting Started with Wallpaper Effects Processor
 
 ## Installation
 
@@ -9,14 +9,14 @@ Add to your `pyproject.toml`:
 ```toml
 [project]
 dependencies = [
-    "wallpaper-processor @ file://../../common/modules/wallpaper-processor",
+    "wallpaper-effects-processor @ file://../../common/modules/wallpaper-effects-processor",
 ]
 ```
 
 ### Standalone Installation
 
 ```bash
-cd src/common/modules/wallpaper-processor
+cd src/common/modules/wallpaper-effects-processor
 make install
 ```
 
