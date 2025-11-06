@@ -33,18 +33,25 @@ endif
 		exit 1; \
 	fi
 	@echo "🔄 Syncing module: $(MODULE)"
-	@cd $(CLI_DIR) && uv pip install -e ../../common/modules/$(MODULE) --force-reinstall --no-deps
-	@echo "✅ Module $(MODULE) synced successfully"
+	@cd $(CLI_DIR) && uv pip uninstall -y $(MODULE) 2>/dev/null || true
+	@cd $(CLI_DIR) && uv pip install -e ../../common/modules/$(MODULE) --no-deps
+	@echo "🔒 Updating lockfile..."
+	@cd $(CLI_DIR) && uv lock
+	@echo "✅ Module $(MODULE) synced successfully and lockfile updated"
 
 sync-all-modules: ## Sync all common modules
 	@echo "🔄 Syncing all modules..."
 	@for module in $(MODULES); do \
 		echo ""; \
 		echo "📦 Syncing $$module..."; \
-		(cd $(CLI_DIR) && uv pip install -e ../../common/modules/$$module --force-reinstall --no-deps) || exit 1; \
+		(cd $(CLI_DIR) && uv pip uninstall -y $$module 2>/dev/null || true) && \
+		(cd $(CLI_DIR) && uv pip install -e ../../common/modules/$$module --no-deps) || exit 1; \
 	done
 	@echo ""
-	@echo "✅ All modules synced successfully"
+	@echo "🔒 Updating lockfile..."
+	@cd $(CLI_DIR) && uv lock
+	@echo ""
+	@echo "✅ All modules synced successfully and lockfile updated"
 
 clean-cache: ## Clean Python cache files
 	@echo "🧹 Cleaning Python cache..."

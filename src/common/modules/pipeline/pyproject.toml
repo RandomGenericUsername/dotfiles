@@ -31,8 +31,8 @@ packages = ["src/dotfiles_pipeline"]
 allow-direct-references = true
 
 [tool.uv.sources]
-dotfiles-logging = { path = "../logging" }
-dotfiles-package-manager = { path = "../package-manager" }
+dotfiles-logging = { path = "../logging", editable = true }
+dotfiles-package-manager = { path = "../package-manager", editable = true }
 
 [tool.black]
 line-length = 79

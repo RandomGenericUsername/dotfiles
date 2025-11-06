@@ -46,12 +46,12 @@ packages = ["src"]
 allow-direct-references = true
 
 [tool.uv.sources]
-dotfiles-logging = { path = "../../common/modules/logging" }
-dotfiles-package-manager = { path = "../../common/modules/package-manager" }
-dotfiles-pipeline = { path = "../../common/modules/pipeline" }
-dotfiles-template-renderer = { path = "../../common/modules/template-renderer" }
-dotfiles-container-manager = { path = "../../common/modules/container-manager" }
-filesystem-path-builder = { path = "../../common/modules/filesystem-path-builder" }
+dotfiles-logging = { path = "../../common/modules/logging", editable = true }
+dotfiles-package-manager = { path = "../../common/modules/package-manager", editable = true }
+dotfiles-pipeline = { path = "../../common/modules/pipeline", editable = true }
+dotfiles-template-renderer = { path = "../../common/modules/template-renderer", editable = true }
+dotfiles-container-manager = { path = "../../common/modules/container-manager", editable = true }
+filesystem-path-builder = { path = "../../common/modules/filesystem-path-builder", editable = true }
 
 # Formatting and linting configuration
 [tool.black]

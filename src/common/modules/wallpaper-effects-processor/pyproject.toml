@@ -36,6 +36,12 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/wallpaper_processor"]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.uv.sources]
+dotfiles-logging = { path = "../logging", editable = true }
+
 [tool.black]
 line-length = 79
 target-version = ["py312"]
