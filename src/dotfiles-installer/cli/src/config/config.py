@@ -81,7 +81,6 @@ class InstallDebugSettings(BaseModel):
 from filesystem_path_builder import PathTree  # noqa: E402
 
 from config import default_settings as defaults  # noqa: E402
-from config import directories  # noqa: E402
 
 
 class PathsConfig(BaseModel):
@@ -114,23 +113,38 @@ class PathsConfig(BaseModel):
     }
 
     source: PathTree = Field(
-        default=directories.src,
+        default=None,
         description="Source paths (relative to project root)",
     )
     install: PathTree = Field(
-        default=directories.install,
+        default=None,
         description=(
             "Installation paths (ManagedPathTree with create() method)"
         ),
     )
     host: PathTree = Field(
-        default=directories.host,
+        default=None,
         description="Host system paths",
     )
     # runtime: PathTree = Field(
     #    default=directories.runtime,
     #    description="Runtime paths",
     # )
+
+    def model_post_init(self, __context: Any) -> None:
+        """Initialize all path trees using factory functions."""
+        from cli.config.directories import (
+            HOST_ROOT,
+            SRC_ROOT,
+            create_host_builder,
+            create_src_builder,
+        )
+
+        # Create all path trees using factory functions
+        self.host = create_host_builder(HOST_ROOT).build()
+        self.source = create_src_builder(SRC_ROOT).build()
+        # Note: install is created in AppConfig.model_post_init()
+        # because it needs the user's installation directory
 
     @field_validator("install", "host", mode="before")
     @classmethod
@@ -613,22 +627,15 @@ class AppConfig(BaseModel):
     def model_post_init(self, __context: Any) -> None:
         """Set up cross-references after initialization."""
         # Sync user's installation directory to project paths
-        from filesystem_path_builder import PathsBuilder
+        from cli.config.directories import create_install_builder
 
         # Regenerate install paths with user's installation directory
         install_root = self.cli_settings.installation_directory
 
-        # Create new builder with user's installation directory
-        # Copy all path definitions from directories.install_builder
-        # This ensures directories.py is the SINGLE SOURCE OF TRUTH
-        # Use strict=True to match the original builder's strict mode
-        builder = PathsBuilder(install_root, strict=True)
-        for (
-            _key,
-            definition,
-        ) in directories.install_builder.definitions.items():
-            # Use original_key to preserve hyphens, spaces, and case in directory names
-            builder.add_path(definition.original_key, hidden=definition.hidden)
+        # Create builder with user's installation directory
+        # directories.create_install_builder is the SINGLE SOURCE OF TRUTH
+        # for installation directory structure and strict mode setting
+        builder = create_install_builder(install_root, strict=True)
 
         # Build returns ManagedPathTree with create() and navigation
         self.project.paths.install = builder.build()
