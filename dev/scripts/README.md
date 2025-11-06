@@ -47,7 +47,7 @@ Formats and lints all UV Python projects in the repository.
 
 **Usage:**
 ```bash
-./scripts/dev/format-all.sh
+./dev/scripts/format-all.sh
 ```
 
 **When to use:**
@@ -74,7 +74,7 @@ Comprehensive linting with auto-fixes across all projects.
 
 **Usage:**
 ```bash
-./scripts/dev/lint-all.sh
+./dev/scripts/lint-all.sh
 ```
 
 **Note:** This is more aggressive than `format-all.sh` as it applies unsafe fixes.
