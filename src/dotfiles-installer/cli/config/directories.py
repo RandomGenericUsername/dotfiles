@@ -9,98 +9,110 @@ from src.config.project_root import get_project_root
 # ============================================================================
 
 HOST_ROOT = Path.home()
-_host_builder = PathsBuilder(HOST_ROOT)
-_host_builder.add_path("cache", hidden=True)
-host_builder = _host_builder
-host = _host_builder.build()
+
+
+def create_host_builder(root: Path, strict: bool = False) -> PathsBuilder:
+    """Create a PathsBuilder with all host system directories.
+
+    This is the SINGLE SOURCE OF TRUTH for host directory structure.
+
+    Args:
+        root: Root directory for host paths (typically Path.home())
+        strict: If True, only registered paths can be accessed (catches typos)
+
+    Returns:
+        PathsBuilder configured with all host subdirectories
+    """
+    builder = PathsBuilder(root, strict=strict)
+
+    # Hidden cache directory
+    builder.add_path("cache", hidden=True)
+
+    return builder
 
 
 # ============================================================================
 # Installation Paths (Where dotfiles will be installed on user's system)
 # ============================================================================
 
-# NOTE: This is a PLACEHOLDER that is ALWAYS replaced by
-# AppConfig.model_post_init()
-# The actual installation root comes from:
-#   1. CLI arguments (--install-dir)
-#   2. User settings.toml (installation_directory)
-#   3. Project defaults.toml (installation_directory)
-# This placeholder exists only to satisfy initial imports before
-# AppConfig is created.
-# DO NOT rely on this value - it will be replaced!
 
-_PLACEHOLDER_INSTALL_ROOT = Path.home() / ".tmp" / "dotfiles-placeholder"
+def create_install_builder(root: Path, strict: bool = True) -> PathsBuilder:
+    """Create a PathsBuilder with all installation subdirectories.
 
+    This is the SINGLE SOURCE OF TRUTH for installation directory structure.
 
-# ======================== Base directory ================================= #
+    Args:
+        root: Root directory for installation paths
+        strict: If True, only registered paths can be accessed (catches typos)
 
-# Placeholder builder - WILL BE REPLACED by AppConfig.model_post_init()
-# Use strict=True to catch typos in dotfiles structure
-_install_builder = PathsBuilder(_PLACEHOLDER_INSTALL_ROOT, strict=True)
+    Returns:
+        PathsBuilder configured with all installation subdirectories
+    """
+    builder = PathsBuilder(root, strict=strict)
 
+    # =====================First level directories ======================== #
 
-# =====================First level directories ======================== #
+    # Directory for dotfiles (symlinks to original files)
+    builder.add_path("dotfiles")
+    # Directory for dependencies files
+    builder.add_path("dependencies", hidden=True)
+    # Directory for scripts
+    builder.add_path("scripts")
 
-# Directory for dotfiles (symlinks to original files)
-_install_builder.add_path("dotfiles")
-# Directory for dependencies files
-_install_builder.add_path("dependencies", hidden=True)
-# Directory for scripts
-_install_builder.add_path("scripts")
+    # =====================Second level directories ======================= #
+    # ----------------------------- Dotfiles ------------------------------ #
+    builder.add_path("dotfiles.starship")
+    builder.add_path("dotfiles.zsh")
+    builder.add_path("dotfiles.wallpapers")
 
+    # ----------------------------- Dependencies -------------------------- #
+    builder.add_path("dependencies.nvm")
+    builder.add_path("dependencies.pyenv")
+    builder.add_path("dependencies.oh-my-zsh")
+    # ----------------------------- config -------------------------------- #
+    builder.add_path("dotfiles.config")
+    builder.add_path("dotfiles.config.hypr")
+    # ----------------------------- scripts ------------------------------- #
 
-# =====================Second level directories ======================= #
-# ----------------------------- Dotfiles ------------------------------ #
-_install_builder.add_path("dotfiles.starship")
-_install_builder.add_path("dotfiles.zsh")
-_install_builder.add_path("dotfiles.wallpapers")
-
-# ----------------------------- Dependencies ------------------------------ #
-_install_builder.add_path("dependencies.nvm")
-_install_builder.add_path("dependencies.pyenv")
-_install_builder.add_path("dependencies.oh-my-zsh")
-# ----------------------------- config ------------------------------ #
-_install_builder.add_path("dotfiles.config")
-_install_builder.add_path("dotfiles.config.hypr")
-# ----------------------------- scripts ----------------------------- #
-
-
-# Export the builder so AppConfig.model_post_init() can copy path definitions
-# This is the SINGLE SOURCE OF TRUTH for installation directory structure
-install_builder = _install_builder
-
-# Export ManagedPathTree (combines navigation and create())
-# WARNING: This is a PLACEHOLDER and will be replaced by
-# AppConfig.model_post_init()
-# Always access via: app_config.project.paths.install
-# The install object provides:
-#   - install.create() - Create all registered directories
-#   - install.path - Get root installation path
-#   - install.dotfiles.starship.path - Navigate to any registered path
-#   - install.dotfiles.starship.file('x') - Get file paths
-install = _install_builder.build()
+    return builder
 
 
 # ============================================================================
 # Source Paths (Project source files)
 # ============================================================================
 
-#
 SRC_ROOT = get_project_root() / "src"
-src_builder = PathsBuilder(SRC_ROOT)
 
-src_builder.add_path("common")
-src_builder.add_path("dotfiles")
-src_builder.add_path("dotfiles-installer")
 
-src_builder.add_path("common.modules")
-src_builder.add_path("common.tools")
+def create_src_builder(root: Path, strict: bool = False) -> PathsBuilder:
+    """Create a PathsBuilder with all project source directories.
 
-src_builder.add_path("dotfiles.assets")
-src_builder.add_path("dotfiles.config-files")
-src_builder.add_path("dotfiles.modules")
-src_builder.add_path("dotfiles.scripts")
+    This is the SINGLE SOURCE OF TRUTH for source directory structure.
 
-src_builder.add_path("dotfiles.assets.wallpapers")
+    Args:
+        root: Root directory for source paths (typically project_root/src)
+        strict: If True, only registered paths can be accessed (catches typos)
 
-src = src_builder.build()
+    Returns:
+        PathsBuilder configured with all source subdirectories
+    """
+    builder = PathsBuilder(root, strict=strict)
+
+    # =====================First level directories ======================== #
+    builder.add_path("common")
+    builder.add_path("dotfiles")
+    builder.add_path("dotfiles-installer")
+
+    # =====================Second level directories ======================= #
+    builder.add_path("common.modules")
+    builder.add_path("common.tools")
+
+    builder.add_path("dotfiles.assets")
+    builder.add_path("dotfiles.config-files")
+    builder.add_path("dotfiles.modules")
+    builder.add_path("dotfiles.scripts")
+
+    # =====================Third level directories ======================== #
+    builder.add_path("dotfiles.assets.wallpapers")
+
+    return builder
