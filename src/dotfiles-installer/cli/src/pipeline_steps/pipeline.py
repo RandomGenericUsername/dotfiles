@@ -410,3 +410,83 @@ class ExtractWallpapersStep(PipelineStep):
         from src.pipeline_steps.utils import extract_wallpapers
 
         return extract_wallpapers(context)
+
+
+class InstallModuleStep(PipelineStep):
+    """Pipeline step to install hyprpaper."""
+
+    def __init__(
+        self,
+        module_name: str,
+        settings_overrides: dict[str, any] | None = None,
+    ):
+        self.module_name = module_name
+        self.settings_overrides = settings_overrides
+
+    @property
+    def step_id(self) -> str:
+        return "install_hyprpaper"
+
+    @property
+    def description(self) -> str:
+        return "Install hyprpaper"
+
+    @property
+    def timeout(self) -> float | None:
+        """Step timeout in seconds."""
+        return 300.0
+
+    @property
+    def critical(self) -> bool:
+        return True
+
+    def run(self, context: PipelineContext) -> PipelineContext:
+        """Install hyprpaper."""
+        from src.pipeline_steps.utils import install_component
+
+        return install_component(
+            context=context,
+            name=self.module_name,
+            component="module",
+            install_path=context.app_config.project.paths.install.modules[
+                self.module_name
+            ].path,
+            settings_overrides=self.settings_overrides,
+        )
+
+
+class InstallToolStep(PipelineStep):
+    """Pipeline step to install hyprpaper."""
+
+    def __init__(self, tool_name: str):
+        self.tool_name = tool_name
+
+    @property
+    def step_id(self) -> str:
+        return "install_hyprpaper"
+
+    @property
+    def description(self) -> str:
+        return "Install hyprpaper"
+
+    @property
+    def timeout(self) -> float | None:
+        """Step timeout in seconds."""
+        return 300.0
+
+    @property
+    def critical(self) -> bool:
+        return True
+
+    def run(self, context: PipelineContext) -> PipelineContext:
+        """Install hyprpaper."""
+        from src.pipeline_steps.utils import install_component
+
+        return install_component(
+            context=context,
+            name=self.tool_name,
+            component="tool",
+            install_path=context.app_config.project.paths.install.modules[
+                self.tool_name
+            ].path,
+        )

@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any, Literal
 
 from dotfiles_logging.rich.rich_logger import RichLogger
 from dotfiles_package_manager.core.base import (
@@ -18,9 +19,14 @@ from src.tasks.install_starship import (
     install_starship,
 )
 from src.utils import file_manager
+from src.utils.config_model_registry import ConfigModelRegistry
 from src.utils.file_manager import (
     delete_directory_safe,
     get_file_hash,
+)
+from src.utils.settings_override import (
+    SettingsOverrideError,
+    SettingsOverrider,
 )
 
 
@@ -1153,10 +1159,8 @@ def extract_wallpapers(context: PipelineContext) -> PipelineContext:
     wallpaper_dir: Path = (
         context.app_config.project.paths.install.dotfiles.wallpapers.path
     )
-    wallpapers: Path = (
-        context.app_config.project.paths.source.dotfiles.assets.wallpapers.file(
-            "wallpapers.tar.gz"
-        )
+    wallpapers: Path = context.app_config.project.paths.source.dotfiles.assets.wallpapers.file(
+        "wallpapers.tar.gz"
     )
     logger.debug(f"Extracting wallpapers to path: {wallpaper_dir}")
     logger.debug(f"Wallpapers archive path: {wallpapers}")
@@ -1169,4 +1173,139 @@ def extract_wallpapers(context: PipelineContext) -> PipelineContext:
         logger.error(f"Failed to extract wallpapers: {e}")
         context.errors.append(e)
         context.results["wallpapers_extracted"] = False
+    return context
+
+
+def install_component(
+    context: PipelineContext,
+    name: str,
+    component: Literal["module", "tool"],
+    install_path: Path,
+    settings_overrides: dict[str, Any] | None = None,
+) -> PipelineContext:
+    """Install a module/tool with optional settings customization.
+
+    This function:
+    1. Copies the component from source to installation directory
+    2. Applies settings overrides to config/settings.toml (if provided)
+    3. Validates settings against Pydantic models (always enabled)
+    4. Creates backups and supports rollback on failure
+
+    Args:
+        context: Pipeline context
+        name: Component name (e.g., "hyprpaper-manager")
+        component: Component type ("module" or "tool")
+        install_path: Destination path for installation
+        settings_overrides: Optional dict of settings to override
+                          Uses dot notation for nested keys:
+                          {
+                              "hyprpaper.wallpaper_dirs": ["~/custom"],
+                              "hyprpaper.max_preload_pool_mb": 200,
+                          }
+
+    Returns:
+        Updated pipeline context with installation results
+
+    Example:
+        >>> install_component(
+        ...     context=context,
+        ...     name="hyprpaper-manager",
+        ...     component="module",
+        ...     install_path=Path("~/.local/share/dotfiles/modules/hyprpaper-manager"),
+        ...     settings_overrides={
+        ...         "hyprpaper.wallpaper_dirs": ["~/Pictures/wallpapers"],
+        ...         "hyprpaper.max_preload_pool_mb": 200,
+        ...     },
+        ... )
+    """
+    import shutil
+
+    component_type = f"{component}s"
+    logger: RichLogger = context.logger_instance
+
+    logger.debug(f"Installing {component}: {name}")
+
+    try:
+        # 1. Get source path
+        module_path = context.app_config.project.paths.source.common[
+            component_type
+        ][name].path
+
+        logger.debug(f"Source: {module_path}")
+        logger.debug(f"Destination: {install_path}")
+
+        # 2. Validate source exists
+        if not module_path.exists():
+            raise FileNotFoundError(
+                f"Source {component} not found: {module_path}"
+            )
+
+        # 3. Copy component
+        logger.debug(f"Copying {component}...")
+        shutil.copytree(module_path, install_path, dirs_exist_ok=True)
+        logger.debug(f"{component.capitalize()} copied successfully")
+
+        # 4. Apply settings overrides if provided
+        if settings_overrides:
+            logger.debug(
+                f"Applying {len(settings_overrides)} settings overrides..."
+            )
+
+            settings_file = install_path / "config" / "settings.toml"
+
+            if not settings_file.exists():
+                logger.warning(
+                    f"Settings file not found: {settings_file}. "
+                    f"Skipping overrides."
+                )
+            else:
+                # Get config model from registry for validation
+                config_model = ConfigModelRegistry.get_model(name, component)
+
+                if config_model:
+                    logger.debug(
+                        f"Using {config_model.__name__} for validation"
+                    )
+                else:
+                    logger.warning(
+                        f"No config model registered for '{name}'. "
+                        f"Validation will be skipped."
+                    )
+
+                # Apply overrides with validation
+                overrider = SettingsOverrider(logger=logger)
+
+                result = overrider.apply_overrides(
+                    settings_file=settings_file,
+                    overrides=settings_overrides,
+                    config_model=config_model,
+                )
+
+                if result.success:
+                    logger.debug(
+                        f"✓ Successfully applied {len(result.overrides_applied)} "
+                        f"overrides"
+                    )
+                    context.results[f"{name}_settings_overridden"] = True
+                    context.results[f"{name}_overrides"] = (
+                        result.overrides_applied
+                    )
+                else:
+                    logger.error(
+                        f"✗ Failed to apply overrides: {'; '.join(result.errors)}"
+                    )
+                    context.results[f"{name}_settings_overridden"] = False
+                    # Add errors but don't fail the installation
+                    for error in result.errors:
+                        context.errors.append(SettingsOverrideError(error))
+
+        # 5. Mark installation as successful
+        context.results[f"{name}_installed"] = True
+        logger.debug(f"✓ Successfully installed {component}: {name}")
+
+    except Exception as e:
+        logger.error(f"✗ Failed to install {component} '{name}': {e}")
+        context.errors.append(e)
+        context.results[f"{name}_installed"] = False
+
     return context

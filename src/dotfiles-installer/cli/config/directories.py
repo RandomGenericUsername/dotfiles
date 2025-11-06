@@ -11,6 +11,7 @@ from src.config.project_root import get_project_root
 HOST_ROOT = Path.home()
 _host_builder = PathsBuilder(HOST_ROOT)
 _host_builder.add_path("cache", hidden=True)
+_host_builder.add_path("Wallpapers")
 host_builder = _host_builder
 host = _host_builder.build()
 
@@ -60,6 +61,7 @@ _install_builder.add_path("dependencies.pyenv")
 _install_builder.add_path("dependencies.oh-my-zsh")
 # ----------------------------- config ------------------------------ #
 _install_builder.add_path("dotfiles.config")
+_install_builder.add_path("dotfiles.config.hypr")
 # ----------------------------- scripts ----------------------------- #
 
 

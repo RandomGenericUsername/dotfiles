@@ -16,6 +16,7 @@ dependencies = [
     "shellingham>=1.5.0",
     "typer>=0.19.2",
     "pyfiglet>=1.0.4",
+    "tomli-w>=1.0.0",
 ]
 
 [dependency-groups]

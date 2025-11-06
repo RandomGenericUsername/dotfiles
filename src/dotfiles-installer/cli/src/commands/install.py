@@ -31,6 +31,7 @@ from src.pipeline_steps.pipeline import (
     DetectPackageManagerStep,
     ExtractWallpapersStep,
     HandlePreviousInstallStep,
+    InstallModuleStep,
     InstallNodejsStep,
     InstallNvmStep,
     InstallOhMyZshStep,
@@ -153,6 +154,19 @@ def install(
         app_config=config,
     )
 
+    module_settings_overrides = {
+        "hyprpaper-manager": {
+            "hyprpaper.wallpaper_dirs": [
+                str(context.app_config.project.paths.host["Wallpapers"].path)
+            ],
+            "hyprpaper.config_file": str(
+                context.app_config.project.paths.install.dotfiles.config.hypr.file(
+                    "hyprpaper.conf"
+                )
+            ),
+        }
+    }
+
     steps: list[TaskStep] = [
         PrintInstallationMessageStep(),
         CheckPreviousInstallStep(),
@@ -170,6 +184,13 @@ def install(
         InstallPythonStep(),
         InstallPipPackagesStep(),
         ExtractWallpapersStep(),
+        InstallModuleStep(module_name="logging"),
+        InstallModuleStep(
+            module_name="hyprpaper-manager",
+            settings_overrides=module_settings_overrides["hyprpaper-manager"],
+        ),
+        # InstallModuleStep(module_name="colorscheme-generator"),
+        # InstallModuleStep(module_name="wallpaper-effects-processor"),
     ]
     pipeline: Pipeline = Pipeline.create(steps)
     pipeline.run(context)
