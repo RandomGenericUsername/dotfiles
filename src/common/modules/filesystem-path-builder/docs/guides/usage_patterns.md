@@ -450,6 +450,89 @@ def test_processing(test_workspace):
 
 ---
 
+## Pattern 13: Strict Mode for Type Safety
+
+**Use Case:** Enforce explicit path registration to catch typos and ensure all paths are defined.
+
+```python
+from pathlib import Path
+from filesystem_path_builder import PathsBuilder
+
+def setup_production_paths(app_root: Path) -> "ManagedPathTree":
+    """Setup production paths with strict mode enabled."""
+    # Enable strict mode to catch typos
+    builder = PathsBuilder(app_root, strict=True)
+
+    # Explicitly register all allowed paths
+    builder.add_path("config", hidden=False)
+    builder.add_path("config.app", hidden=False)
+    builder.add_path("config.database", hidden=False)
+    builder.add_path("data", hidden=False)
+    builder.add_path("data.uploads", hidden=False)
+    builder.add_path("data.cache", hidden=False)
+    builder.add_path("logs", hidden=False)
+    builder.add_path("logs.access", hidden=False)
+    builder.add_path("logs.error", hidden=False)
+    builder.add_path("temp", hidden=False)
+
+    paths = builder.build()
+    paths.create()
+    return paths
+
+# Usage
+app_paths = setup_production_paths(Path("/var/app"))
+
+# Registered paths work
+config_file = app_paths.config.app / "settings.toml"  # OK
+log_file = app_paths.logs.error / "error.log"  # OK
+
+# Typos are caught immediately
+cache_file = app_paths.data.chache / "data.json"  # AttributeError: 'chache' not registered
+# This would have silently created wrong directory in flexible mode!
+```
+
+**Benefits:**
+- Catches typos at runtime
+- Enforces explicit path definitions
+- Self-documenting (all paths visible in one place)
+- Prevents accidental directory creation
+
+**Comparison with Flexible Mode:**
+
+```python
+# Flexible mode (default) - typos create wrong directories
+builder = PathsBuilder(Path("/var/app"))
+builder.add_path("config", hidden=False)
+builder.add_path("data", hidden=False)
+paths = builder.build()
+
+# Typo creates wrong directory silently
+cache = paths.data.chache  # Creates /var/app/data/chache (wrong!)
+# Should be: paths.data.cache
+
+# Strict mode - typos raise errors
+builder = PathsBuilder(Path("/var/app"), strict=True)
+builder.add_path("config", hidden=False)
+builder.add_path("data", hidden=False)
+builder.add_path("data.cache", hidden=False)  # Explicitly register
+paths = builder.build()
+
+# Typo raises AttributeError immediately
+cache = paths.data.chache  # AttributeError: Path 'chache' is not registered
+# Correct usage:
+cache = paths.data.cache  # OK
+```
+
+**When to Use:**
+- ✅ Production applications
+- ✅ Configuration management
+- ✅ Large projects with many paths
+- ✅ When you want to catch errors early
+- ❌ Exploratory scripts
+- ❌ When you need dynamic path navigation
+
+---
+
 ## Best Practices Summary
 
 ### 1. Choose the Right Tool

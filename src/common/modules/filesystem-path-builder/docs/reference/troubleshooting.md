@@ -449,6 +449,146 @@ paths = [base / f"file_{i}.txt" for i in range(1000000)]
 
 ---
 
+## Development Issues
+
+### Issue: Module Changes Not Reflected After `uv sync`
+
+**Problem:**
+
+You make changes to the filesystem-path-builder source code, but when you run your application, the changes aren't reflected. Running `uv sync` seems to overwrite your changes.
+
+```python
+# You added a new parameter to PathsBuilder
+builder = PathsBuilder(Path("/home/user"), strict=True)
+# TypeError: __init__() got an unexpected keyword argument 'strict'
+```
+
+**Cause:**
+
+The module is installed in **non-editable mode** instead of editable mode. This means the package files are copied to `site-packages` instead of being symlinked to the source directory.
+
+**Diagnosis:**
+
+Check if the module is installed in editable mode:
+
+```bash
+cat .venv/lib/python3.12/site-packages/filesystem_path_builder-*.dist-info/direct_url.json
+```
+
+If you see `"editable":false`, the module is not in editable mode.
+
+**Solution:**
+
+**Option 1: Fix `pyproject.toml` (Recommended)**
+
+Add `editable = true` to the `[tool.uv.sources]` section:
+
+```toml
+[tool.uv.sources]
+filesystem-path-builder = { path = "../../common/modules/filesystem-path-builder", editable = true }
+```
+
+Then run:
+```bash
+uv lock
+uv sync
+```
+
+**Option 2: Manual Reinstall**
+
+```bash
+# Uninstall the package
+uv pip uninstall filesystem-path-builder
+
+# Reinstall in editable mode
+uv pip install -e ../../common/modules/filesystem-path-builder --no-deps
+
+# Update lockfile
+uv lock
+```
+
+**Prevention:**
+
+Always use `editable = true` in `[tool.uv.sources]` for local path dependencies that you're actively developing.
+
+---
+
+### Issue: `--force-reinstall` Creates Non-Editable Install
+
+**Problem:**
+
+Using `uv pip install -e ... --force-reinstall` creates a non-editable install instead of an editable one.
+
+**Cause:**
+
+The `--force-reinstall` flag in `uv` causes the package to be copied instead of symlinked, even with the `-e` flag.
+
+**Solution:**
+
+Uninstall first, then install without `--force-reinstall`:
+
+```bash
+# Wrong - creates non-editable install
+uv pip install -e . --force-reinstall --no-deps
+
+# Correct - creates editable install
+uv pip uninstall -y filesystem-path-builder
+uv pip install -e . --no-deps
+```
+
+**Verification:**
+
+Check that the install is editable:
+
+```bash
+cat .venv/lib/python3.12/site-packages/filesystem_path_builder-*.dist-info/direct_url.json
+# Should show: "editable":true
+```
+
+---
+
+### Issue: Changes to Source Code Not Reflected
+
+**Problem:**
+
+You edit the source code but the changes don't appear when you import the module.
+
+**Possible Causes:**
+
+1. **Non-editable install** - See "Module Changes Not Reflected" above
+2. **Python bytecode cache** - Old `.pyc` files are being used
+3. **Module already imported** - Python caches imported modules
+
+**Solutions:**
+
+**For bytecode cache:**
+```bash
+# Clean all __pycache__ directories
+find . -type d -name "__pycache__" -exec rm -rf {} +
+
+# Or use Python's built-in
+python -Bc "import compileall; compileall.compile_dir('.', force=True)"
+```
+
+**For cached imports (in Python REPL or Jupyter):**
+```python
+# Reload the module
+import importlib
+import filesystem_path_builder
+importlib.reload(filesystem_path_builder)
+```
+
+**For persistent issues:**
+```bash
+# Complete cleanup
+uv pip uninstall filesystem-path-builder
+find . -type d -name "__pycache__" -exec rm -rf {} +
+find . -name "*.pyc" -delete
+uv pip install -e . --no-deps
+```
+
+---
+
 ## Getting Help
 
 If you encounter an issue not covered here:

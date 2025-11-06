@@ -17,6 +17,8 @@ The `filesystem-path-builder` module provides a flexible, type-safe system for m
 - **Type-Safe** - Full type hints with mypy compatibility
 - **Immutable Design** - Frozen dataclasses for thread safety
 - **Flexible Navigation** - Attribute chaining, bracket notation, and slash operator
+- **Strict Mode** - Optional enforcement of explicit path registration to catch typos
+- **Key Sanitization** - Automatic normalization of path keys for Python attribute access
 - **Hidden Directory Support** - Unix-style dot-prefixed directories
 - **Bulk Creation** - Create entire directory trees at once
 - **PathLib Integration** - Seamless integration with pathlib.Path
@@ -57,9 +59,17 @@ config_file = paths.config.app / "settings.json"
 
 # Explicit building with PathsBuilder
 builder = PathsBuilder(Path("/home/user"))
-builder.add("config.app", hidden=False)
-builder.add("data.cache", hidden=True)  # Creates .cache
+builder.add_path("config.app", hidden=False)
+builder.add_path("data.cache", hidden=True)  # Creates .cache
 paths = builder.build()
+
+# Strict mode for production (catches typos)
+builder = PathsBuilder(Path("/home/user"), strict=True)
+builder.add_path("config", hidden=False)
+builder.add_path("data", hidden=False)
+paths = builder.build()
+# paths.config.path  # OK - registered
+# paths.typo.path    # AttributeError - not registered
 
 # Bulk creation with ManagedPathTree
 managed = ManagedPathTree(
@@ -242,6 +252,6 @@ MIT License - See LICENSE file for details.
 
 ---
 
-**Last Updated:** 2025-10-29
-**Documentation Version:** 1.0
+**Last Updated:** 2025-11-06
+**Documentation Version:** 1.1
 **Module Version:** 0.1.0
