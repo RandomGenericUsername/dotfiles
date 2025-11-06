@@ -1,9 +1,8 @@
 """Tests for configuration."""
 
-import pytest
 from pathlib import Path
 
-from hyprpaper_manager.config.config import HyprpaperConfig, AppConfig
+from hyprpaper_manager.config.config import AppConfig, HyprpaperConfig
 
 
 def test_hyprpaper_config_defaults():

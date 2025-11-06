@@ -1,14 +1,14 @@
 """Tests for IPC client."""
 
-import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from hyprpaper_manager.ipc.client import HyprpaperIPC
+import pytest
+
 from hyprpaper_manager.core.exceptions import (
     HyprpaperNotRunningError,
-    HyprpaperIPCError,
 )
+from hyprpaper_manager.ipc.client import HyprpaperIPC
 
 
 @pytest.fixture

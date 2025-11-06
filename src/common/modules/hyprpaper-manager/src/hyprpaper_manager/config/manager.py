@@ -1,7 +1,5 @@
 """Configuration file management."""
 
-from pathlib import Path
-
 from hyprpaper_manager.config.config import HyprpaperConfig
 
 

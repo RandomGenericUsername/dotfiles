@@ -33,9 +33,7 @@ class MonitorManager:
                 timeout=self.timeout,
                 check=True,
             )
-            monitors_data: list[dict[str, Any]] = json.loads(
-                result.stdout
-            )
+            monitors_data: list[dict[str, Any]] = json.loads(result.stdout)
 
             return [
                 MonitorInfo(

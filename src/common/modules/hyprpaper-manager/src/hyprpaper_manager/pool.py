@@ -150,11 +150,11 @@ class WallpaperPool:
         Returns:
             List of wallpaper paths not displayed on any monitor
         """
-        return [
-            wp.path for wp in self._pool.values() if not wp.displayed
-        ]
+        return [wp.path for wp in self._pool.values() if not wp.displayed]
 
-    def get_oldest_wallpapers(self, exclude_displayed: bool = True) -> list[Path]:
+    def get_oldest_wallpapers(
+        self, exclude_displayed: bool = True
+    ) -> list[Path]:
         """Get wallpapers in LRU order (oldest first).
 
         Args:
@@ -240,9 +240,9 @@ class WallpaperPool:
             "preloaded_wallpapers": wallpapers,
             "total_size_mb": round(total_size, 2),
             "max_size_mb": max_size,
-            "usage_percent": round((total_size / max_size * 100), 1)
-            if max_size > 0
-            else 0,
+            "usage_percent": (
+                round((total_size / max_size * 100), 1) if max_size > 0 else 0
+            ),
             "max_single_wallpaper_mb": round(max_single, 2),
             "is_over_limit": self.is_over_limit(),
         }

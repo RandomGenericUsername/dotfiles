@@ -1,14 +1,13 @@
 """Tests for HyprpaperManager."""
 
-import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
+import pytest
+
 from hyprpaper_manager import HyprpaperManager
-from hyprpaper_manager.core.types import WallpaperMode, MonitorSelector
 from hyprpaper_manager.core.exceptions import (
     WallpaperNotFoundError,
-    HyprpaperNotRunningError,
 )
 
 

@@ -1,7 +1,7 @@
 MAKEFLAGS += --no-print-directory
 
 # Development tools
-.PHONY: format lint type-check test security-check safety-check clean dev-shell sync-check ensure-sync
+.PHONY: format lint type-check test security-check safety-check clean clean-venv dev-shell sync-check ensure-sync
 
 sync-check: ## Check if sync is needed
 	@if ! uv run python -c "import main" 2>/dev/null; then \
@@ -47,6 +47,12 @@ safety-check: ## Check dependencies for vulnerabilities
 clean: ## Clean cache files
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete 2>/dev/null || true
+
+clean-venv: ## Remove virtual environment
+	@echo "Removing virtual environment..."
+	@rm -rf .venv
+	@echo "✅ Virtual environment removed"
+	@echo "Run 'uv sync' to recreate"
 
 help: ## Show help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'

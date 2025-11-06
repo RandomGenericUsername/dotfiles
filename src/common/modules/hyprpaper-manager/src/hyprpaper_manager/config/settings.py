@@ -23,9 +23,7 @@ def _get_settings_files() -> list[str]:
         files.append(str(local_config))
 
     # User config
-    user_config = (
-        Path.home() / ".config/hyprpaper-manager/settings.toml"
-    )
+    user_config = Path.home() / ".config/hyprpaper-manager/settings.toml"
     if user_config.exists():
         files.append(str(user_config))
 

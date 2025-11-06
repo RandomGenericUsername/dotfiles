@@ -67,14 +67,12 @@ def status() -> None:
 
     except HyprpaperError as e:
         console.print(f"[red]Error: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
 def set(
-    wallpaper: Annotated[
-        str, typer.Argument(help="Wallpaper path or name")
-    ],
+    wallpaper: Annotated[str, typer.Argument(help="Wallpaper path or name")],
     monitor: Annotated[
         str, typer.Option("--monitor", "-m", help="Monitor name or 'all'")
     ] = "all",
@@ -90,7 +88,7 @@ def set(
         console.print(f"[green]✓[/green] Set wallpaper: {wallpaper}")
     except HyprpaperError as e:
         console.print(f"[red]Error: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -112,7 +110,7 @@ def random(
         )
     except HyprpaperError as e:
         console.print(f"[red]Error: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -126,14 +124,12 @@ def list() -> None:
             console.print("[yellow]No wallpapers found[/yellow]")
             return
 
-        console.print(
-            f"\n[bold]Found {len(wallpapers)} wallpapers:[/bold]\n"
-        )
+        console.print(f"\n[bold]Found {len(wallpapers)} wallpapers:[/bold]\n")
         for wp in wallpapers:
             console.print(f"  • {wp.name}")
     except HyprpaperError as e:
         console.print(f"[red]Error: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -168,14 +164,12 @@ def monitors() -> None:
         console.print(table)
     except HyprpaperError as e:
         console.print(f"[red]Error: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
 def preload(
-    wallpaper: Annotated[
-        str, typer.Argument(help="Wallpaper path or name")
-    ],
+    wallpaper: Annotated[str, typer.Argument(help="Wallpaper path or name")],
 ) -> None:
     """Preload wallpaper into memory."""
     try:
@@ -184,7 +178,7 @@ def preload(
         console.print(f"[green]✓[/green] Preloaded: {wallpaper}")
     except HyprpaperError as e:
         console.print(f"[red]Error: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
@@ -201,7 +195,7 @@ def unload(
         console.print(f"[green]✓[/green] Unloaded: {wallpaper}")
     except HyprpaperError as e:
         console.print(f"[red]Error: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 def main() -> None:

@@ -3,7 +3,7 @@ MAKEFLAGS += --no-print-directory
 # Standard Makefile for dotfiles-container-manager
 # Provides consistent development workflows
 
-.PHONY: help sync-check ensure-sync dev-shell format lint type-check test test-cov clean install build pre-commit-install pre-commit-run all-checks
+.PHONY: help sync-check ensure-sync dev-shell format lint type-check test test-cov clean clean-venv install build pre-commit-install pre-commit-run all-checks
 
 help: ## Show this help message
 	@echo "Available commands:"
@@ -67,6 +67,12 @@ clean: ## Clean cache files and build artifacts
 	@find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
 	@rm -rf build/ dist/ htmlcov/ .coverage 2>/dev/null || true
 	@echo "✅ Cleanup complete"
+
+clean-venv: ## Remove virtual environment
+	@echo "Removing virtual environment..."
+	@rm -rf .venv
+	@echo "✅ Virtual environment removed"
+	@echo "Run 'make install' or 'uv sync' to recreate"
 
 install: ## Install project in editable mode
 	@echo "Installing project..."

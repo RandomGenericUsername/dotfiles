@@ -118,9 +118,7 @@ class HyprpaperIPC:
         if not output:
             return []
         return [
-            Path(line.strip())
-            for line in output.split("\n")
-            if line.strip()
+            Path(line.strip()) for line in output.split("\n") if line.strip()
         ]
 
     def listactive(self) -> dict[str, Path]:

@@ -1,7 +1,6 @@
 """Tests for configuration manager."""
 
 import pytest
-from pathlib import Path
 
 from hyprpaper_manager.config.config import HyprpaperConfig
 from hyprpaper_manager.config.manager import ConfigManager
