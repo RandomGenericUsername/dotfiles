@@ -97,6 +97,9 @@ hyprpaper-manager set mountain.jpg
 hyprpaper-manager set ~/Pictures/beach.png --monitor DP-1
 hyprpaper-manager set pattern.png --mode tile
 
+# Set wallpaper with custom directory
+hyprpaper-manager set wallpaper.jpg -d ~/my-wallpapers -d ~/Downloads
+
 # Set random wallpaper
 hyprpaper-manager random
 hyprpaper-manager random --monitor focused
@@ -104,8 +107,30 @@ hyprpaper-manager random --monitor focused
 # List wallpapers
 hyprpaper-manager list
 
+# List wallpapers from custom directories
+hyprpaper-manager list -d ~/my-wallpapers -d ~/Downloads
+
 # List monitors
 hyprpaper-manager monitors
+
+# Preload wallpaper
+hyprpaper-manager preload wallpaper.jpg
+
+# Unload wallpaper
+hyprpaper-manager unload wallpaper.jpg
+hyprpaper-manager unload unused
+hyprpaper-manager unload all
+```
+
+**CLI Options:**
+
+All wallpaper-related commands (`set`, `random`, `list`, `preload`, `unload`) support the `--wallpaper-dir` / `-d` option to override configured wallpaper directories:
+
+```bash
+# Use custom directories instead of configured ones
+hyprpaper-manager set mountain.jpg -d ~/custom-wallpapers
+hyprpaper-manager random -d ~/wallpapers -d ~/Downloads
+hyprpaper-manager list -d ~/Pictures
 ```
 
 ## Configuration
@@ -181,6 +206,19 @@ make pre-commit-install
 ## API Reference
 
 See [docs/api.md](docs/api.md) for detailed API documentation.
+
+## Changelog
+
+### Recent Fixes
+
+**Bug Fixes:**
+- Fixed critical bug where wallpapers were never actually preloaded to hyprpaper (wallpaper was added to pool tracking before checking if it needed preloading, causing the preload check to always pass)
+- Fixed IPC response parsing to properly handle "no wallpapers loaded" and "no wallpapers active" responses from hyprpaper
+- Fixed black background issue on first command (caused by wallpapers not being preloaded)
+
+**Enhancements:**
+- Added `--wallpaper-dir` / `-d` CLI option to all wallpaper-related commands (`set`, `random`, `list`, `preload`, `unload`) to override configured wallpaper directories
+- Improved CLI flexibility for users who don't want to rely on configuration files
 
 ## License
 

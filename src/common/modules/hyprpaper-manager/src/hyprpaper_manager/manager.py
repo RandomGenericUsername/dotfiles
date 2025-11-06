@@ -124,11 +124,12 @@ class HyprpaperManager:
         # Get wallpaper size and validate
         size_mb = self._get_wallpaper_size_mb(wallpaper_path)
 
-        # Add to pool (validates size limits)
+        # Validate size limits before preloading
         self.pool.add(wallpaper_path, size_mb)
 
-        # Preload if not already loaded
-        if not self.pool.contains(wallpaper_path):
+        # Preload if not already loaded in hyprpaper
+        loaded_wallpapers = self.ipc.listloaded()
+        if wallpaper_path not in loaded_wallpapers:
             self.ipc.preload(wallpaper_path)
 
         # Resolve monitor(s)

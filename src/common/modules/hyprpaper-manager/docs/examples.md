@@ -398,24 +398,58 @@ hyprpaper-manager set mountain.jpg
 hyprpaper-manager set ~/Pictures/beach.png --monitor DP-1
 hyprpaper-manager set pattern.png --mode tile
 
+# Set wallpaper with custom directory
+hyprpaper-manager set wallpaper.jpg -d ~/my-wallpapers
+hyprpaper-manager set wallpaper.jpg -d ~/wallpapers -d ~/Downloads
+
 # Random wallpaper
 hyprpaper-manager random
 hyprpaper-manager random --monitor focused
+hyprpaper-manager random -d ~/custom-wallpapers
 
 # List wallpapers
 hyprpaper-manager list
+
+# List wallpapers from custom directories
+hyprpaper-manager list -d ~/my-wallpapers
+hyprpaper-manager list -d ~/wallpapers -d ~/Downloads
 
 # List monitors
 hyprpaper-manager monitors
 
 # Preload wallpaper
 hyprpaper-manager preload wallpaper.jpg
+hyprpaper-manager preload wallpaper.jpg -d ~/custom-wallpapers
 
 # Unload wallpaper
 hyprpaper-manager unload wallpaper.jpg
 hyprpaper-manager unload unused
 hyprpaper-manager unload all
 ```
+
+### Custom Wallpaper Directories
+
+All wallpaper-related commands support the `--wallpaper-dir` / `-d` option to override configured directories:
+
+```bash
+# Override wallpaper directories for a single command
+hyprpaper-manager set mountain.jpg -d ~/custom-wallpapers
+
+# Use multiple custom directories
+hyprpaper-manager random -d ~/wallpapers -d ~/Downloads -d ~/Pictures
+
+# List wallpapers from specific directory
+hyprpaper-manager list -d ~/my-wallpapers
+
+# Preload from custom directory
+hyprpaper-manager preload wallpaper.jpg -d ~/Downloads
+```
+
+This is useful when:
+- You want to use wallpapers from a temporary location
+- You don't want to modify the configuration file
+- You're testing wallpapers from different directories
+- You're using the CLI in scripts with dynamic paths
 
 ## Integration with Hyprland
 

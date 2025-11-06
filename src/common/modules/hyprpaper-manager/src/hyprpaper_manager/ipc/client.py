@@ -115,15 +115,19 @@ class HyprpaperIPC:
     def listloaded(self) -> list[Path]:
         """List loaded wallpapers."""
         output = self._execute("listloaded")
-        if not output:
+        if not output or output == "no wallpapers loaded":
             return []
         return [
-            Path(line.strip()) for line in output.split("\n") if line.strip()
+            Path(line.strip())
+            for line in output.split("\n")
+            if line.strip() and line.strip() != "no wallpapers loaded"
         ]
 
     def listactive(self) -> dict[str, Path]:
         """List active wallpapers per monitor."""
         output = self._execute("listactive")
+        if not output or output == "no wallpapers active":
+            return {}
         result = {}
         for line in output.split("\n"):
             if "=" in line:
