@@ -25,25 +25,61 @@ from pathlib import Path
 from filesystem_path_builder.pathtree import PathTree
 
 
+def _sanitize_key(key: str) -> str:
+    """Sanitize a path key for Python attribute access.
+
+    Converts the key to a Python-friendly format:
+    - Lowercase
+    - Spaces → underscores
+    - Hyphens → underscores
+    - Dots preserved (for nesting)
+
+    Args:
+        key: Original path key (e.g., "dotfiles.My Config-Files")
+
+    Returns:
+        Sanitized key (e.g., "dotfiles.my_config_files")
+
+    Example:
+        >>> _sanitize_key("dotfiles.Oh-My-Zsh")
+        'dotfiles.oh_my_zsh'
+        >>> _sanitize_key("Wallpapers Directory")
+        'wallpapers_directory'
+    """
+    # Split by dots to preserve nesting
+    parts = key.split(".")
+    # Sanitize each component: lowercase, spaces/hyphens → underscores
+    sanitized_parts = [
+        part.lower().replace(" ", "_").replace("-", "_") for part in parts
+    ]
+    # Rejoin with dots
+    return ".".join(sanitized_parts)
+
+
 @dataclass
 class PathDefinition:
     """Definition of a single path with its properties.
 
-    The key is normalized (hyphens replaced with underscores) for Python
+    The key is normalized (lowercase, spaces/hyphens → underscores) for Python
     attribute access, while original_key preserves the original component
     names for directory creation.
 
-    This allows defining paths like "dotfiles.oh-my-zsh" (with hyphens)
-    while accessing them via attributes like dotfiles.oh_my_zsh
-    (with underscores).
+    This allows defining paths like "dotfiles.Oh-My Zsh" (with mixed case,
+    spaces, hyphens) while accessing them via attributes like
+    dotfiles.oh_my_zsh (with underscores).
     """
 
-    key: str  # Normalized key for registry lookups (underscores)
-    original_key: str  # Original key as provided (may have hyphens)
+    key: str  # Normalized key for registry lookups (lowercase, underscores)
+    original_key: (
+        str  # Original key as provided (preserves case, spaces, hyphens)
+    )
     hidden: bool = False
 
     def get_parts(self) -> list[str]:
-        """Get path components from original key (preserves hyphens)."""
+        """Get path components from original key.
+
+        Preserves case, spaces, hyphens.
+        """
         return self.original_key.split(".")
 
 
@@ -54,37 +90,54 @@ class PathsBuilder:
     specifying which ones should be hidden. It builds a namespace object
     that provides attribute access to all defined paths.
 
+    The builder supports strict mode, which enforces that only registered
+    paths can be accessed. This helps catch typos and ensures all paths
+    are explicitly defined.
+
     Example:
+        >>> # Flexible mode (default) - allows dynamic navigation
         >>> builder = PathsBuilder(Path.home() / "dotfiles")
         >>> builder.add_path("dotfiles", hidden=True)
         >>> builder.add_path("dotfiles.starship", hidden=True)
-        >>> builder.add_path("scripts", hidden=False)
         >>> paths = builder.build()
-        >>> paths.dotfiles.path
+        >>> paths.dotfiles.path  # Registered path
         PosixPath('/home/user/.dotfiles')
-        >>> paths.scripts.path
+        >>> paths.scripts.path  # Dynamic navigation allowed
         PosixPath('/home/user/dotfiles/scripts')
+
+        >>> # Strict mode - only registered paths allowed
+        >>> builder = PathsBuilder(Path.home() / "dotfiles", strict=True)
+        >>> builder.add_path("dotfiles", hidden=True)
+        >>> paths = builder.build()
+        >>> paths.dotfiles.path  # OK - registered
+        PosixPath('/home/user/.dotfiles')
+        >>> paths.scripts.path  # Error - not registered
+        AttributeError: Path 'scripts' is not registered...
     """
 
-    def __init__(self, root: Path):
+    def __init__(self, root: Path, strict: bool = False):
         """Initialize builder with root directory.
 
         Args:
             root: Root directory for all paths
+            strict: If True, only registered paths can be accessed.
+                   If False (default), allows dynamic navigation.
         """
         self.root = Path(root)
+        self.strict = strict
         self.definitions: dict[str, PathDefinition] = {}
 
     def add_path(self, key: str, hidden: bool = False) -> "PathsBuilder":
         """Add a path definition.
 
-        The key is normalized (hyphens replaced with underscores) for Python
-        attribute access, but the original component names are preserved for
-        directory creation. This allows using hyphens in path names while
-        accessing them via Python attributes with underscores.
+        The key is automatically sanitized (lowercase, spaces/hyphens →
+        underscores) for Python attribute access, but the original
+        component names are preserved for directory creation. This allows
+        using natural names with mixed case, spaces, and hyphens while
+        accessing them via clean Python attributes.
 
         Args:
-            key: Dot-separated path key (e.g., "dotfiles.oh-my-zsh")
+            key: Dot-separated path key (e.g., "dotfiles.Oh-My Zsh")
             hidden: Whether this directory should be hidden (prefixed with .)
 
         Returns:
@@ -93,14 +146,18 @@ class PathsBuilder:
         Example:
             >>> builder = PathsBuilder(Path.home() / "dotfiles")
             >>> builder.add_path("dotfiles", hidden=True)
-            >>> builder.add_path("dotfiles.oh-my-zsh", hidden=True)
+            >>> builder.add_path("dotfiles.Oh-My Zsh", hidden=True)
+            >>> builder.add_path("Wallpapers Directory")
             >>> paths = builder.build()
-            >>> # Access with underscores, creates with hyphens
+            >>> # Access with sanitized names (lowercase, underscores)
             >>> paths.dotfiles.oh_my_zsh.path
-            PosixPath('/home/user/.dotfiles/.oh-my-zsh')
+            PosixPath('/home/user/.dotfiles/.Oh-My Zsh')
+            >>> paths.wallpapers_directory.path
+            PosixPath('/home/user/dotfiles/Wallpapers Directory')
         """
-        # Normalize key for registry lookups (hyphens → underscores)
-        normalized_key = key.replace("-", "_")
+        # Sanitize key for registry lookups
+        # (lowercase, spaces/hyphens → underscores)
+        normalized_key = _sanitize_key(key)
         self.definitions[normalized_key] = PathDefinition(
             key=normalized_key, original_key=key, hidden=hidden
         )
@@ -129,6 +186,7 @@ class PathsBuilder:
             rel=Path(),
             hidden=False,
             _registry=self.definitions.copy(),
+            _strict=self.strict,
         )
 
     def create(self) -> list[Path]:
@@ -159,8 +217,8 @@ class PathsBuilder:
             for i in range(len(parts)):
                 # Build key for this level (from original parts)
                 level_key_original = ".".join(parts[: i + 1])
-                # Normalize for registry lookup
-                level_key = level_key_original.replace("-", "_")
+                # Sanitize for registry lookup
+                level_key = _sanitize_key(level_key_original)
                 component = parts[i]
 
                 # Check if this level is marked as hidden
@@ -188,42 +246,41 @@ class ManagedPathTree(PathTree):
     bulk directory creation capability. This is the recommended way to
     manage directory structures.
 
+    Supports strict mode to enforce that only registered paths can be accessed,
+    helping catch typos and ensuring all paths are explicitly defined.
+
     Attributes:
         base: The root directory for this PathTree
         rel: The relative path from base to current position
         hidden: Whether this directory should be hidden (prefixed with .)
         _registry: Internal registry of all path definitions
+        _strict: If True, only registered paths can be accessed
 
     Example:
+        >>> # Flexible mode (default)
         >>> builder = PathsBuilder(Path.home() / "dotfiles")
         >>> builder.add_path("dotfiles", hidden=True)
         >>> builder.add_path("dotfiles.starship", hidden=True)
-        >>> builder.add_path("config", hidden=True)
         >>> paths = builder.build()
-        >>>
-        >>> # Create all registered directories at once
-        >>> paths.create()
-        >>>
-        >>> # Navigate using attributes
-        >>> paths.dotfiles.starship.path
+        >>> paths.dotfiles.starship.path  # Registered
         PosixPath('/home/user/.dotfiles/.starship')
-        >>>
-        >>> # Use as a path
-        >>> str(paths.dotfiles)
-        '/home/user/.dotfiles'
-        >>>
-        >>> # Access files
-        >>> paths.dotfiles.starship.file("starship.toml")
-        PosixPath('/home/user/.dotfiles/.starship/starship.toml')
-        >>>
-        >>> # Use in os functions (via __fspath__)
-        >>> import shutil
-        >>> shutil.copy("file.txt", paths.dotfiles)
+        >>> paths.scripts.path  # Dynamic navigation allowed
+        PosixPath('/home/user/dotfiles/scripts')
+
+        >>> # Strict mode
+        >>> builder = PathsBuilder(Path.home() / "dotfiles", strict=True)
+        >>> builder.add_path("dotfiles", hidden=True)
+        >>> paths = builder.build()
+        >>> paths.dotfiles.path  # OK - registered
+        PosixPath('/home/user/.dotfiles')
+        >>> paths.scripts.path  # Error - not registered
+        AttributeError: Path 'scripts' is not registered...
     """
 
     _registry: dict[str, PathDefinition] = field(
         default_factory=dict, repr=False, compare=False
     )
+    _strict: bool = field(default=False, repr=False, compare=False)
 
     def create(self) -> list[Path]:
         """Create all registered directories on the filesystem.
@@ -255,8 +312,8 @@ class ManagedPathTree(PathTree):
             for i in range(len(parts)):
                 # Build key for this level (from original parts)
                 level_key_original = ".".join(parts[: i + 1])
-                # Normalize for registry lookup
-                level_key = level_key_original.replace("-", "_")
+                # Sanitize for registry lookup
+                level_key = _sanitize_key(level_key_original)
                 component = parts[i]
 
                 # Check if this level is marked as hidden in registry
@@ -370,11 +427,17 @@ class ManagedPathTree(PathTree):
         Overrides PathTree's __getattr__ to return ManagedPathTree
         instead of PathTree, preserving the registry.
 
+        In strict mode, raises AttributeError if the path is not registered.
+
         Args:
             name: Directory name (trailing underscore removed for keywords)
 
         Returns:
             New ManagedPathTree instance pointing to the subdirectory
+
+        Raises:
+            AttributeError: If strict mode is enabled and path is not
+                registered
 
         Example:
             >>> paths = builder.build()
@@ -385,11 +448,27 @@ class ManagedPathTree(PathTree):
 
         seg = _clean_segment(name)
         new_rel = self.rel / seg
+
+        # In strict mode, check if path is registered
+        if self._strict:
+            # Convert path to dot-separated key
+            key = ".".join(new_rel.parts)
+            if key not in self._registry:
+                # Build helpful error message
+                available = sorted(self._registry.keys())
+                raise AttributeError(
+                    f"Path '{key}' is not registered in strict mode. "
+                    f"Available registered paths: {available}. "
+                    f"Register it in directories.py with: "
+                    f"builder.add_path('{key}')"
+                )
+
         return ManagedPathTree(
             base=self.base,
             rel=new_rel,
             hidden=self._get_hidden_status(new_rel),
             _registry=self._registry,
+            _strict=self._strict,
         )
 
     def __getitem__(self, key: str | Path) -> "ManagedPathTree":
@@ -398,11 +477,16 @@ class ManagedPathTree(PathTree):
         Overrides PathTree's __getitem__ to return ManagedPathTree
         instead of PathTree, preserving the registry.
 
+        In strict mode, raises KeyError if the path is not registered.
+
         Args:
             key: Directory name as string or Path
 
         Returns:
             New ManagedPathTree instance pointing to the subdirectory
+
+        Raises:
+            KeyError: If strict mode is enabled and path is not registered
 
         Example:
             >>> paths = builder.build()
@@ -410,11 +494,25 @@ class ManagedPathTree(PathTree):
             ManagedPathTree(base=/home/user/dotfiles, rel=dotfiles/starship)
         """
         new_rel = self.rel / str(key)
+
+        # In strict mode, check if path is registered
+        if self._strict:
+            path_key = ".".join(new_rel.parts)
+            if path_key not in self._registry:
+                available = sorted(self._registry.keys())
+                raise KeyError(
+                    f"Path '{path_key}' is not registered in strict mode. "
+                    f"Available registered paths: {available}. "
+                    f"Register it in directories.py with: "
+                    f"builder.add_path('{path_key}')"
+                )
+
         return ManagedPathTree(
             base=self.base,
             rel=new_rel,
             hidden=self._get_hidden_status(new_rel),
             _registry=self._registry,
+            _strict=self._strict,
         )
 
     def __truediv__(self, other: str | Path) -> "ManagedPathTree":
@@ -423,11 +521,16 @@ class ManagedPathTree(PathTree):
         Overrides PathTree's __truediv__ to return ManagedPathTree
         instead of PathTree, preserving the registry.
 
+        In strict mode, raises ValueError if the path is not registered.
+
         Args:
             other: Directory name as string or Path
 
         Returns:
             New ManagedPathTree instance pointing to the subdirectory
+
+        Raises:
+            ValueError: If strict mode is enabled and path is not registered
 
         Example:
             >>> paths = builder.build()
@@ -435,9 +538,23 @@ class ManagedPathTree(PathTree):
             ManagedPathTree(base=/home/user/dotfiles, rel=dotfiles/starship)
         """
         new_rel = self.rel / str(other)
+
+        # In strict mode, check if path is registered
+        if self._strict:
+            path_key = ".".join(new_rel.parts)
+            if path_key not in self._registry:
+                available = sorted(self._registry.keys())
+                raise ValueError(
+                    f"Path '{path_key}' is not registered in strict mode. "
+                    f"Available registered paths: {available}. "
+                    f"Register it in directories.py with: "
+                    f"builder.add_path('{path_key}')"
+                )
+
         return ManagedPathTree(
             base=self.base,
             rel=new_rel,
             hidden=self._get_hidden_status(new_rel),
             _registry=self._registry,
+            _strict=self._strict,
         )

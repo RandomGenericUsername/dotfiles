@@ -621,12 +621,13 @@ class AppConfig(BaseModel):
         # Create new builder with user's installation directory
         # Copy all path definitions from directories.install_builder
         # This ensures directories.py is the SINGLE SOURCE OF TRUTH
-        builder = PathsBuilder(install_root)
+        # Use strict=True to match the original builder's strict mode
+        builder = PathsBuilder(install_root, strict=True)
         for (
             _key,
             definition,
         ) in directories.install_builder.definitions.items():
-            # Use original_key to preserve hyphens in directory names
+            # Use original_key to preserve hyphens, spaces, and case in directory names
             builder.add_path(definition.original_key, hidden=definition.hidden)
 
         # Build returns ManagedPathTree with create() and navigation

@@ -11,7 +11,6 @@ from src.config.project_root import get_project_root
 HOST_ROOT = Path.home()
 _host_builder = PathsBuilder(HOST_ROOT)
 _host_builder.add_path("cache", hidden=True)
-_host_builder.add_path("Wallpapers")
 host_builder = _host_builder
 host = _host_builder.build()
 
@@ -36,7 +35,8 @@ _PLACEHOLDER_INSTALL_ROOT = Path.home() / ".tmp" / "dotfiles-placeholder"
 # ======================== Base directory ================================= #
 
 # Placeholder builder - WILL BE REPLACED by AppConfig.model_post_init()
-_install_builder = PathsBuilder(_PLACEHOLDER_INSTALL_ROOT)
+# Use strict=True to catch typos in dotfiles structure
+_install_builder = PathsBuilder(_PLACEHOLDER_INSTALL_ROOT, strict=True)
 
 
 # =====================First level directories ======================== #
