@@ -15,6 +15,7 @@ PROJECTS=(
     "src/common/modules/colorscheme-generator"
     "src/common/modules/container-manager"
     "src/common/modules/filesystem-path-builder"
+    "src/common/modules/hyprpaper-manager"
     "src/common/modules/logging"
     "src/common/modules/package-manager"
     "src/common/modules/pipeline"
