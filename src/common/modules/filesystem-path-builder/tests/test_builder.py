@@ -4,10 +4,9 @@ import tempfile
 from pathlib import Path
 
 from filesystem_path_builder import (
+    ManagedPathTree,
     PathDefinition,
-    PathNamespace,
     PathsBuilder,
-    PathTree,
 )
 
 
@@ -46,30 +45,6 @@ class TestPathDefinition:
             key="foo.bar_baz", original_key="foo.bar-baz", hidden=False
         )
         assert pd.get_parts() == ["foo", "bar-baz"]
-
-
-class TestPathNamespace:
-    """Test PathNamespace class."""
-
-    def test_creation(self):
-        """Test PathNamespace creation."""
-        ns = PathNamespace()
-        assert isinstance(ns, PathNamespace)
-
-    def test_attribute_setting(self):
-        """Test setting attributes on PathNamespace."""
-        ns = PathNamespace()
-        paths = PathTree.from_str("/tmp")
-        ns.foo = paths
-        assert ns.foo == paths
-
-    def test_attribute_access(self):
-        """Test accessing attributes on PathNamespace."""
-        ns = PathNamespace()
-        paths = PathTree.from_str("/tmp")
-        ns.foo = paths
-        assert hasattr(ns, "foo")
-        assert ns.foo.path == Path("/tmp")
 
 
 class TestPathsBuilder:
@@ -161,8 +136,9 @@ class TestPathsBuilder:
         assert ns.config.hidden is True
         assert ns.scripts.hidden is False
 
-        # Paths are correct
-        assert ns.dotfiles.path == Path("/tmp/dotfiles")
+        # Paths are correct (hidden paths have dot prefix)
+        assert ns.dotfiles.path == Path("/tmp/.dotfiles")
+        assert ns.config.path == Path("/tmp/.config")
         assert ns.scripts.path == Path("/tmp/scripts")
 
 
@@ -222,7 +198,7 @@ class TestPathsBuilderEdgeCases:
         """Test building with no paths added."""
         builder = PathsBuilder(Path("/tmp"))
         ns = builder.build()
-        assert isinstance(ns, PathNamespace)
+        assert isinstance(ns, ManagedPathTree)
 
     def test_duplicate_paths(self):
         """Test adding duplicate paths (should overwrite)."""
@@ -240,12 +216,11 @@ class TestPathsBuilderEdgeCases:
         builder.add_path("foo")
         ns = builder.build()
 
-        # First definition wins for top-level attribute
-        # (due to `if not hasattr`)
-        # "foo.bar" was added first, so ns.foo points to /tmp/foo/bar
-        assert ns.foo.path == Path("/tmp/foo/bar")
-        # Can navigate from there
-        assert ns.foo.baz.path == Path("/tmp/foo/bar/baz")
+        # Last definition wins (foo was added last)
+        assert ns.foo.path == Path("/tmp/foo")
+        # Can still navigate to nested paths
+        assert ns.foo.bar.path == Path("/tmp/foo/bar")
+        assert ns.foo.bar.baz.path == Path("/tmp/foo/bar/baz")
 
     def test_root_with_tilde(self):
         """Test builder with ~ in root."""
@@ -309,35 +284,47 @@ class TestPathsBuilderEdgeCases:
             assert all(isinstance(p, Path) for p in created)
 
 
-class TestHyphenNormalization:
-    """Test hyphen-to-underscore normalization feature."""
+class TestNoSanitization:
+    """Test that keys are stored exactly as provided without sanitization.
 
-    def test_add_path_normalizes_hyphens(self):
-        """Test that add_path normalizes hyphens to underscores in registry."""
+    The filesystem-path-builder module does NOT automatically sanitize
+    keys. Keys are stored exactly as registered, allowing both hyphens
+    and underscores to coexist as separate paths.
+
+    This design provides:
+    - Explicit control over path naming
+    - No collision between similar names (e.g., "my-config" vs
+      "my_config")
+    - Choice between attribute access (underscores) or bracket notation
+      (any name)
+    """
+
+    def test_add_path_stores_original_key(self):
+        """Keys are stored exactly as provided without modification."""
         builder = PathsBuilder(Path("/tmp"))
         builder.add_path("foo.bar-baz")
 
-        # Registry key should be normalized
-        assert "foo.bar_baz" in builder.definitions
-        # Original key should be preserved
-        assert builder.definitions["foo.bar_baz"].original_key == "foo.bar-baz"
+        # Registry key should be exactly as provided (no normalization)
+        assert "foo.bar-baz" in builder.definitions
+        # Original key should match the registry key
+        assert builder.definitions["foo.bar-baz"].original_key == "foo.bar-baz"
 
-    def test_path_resolution_with_hyphens(self):
-        """Test that paths with hyphens resolve correctly."""
+    def test_bracket_access_with_hyphens(self):
+        """Bracket notation works with hyphenated keys (exact match)."""
         with tempfile.TemporaryDirectory() as tmpdir:
             builder = PathsBuilder(Path(tmpdir))
             builder.add_path("dotfiles.oh-my-zsh", hidden=True)
             paths = builder.build()
 
-            # Access with underscores
-            resolved_path = paths.dotfiles.oh_my_zsh.path
+            # Access with bracket notation using exact key
+            resolved_path = paths.dotfiles["oh-my-zsh"].path
 
             # Should resolve to hyphenated directory name
             expected = Path(tmpdir) / "dotfiles" / ".oh-my-zsh"
             assert resolved_path == expected
 
     def test_create_with_hyphens(self):
-        """Test that create() uses original hyphenated names."""
+        """Directory names preserve hyphens exactly as registered."""
         with tempfile.TemporaryDirectory() as tmpdir:
             builder = PathsBuilder(Path(tmpdir))
             builder.add_path("dotfiles.oh-my-zsh", hidden=True)
@@ -374,8 +361,8 @@ class TestHyphenNormalization:
             )
             paths = builder.build()
 
-            # Access with underscores
-            resolved = paths.my_dotfiles.oh_my_zsh.custom_plugins.path
+            # Access with bracket notation using exact keys
+            resolved = paths["my-dotfiles"]["oh-my-zsh"]["custom-plugins"].path
 
             # Should resolve to hyphenated names
             expected = (
@@ -387,20 +374,44 @@ class TestHyphenNormalization:
             paths.create()
             assert expected.exists()
 
-    def test_mixed_hyphens_and_underscores(self):
-        """Test paths with both hyphens and underscores."""
+    def test_attribute_access_with_underscores(self):
+        """Attribute access requires Python-friendly names (underscores)."""
         with tempfile.TemporaryDirectory() as tmpdir:
             builder = PathsBuilder(Path(tmpdir))
-            # Original has both hyphens and underscores
-            builder.add_path("my_config.oh-my-zsh")
+            # Register with underscores (Python-friendly)
+            builder.add_path("my_config.oh_my_zsh")
             paths = builder.build()
 
-            # Access with underscores (hyphens converted)
+            # Access with attribute notation
             resolved = paths.my_config.oh_my_zsh.path
 
             # Should preserve original naming
-            expected = Path(tmpdir) / "my_config" / "oh-my-zsh"
+            expected = Path(tmpdir) / "my_config" / "oh_my_zsh"
             assert resolved == expected
 
             paths.create()
             assert expected.exists()
+
+    def test_separate_hyphen_and_underscore_paths(self):
+        """Hyphenated and underscored paths are separate (no collision)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            builder = PathsBuilder(Path(tmpdir))
+            # Register both as separate paths
+            builder.add_path("modules.my-module")
+            builder.add_path("modules.my_module")
+            paths = builder.build()
+
+            # Both should exist as separate paths
+            hyphen_path = paths.modules["my-module"].path
+            underscore_path = paths.modules.my_module.path
+
+            # Should be different paths
+            expected_hyphen = Path(tmpdir) / "modules" / "my-module"
+            expected_underscore = Path(tmpdir) / "modules" / "my_module"
+            assert hyphen_path == expected_hyphen
+            assert underscore_path == expected_underscore
+
+            # Create both
+            paths.create()
+            assert expected_hyphen.exists()
+            assert expected_underscore.exists()

@@ -130,14 +130,12 @@ class PathsBuilder:
     def add_path(self, key: str, hidden: bool = False) -> "PathsBuilder":
         """Add a path definition.
 
-        The key is automatically sanitized (lowercase, spaces/hyphens →
-        underscores) for Python attribute access, but the original
-        component names are preserved for directory creation. This allows
-        using natural names with mixed case, spaces, and hyphens while
-        accessing them via clean Python attributes.
+        The key is stored exactly as provided. For attribute access, use
+        Python-friendly names (lowercase, underscores). For paths with
+        hyphens, spaces, or mixed case, use bracket notation.
 
         Args:
-            key: Dot-separated path key (e.g., "dotfiles.Oh-My Zsh")
+            key: Dot-separated path key (e.g., "dotfiles.config")
             hidden: Whether this directory should be hidden (prefixed with .)
 
         Returns:
@@ -146,20 +144,19 @@ class PathsBuilder:
         Example:
             >>> builder = PathsBuilder(Path.home() / "dotfiles")
             >>> builder.add_path("dotfiles", hidden=True)
-            >>> builder.add_path("dotfiles.Oh-My Zsh", hidden=True)
-            >>> builder.add_path("Wallpapers Directory")
+            >>> builder.add_path("dotfiles.oh_my_zsh", hidden=True)
+            >>> builder.add_path("dotfiles.oh-my-zsh")  # Different path!
             >>> paths = builder.build()
-            >>> # Access with sanitized names (lowercase, underscores)
+            >>> # Attribute access (Python-friendly names)
             >>> paths.dotfiles.oh_my_zsh.path
-            PosixPath('/home/user/.dotfiles/.Oh-My Zsh')
-            >>> paths.wallpapers_directory.path
-            PosixPath('/home/user/dotfiles/Wallpapers Directory')
+            PosixPath('/home/user/.dotfiles/.oh_my_zsh')
+            >>> # Bracket access (any name)
+            >>> paths.dotfiles["oh-my-zsh"].path
+            PosixPath('/home/user/.dotfiles/oh-my-zsh')
         """
-        # Sanitize key for registry lookups
-        # (lowercase, spaces/hyphens → underscores)
-        normalized_key = _sanitize_key(key)
-        self.definitions[normalized_key] = PathDefinition(
-            key=normalized_key, original_key=key, hidden=hidden
+        # Store with original key (no sanitization)
+        self.definitions[key] = PathDefinition(
+            key=key, original_key=key, hidden=hidden
         )
         return self
 
@@ -216,9 +213,7 @@ class PathsBuilder:
             path_components = []
             for i in range(len(parts)):
                 # Build key for this level (from original parts)
-                level_key_original = ".".join(parts[: i + 1])
-                # Sanitize for registry lookup
-                level_key = _sanitize_key(level_key_original)
+                level_key = ".".join(parts[: i + 1])
                 component = parts[i]
 
                 # Check if this level is marked as hidden
@@ -311,9 +306,7 @@ class ManagedPathTree(PathTree):
             path_components = []
             for i in range(len(parts)):
                 # Build key for this level (from original parts)
-                level_key_original = ".".join(parts[: i + 1])
-                # Sanitize for registry lookup
-                level_key = _sanitize_key(level_key_original)
+                level_key = ".".join(parts[: i + 1])
                 component = parts[i]
 
                 # Check if this level is marked as hidden in registry
