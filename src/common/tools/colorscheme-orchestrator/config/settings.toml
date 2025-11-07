@@ -1,0 +1,53 @@
+# Colorscheme Orchestrator Settings
+# These are defaults that can be overridden by CLI parameters
+
+[orchestrator]
+# Default backend to use if not specified
+default_backend = "pywal"
+
+# Default output directory for generated colorschemes
+default_output_dir = "~/.cache/colorscheme"
+
+# Default output formats
+default_formats = ["json", "css", "yaml", "sh"]
+
+# Default number of colors to extract
+default_color_count = 16
+
+# Container runtime to use (docker or podman)
+container_runtime = "docker"
+
+# Container settings
+container_prefix = "colorscheme"
+auto_cleanup = true
+keep_images = true
+
+# Logging
+log_level = "INFO"
+verbose = false
+
+[backends.pywal]
+# Container image settings
+image_name = "colorscheme-pywal"
+image_tag = "latest"
+
+# Backend-specific defaults
+use_library = true
+
+[backends.wallust]
+# Container image settings
+image_name = "colorscheme-wallust"
+image_tag = "latest"
+
+# Backend-specific defaults
+output_format = "json"
+backend_type = "resized"
+
+[backends.custom]
+# Container image settings
+image_name = "colorscheme-custom"
+image_tag = "latest"
+
+# Backend-specific defaults
+algorithm = "kmeans"
+n_clusters = 16
