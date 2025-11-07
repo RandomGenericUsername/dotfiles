@@ -16,6 +16,28 @@ class HyprpaperConfig(BaseModel):
 
     # IPC settings
     ipc_enabled: bool = Field(default=True, description="Enable IPC control")
+    ipc_timeout: int = Field(
+        default=5,
+        description="Default IPC command timeout in seconds",
+        gt=0,
+    )
+    ipc_retry_attempts: int = Field(
+        default=3,
+        description="Number of retry attempts for transient IPC failures",
+        ge=1,
+    )
+    ipc_retry_delay: float = Field(
+        default=0.5,
+        description=(
+            "Initial delay between retries in seconds (exponential backoff)"
+        ),
+        gt=0,
+    )
+    ipc_startup_wait: float = Field(
+        default=2.0,
+        description="Maximum time to wait for hyprpaper socket on startup",
+        gt=0,
+    )
 
     # Splash settings
     splash_enabled: bool = Field(

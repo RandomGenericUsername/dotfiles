@@ -4,6 +4,10 @@ config_file = "~/.config/hypr/hyprpaper.conf"
 
 # IPC settings
 ipc_enabled = true
+ipc_timeout = 5  # Default command timeout in seconds
+ipc_retry_attempts = 3  # Number of retry attempts for transient failures
+ipc_retry_delay = 0.5  # Initial delay between retries (exponential backoff)
+ipc_startup_wait = 2.0  # Max wait for hyprpaper socket on startup
 
 # Splash settings
 splash_enabled = false
