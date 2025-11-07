@@ -69,6 +69,11 @@ class HyprpaperConfig(BaseModel):
         description="Automatically create config file if it doesn't exist",
     )
 
+    autostart: bool = Field(
+        default=True,
+        description="Automatically start hyprpaper if not running",
+    )
+
     # Memory management
     max_preload_pool_mb: int = Field(
         default=100,

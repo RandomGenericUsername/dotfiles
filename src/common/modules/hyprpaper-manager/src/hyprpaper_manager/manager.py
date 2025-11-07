@@ -49,6 +49,7 @@ class HyprpaperManager:
             retry_attempts=self.config.ipc_retry_attempts,
             retry_delay=self.config.ipc_retry_delay,
             startup_wait=self.config.ipc_startup_wait,
+            autostart=self.config.autostart,
         )
         self.monitors = MonitorManager()
         self.wallpapers = WallpaperFinder(self.config)

@@ -23,6 +23,7 @@ wallpaper_dirs = [
 # Behavior
 auto_unload_unused = true
 auto_create_config = true  # Automatically create config file if missing
+autostart = true  # Automatically start hyprpaper if not running
 
 # Memory management
 max_preload_pool_mb = 100  # Maximum memory (MB) for preloaded wallpapers pool

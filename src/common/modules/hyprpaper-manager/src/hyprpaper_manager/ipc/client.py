@@ -33,6 +33,7 @@ class HyprpaperIPC:
         retry_attempts: int = 3,
         retry_delay: float = 0.5,
         startup_wait: float = 2.0,
+        autostart: bool = True,
     ):
         """Initialize IPC client.
 
@@ -41,15 +42,17 @@ class HyprpaperIPC:
             retry_attempts: Number of retry attempts for transient failures
             retry_delay: Initial delay between retries in seconds
             startup_wait: Maximum time to wait for socket on startup
+            autostart: Automatically start hyprpaper if not running
         """
         self.timeout = timeout
         self.retry_attempts = retry_attempts
         self.retry_delay = retry_delay
         self.startup_wait = startup_wait
+        self.autostart = autostart
         logger.debug(
             f"Initialized HyprpaperIPC: timeout={timeout}s, "
             f"retry_attempts={retry_attempts}, retry_delay={retry_delay}s, "
-            f"startup_wait={startup_wait}s"
+            f"startup_wait={startup_wait}s, autostart={autostart}"
         )
 
     def is_running(self) -> bool:
@@ -72,6 +75,44 @@ class HyprpaperIPC:
             return is_running
         except (subprocess.TimeoutExpired, FileNotFoundError) as e:
             logger.debug(f"Error checking if hyprpaper is running: {e}")
+            return False
+
+    def start(self) -> bool:
+        """Start hyprpaper in the background.
+
+        Returns:
+            True if hyprpaper was started successfully, False otherwise
+        """
+        if self.is_running():
+            logger.debug("hyprpaper already running")
+            return True
+
+        try:
+            logger.info("Starting hyprpaper...")
+            # Start hyprpaper in background, detached from this process
+            subprocess.Popen(
+                ["hyprpaper"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,  # Detach from parent process
+            )
+
+            # Wait for it to be ready
+            if self.is_ready(max_wait=self.startup_wait):
+                logger.info("hyprpaper started successfully")
+                return True
+            else:
+                logger.error("hyprpaper process started but socket not ready")
+                return False
+
+        except FileNotFoundError:
+            logger.error(
+                "hyprpaper command not found. "
+                "Make sure hyprpaper is installed."
+            )
+            return False
+        except Exception as e:
+            logger.error(f"Failed to start hyprpaper: {e}")
             return False
 
     def is_ready(self, max_wait: float | None = None) -> bool:
@@ -182,10 +223,23 @@ class HyprpaperIPC:
         if not self.is_ready():
             # Re-check process to provide better error message
             if not self.is_running():
-                logger.error("hyprpaper process not running")
-                raise HyprpaperNotRunningError(
-                    "hyprpaper is not running. Start it with 'hyprpaper &'"
-                )
+                # Try to autostart if enabled
+                if self.autostart:
+                    logger.info("hyprpaper not running, attempting autostart")
+                    if not self.start():
+                        logger.error("Failed to autostart hyprpaper")
+                        raise HyprpaperNotRunningError(
+                            "hyprpaper is not running and autostart failed. "
+                            "Start it manually with 'hyprpaper &'"
+                        )
+                    # Successfully started, continue with command
+                    logger.info("hyprpaper autostarted successfully")
+                else:
+                    logger.error("hyprpaper process not running")
+                    raise HyprpaperNotRunningError(
+                        "hyprpaper is not running. "
+                        "Start it with 'hyprpaper &' or enable autostart"
+                    )
             else:
                 logger.error("hyprpaper socket not ready")
                 raise HyprpaperIPCError(
