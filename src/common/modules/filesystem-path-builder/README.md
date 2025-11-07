@@ -68,7 +68,7 @@ if config.exists_dir():
 from filesystem_path_builder import PathsBuilder
 from pathlib import Path
 
-# Define paths explicitly
+# Define paths explicitly (use underscores for attribute access)
 builder = PathsBuilder(Path.home() / "dotfiles")
 builder.add_path("dotfiles", hidden=True)
 builder.add_path("dotfiles.starship", hidden=True)
@@ -79,12 +79,18 @@ builder.add_path("scripts", hidden=False)
 # Build namespace
 paths = builder.build()
 
-# Use paths individually
+# Use paths individually (attribute access)
 paths.dotfiles.ensure_dir()   # Creates ~/.dotfiles
 paths.scripts.ensure_dir()    # Creates ~/dotfiles/scripts
 
 # Or create all directories at once
 builder.create()  # Creates all defined directories
+
+# Note: Keys are stored exactly as registered
+# For attribute access, use Python-friendly names (lowercase, underscores)
+# For paths with hyphens or spaces, use bracket notation:
+builder.add_path("my-config")  # Register with hyphen
+paths["my-config"].path        # Access with bracket notation
 ```
 
 ---
@@ -102,6 +108,7 @@ builder.create()  # Creates all defined directories
 
 ```python
 from filesystem_path_builder import PathsBuilder
+from pathlib import Path
 
 builder = PathsBuilder(Path.home() / ".config")
 builder.add_path("nvim", hidden=False)
@@ -111,6 +118,14 @@ builder.add_path("starship", hidden=False)
 
 paths = builder.build()
 paths.nvim.lua.plugins.ensure_dir()
+
+# For paths with hyphens, use underscores in registration for attribute access
+builder.add_path("oh_my_zsh", hidden=True)  # Use underscores
+paths.oh_my_zsh.ensure_dir()                # Access with underscores
+
+# Or use hyphens with bracket notation
+builder.add_path("oh-my-zsh", hidden=True)  # Use hyphens
+paths["oh-my-zsh"].ensure_dir()             # Access with brackets
 ```
 
 ### 2. Project Structure Management
