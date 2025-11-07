@@ -1,5 +1,6 @@
 """Main hyprpaper manager."""
 
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,8 @@ from hyprpaper_manager.ipc.client import HyprpaperIPC
 from hyprpaper_manager.monitor import MonitorManager
 from hyprpaper_manager.wallpaper import WallpaperFinder
 
+logger = logging.getLogger(__name__)
+
 
 class HyprpaperManager:
     """High-level hyprpaper manager."""
@@ -28,6 +31,10 @@ class HyprpaperManager:
         """
         self.config = config or get_default_config().hyprpaper
 
+        logger.debug(
+            f"Initializing HyprpaperManager with config: {self.config}"
+        )
+
         # Ensure config file exists if auto_create_config is enabled
         from hyprpaper_manager.config.manager import ConfigManager
 
@@ -37,10 +44,17 @@ class HyprpaperManager:
         # Initialize components
         from hyprpaper_manager.pool import WallpaperPool
 
-        self.ipc = HyprpaperIPC()
+        self.ipc = HyprpaperIPC(
+            timeout=self.config.ipc_timeout,
+            retry_attempts=self.config.ipc_retry_attempts,
+            retry_delay=self.config.ipc_retry_delay,
+            startup_wait=self.config.ipc_startup_wait,
+        )
         self.monitors = MonitorManager()
         self.wallpapers = WallpaperFinder(self.config)
         self.pool = WallpaperPool(self.config)
+
+        logger.info("HyprpaperManager initialized successfully")
 
     # Helper methods
 
@@ -110,19 +124,26 @@ class HyprpaperManager:
             HyprpaperNotRunningError: If hyprpaper not running
             HyprpaperIPCError: If IPC command fails
         """
+        logger.info(
+            f"Setting wallpaper: {wallpaper} on monitor={monitor}, mode={mode}"
+        )
+
         # Resolve wallpaper path
         if isinstance(wallpaper, str):
             wallpaper_path = self.wallpapers.find_wallpaper(wallpaper)
+            logger.debug(f"Resolved wallpaper path: {wallpaper_path}")
         else:
             wallpaper_path = wallpaper
 
         if not wallpaper_path.exists():
+            logger.error(f"Wallpaper not found: {wallpaper_path}")
             raise WallpaperNotFoundError(
                 f"Wallpaper not found: {wallpaper_path}"
             )
 
         # Get wallpaper size and validate
         size_mb = self._get_wallpaper_size_mb(wallpaper_path)
+        logger.debug(f"Wallpaper size: {size_mb:.2f}MB")
 
         # Validate size limits before preloading
         self.pool.add(wallpaper_path, size_mb)
@@ -130,18 +151,26 @@ class HyprpaperManager:
         # Preload if not already loaded in hyprpaper
         loaded_wallpapers = self.ipc.listloaded()
         if wallpaper_path not in loaded_wallpapers:
+            logger.debug(f"Preloading wallpaper: {wallpaper_path}")
             self.ipc.preload(wallpaper_path)
+        else:
+            logger.debug(f"Wallpaper already loaded: {wallpaper_path}")
 
         # Resolve monitor(s)
         if monitor == MonitorSelector.ALL:
             monitor_name = ""
         elif monitor == MonitorSelector.FOCUSED:
             monitor_name = self.monitors.get_focused_monitor().name
+            logger.debug(f"Resolved focused monitor: {monitor_name}")
         else:
             monitor_name = monitor
 
         # Set wallpaper
         mode_str = mode.value if mode != WallpaperMode.COVER else None
+        logger.debug(
+            f"Setting wallpaper on monitor '{monitor_name}' "
+            f"with mode={mode_str}"
+        )
         self.ipc.wallpaper(monitor_name, wallpaper_path, mode_str)
 
         # Mark as displayed in pool
@@ -149,8 +178,13 @@ class HyprpaperManager:
 
         # Cleanup pool if over limit
         removed = self.pool.cleanup()
-        for wp in removed:
-            self.ipc.unload(wp)
+        if removed:
+            logger.info(f"Cleaned up {len(removed)} wallpapers from pool")
+            for wp in removed:
+                logger.debug(f"Unloading: {wp}")
+                self.ipc.unload(wp)
+
+        logger.info(f"Successfully set wallpaper: {wallpaper_path.name}")
 
     # Alias for backwards compatibility
     def set_wallpaper(
