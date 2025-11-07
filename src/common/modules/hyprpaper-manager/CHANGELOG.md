@@ -5,6 +5,26 @@ All notable changes to hyprpaper-manager will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2025-11-07
+
+### Added
+
+#### ⚡ Auto-Start Feature
+- **Added**: Automatic hyprpaper startup when not running (enabled by default)
+- **Configuration**: New `autostart` setting in `config/settings.toml` (default: `true`)
+- **Behavior**: When enabled, hyprpaper-manager automatically starts hyprpaper in the background if it's not running
+- **Benefits**:
+  - No need to manually start hyprpaper before using the CLI
+  - Seamless user experience - just run commands and it works
+  - Handles process startup and waits for socket to be ready
+- **Error Handling**: Clear error messages if autostart fails (e.g., hyprpaper not installed)
+- **Commit**: `fe2c79a`
+
+### Changed
+
+- **Updated**: Error messages now mention autostart option when hyprpaper is not running
+- **Updated**: Documentation to reflect autostart feature and new workflow
+
 ## [0.2.0] - 2025-11-07
 
 ### Fixed

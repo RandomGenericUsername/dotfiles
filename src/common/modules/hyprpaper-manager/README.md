@@ -8,6 +8,7 @@ Python API and CLI for managing hyprpaper wallpapers with full IPC control.
 - 🔌 **IPC Control**: Complete hyprctl wrapper with timeout/error handling
 - 🔄 **Auto-Retry Logic**: Automatic retry with exponential backoff for transient failures
 - 🚀 **Startup Race Fix**: Handles hyprpaper startup delays automatically (no more black wallpapers!)
+- ⚡ **Auto-Start**: Automatically starts hyprpaper if not running (enabled by default)
 - 🖥️ **Monitor Management**: Query and manage multiple monitors
 - 🔍 **Smart Path Resolution**: Automatically resolves absolute paths, relative paths, or searches configured directories
 - 🧠 **Smart Pool Management**: Automatic memory management with configurable size limits
@@ -34,7 +35,14 @@ make install
 
 The manager will automatically create `~/.config/hypr/hyprpaper.conf` if it doesn't exist (controlled by `auto_create_config` setting, enabled by default).
 
-Then start hyprpaper:
+**No need to manually start hyprpaper!** The manager will automatically start it when needed (controlled by `autostart` setting, enabled by default).
+
+If you prefer to manage hyprpaper manually, disable autostart in `config/settings.toml`:
+```toml
+autostart = false
+```
+
+Then start hyprpaper manually:
 ```bash
 hyprpaper &
 ```
@@ -175,6 +183,7 @@ wallpaper_dirs = [
 # Behavior
 auto_unload_unused = true
 auto_create_config = true
+autostart = true             # Automatically start hyprpaper if not running (NEW in v0.2.1)
 
 # Memory management
 max_preload_pool_mb = 100  # Maximum memory for preloaded wallpapers pool
@@ -223,10 +232,22 @@ make pre-commit-install
 
 ### "hyprpaper is not running"
 
-**Solution**: Start hyprpaper in the background:
+**With autostart enabled (default)**: This should not happen! The manager automatically starts hyprpaper.
+
+**With autostart disabled**: Start hyprpaper in the background:
 ```bash
 hyprpaper &
 ```
+
+### "Failed to autostart hyprpaper"
+
+**Cause**: hyprpaper command not found or failed to start.
+
+**Solution**:
+1. Check if hyprpaper is installed: `which hyprpaper`
+2. Install hyprpaper if missing
+3. Check hyprpaper logs for errors
+4. Try starting manually: `hyprpaper &`
 
 ### "hyprpaper IPC socket not ready"
 

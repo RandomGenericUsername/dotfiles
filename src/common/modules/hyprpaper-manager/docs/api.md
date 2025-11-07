@@ -283,12 +283,17 @@ Configuration for hyprpaper manager.
 **Fields:**
 - `config_file`: Path to hyprpaper config file (default: ~/.config/hypr/hyprpaper.conf)
 - `ipc_enabled`: Enable IPC control (default: True)
+- `ipc_timeout`: Default IPC command timeout in seconds (default: 5)
+- `ipc_retry_attempts`: Number of retry attempts for transient failures (default: 3)
+- `ipc_retry_delay`: Initial delay between retries in seconds (default: 0.5)
+- `ipc_startup_wait`: Maximum time to wait for socket on startup (default: 2.0)
 - `splash_enabled`: Enable Hyprland splash (default: False)
 - `splash_offset`: Splash offset percentage (default: 2.0)
 - `splash_color`: Splash color in ARGB (default: "55ffffff")
 - `wallpaper_dirs`: List of directories to search for wallpapers
 - `auto_unload_unused`: Automatically unload unused wallpapers (default: True)
 - `auto_create_config`: Automatically create config file if missing (default: True)
+- `autostart`: Automatically start hyprpaper if not running (default: True) **NEW in v0.2.1**
 - `max_preload_pool_mb`: Maximum memory (MB) for preloaded wallpapers pool (default: 100)
 - `max_wallpaper_size_multiplier`: Max single wallpaper size = pool_size × multiplier (default: 2.0)
 
