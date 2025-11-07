@@ -103,6 +103,15 @@ class HyprpaperIPC:
 
         while time.time() - start_time < max_wait:
             attempt += 1
+
+            # Re-check if process is still running before each attempt
+            if not self.is_running():
+                logger.debug(
+                    f"hyprpaper process died during socket wait "
+                    f"(after {attempt} attempts)"
+                )
+                return False
+
             try:
                 # Try a simple test command to check socket readiness
                 result = subprocess.run(

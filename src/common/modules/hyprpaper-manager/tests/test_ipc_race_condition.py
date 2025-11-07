@@ -29,12 +29,13 @@ class TestSocketReadiness:
     def test_is_ready_when_socket_ready(self, mock_run, ipc):
         """Test is_ready returns True when socket is ready."""
         mock_run.side_effect = [
-            Mock(returncode=0),  # is_running check
+            Mock(returncode=0),  # initial is_running check
+            Mock(returncode=0),  # is_running check in loop
             Mock(returncode=0, stdout=""),  # listloaded check
         ]
 
         assert ipc.is_ready(max_wait=1.0) is True
-        assert mock_run.call_count == 2
+        assert mock_run.call_count == 3
 
     @patch("hyprpaper_manager.ipc.client.subprocess.run")
     def test_is_ready_when_process_not_running(self, mock_run, ipc):
@@ -51,13 +52,15 @@ class TestSocketReadiness:
         # First attempt: process running but socket not ready
         # Second attempt: socket ready
         mock_run.side_effect = [
-            Mock(returncode=0),  # is_running check
+            Mock(returncode=0),  # initial is_running check
+            Mock(returncode=0),  # is_running check in loop (attempt 1)
             Mock(returncode=1),  # listloaded fails (socket not ready)
+            Mock(returncode=0),  # is_running check in loop (attempt 2)
             Mock(returncode=0),  # listloaded succeeds (socket ready)
         ]
 
         assert ipc.is_ready(max_wait=1.0) is True
-        assert mock_run.call_count == 3
+        assert mock_run.call_count == 5
         assert mock_sleep.call_count >= 1  # Should have slept between attempts
 
     @patch("hyprpaper_manager.ipc.client.subprocess.run")
@@ -69,6 +72,24 @@ class TestSocketReadiness:
 
         # Use very short timeout for test
         assert ipc.is_ready(max_wait=0.2) is False
+
+    @patch("hyprpaper_manager.ipc.client.subprocess.run")
+    @patch("hyprpaper_manager.ipc.client.time.sleep")
+    def test_is_ready_process_dies_during_wait(
+        self, mock_sleep, mock_run, ipc
+    ):
+        """Test is_ready detects when process dies during wait."""
+        mock_run.side_effect = [
+            Mock(returncode=0),  # initial is_running check (process alive)
+            Mock(returncode=0),  # is_running check in loop (attempt 1)
+            Mock(returncode=1),  # listloaded fails (socket not ready)
+            Mock(returncode=1),  # is_running check in loop (process died!)
+        ]
+
+        # Should return False immediately when process dies
+        assert ipc.is_ready(max_wait=1.0) is False
+        # Should not wait full timeout - exits early when process dies
+        assert mock_run.call_count == 4
 
 
 class TestRetryLogic:
