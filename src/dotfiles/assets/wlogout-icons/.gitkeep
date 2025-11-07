@@ -1,0 +1,2 @@
+# This directory contains SVG template files with {%raw%}{{CURRENT_COLOR}}{%endraw%} placeholders
+# These templates are processed to generate colored icons in the generated/ directory
