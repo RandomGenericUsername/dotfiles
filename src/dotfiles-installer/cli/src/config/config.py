@@ -133,7 +133,7 @@ class PathsConfig(BaseModel):
 
     def model_post_init(self, __context: Any) -> None:
         """Initialize all path trees using factory functions."""
-        from cli.config.directories import (
+        from config.directories import (
             HOST_ROOT,
             SRC_ROOT,
             create_host_builder,
@@ -627,7 +627,7 @@ class AppConfig(BaseModel):
     def model_post_init(self, __context: Any) -> None:
         """Set up cross-references after initialization."""
         # Sync user's installation directory to project paths
-        from cli.config.directories import create_install_builder
+        from config.directories import create_install_builder
 
         # Regenerate install paths with user's installation directory
         install_root = self.cli_settings.installation_directory

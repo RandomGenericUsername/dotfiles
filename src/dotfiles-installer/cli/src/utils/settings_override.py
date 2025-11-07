@@ -156,11 +156,11 @@ class SettingsOverrider:
                 except ValidationError as e:
                     raise ValidationFailedError(
                         f"Settings validation failed after applying overrides:\n{e}"
-                    )
+                    ) from e
 
             # 6. Write modified settings
             self._write_toml(settings_file, settings)
-            self.logger.info(
+            self.logger.debug(
                 f"Applied {len(result.overrides_applied)} overrides to "
                 f"{settings_file.name}"
             )
@@ -274,10 +274,12 @@ class SettingsOverrider:
             TOMLOperationError: If loading fails
         """
         try:
-            with open(path, "rb") as f:
+            with path.open("rb") as f:
                 return tomllib.load(f)
         except Exception as e:
-            raise TOMLOperationError(f"Failed to load TOML from {path}: {e}")
+            raise TOMLOperationError(
+                f"Failed to load TOML from {path}: {e}"
+            ) from e
 
     def _write_toml(self, path: Path, data: dict) -> None:
         """Write TOML file.
@@ -290,10 +292,12 @@ class SettingsOverrider:
             TOMLOperationError: If writing fails
         """
         try:
-            with open(path, "wb") as f:
+            with path.open("wb") as f:
                 tomli_w.dump(data, f)
         except Exception as e:
-            raise TOMLOperationError(f"Failed to write TOML to {path}: {e}")
+            raise TOMLOperationError(
+                f"Failed to write TOML to {path}: {e}"
+            ) from e
 
     def _create_backup(self, path: Path) -> Path:
         """Create backup of settings file.
@@ -312,7 +316,9 @@ class SettingsOverrider:
             shutil.copy2(path, backup_path)
             return backup_path
         except Exception as e:
-            raise TOMLOperationError(f"Failed to create backup of {path}: {e}")
+            raise TOMLOperationError(
+                f"Failed to create backup of {path}: {e}"
+            ) from e
 
     def _rollback(self, original: Path, backup: Path) -> None:
         """Rollback to backup file.

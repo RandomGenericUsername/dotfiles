@@ -512,7 +512,7 @@ def render_zsh_config(context: PipelineContext) -> PipelineContext:
         context.app_config.project.paths.install.dotfiles.zsh.file("zshrc")
     )
     oh_my_zsh_path: Path = (
-        context.app_config.project.paths.install.dotfiles.oh_my_zsh.path
+        context.app_config.project.paths.install.dependencies["oh-my-zsh"].path
     )
     cache_dir: Path = context.app_config.project.paths.host.cache.path
     nvm_path: Path = (
@@ -636,7 +636,7 @@ def install_oh_my_zsh_framework(
 
     # Get Oh My Zsh directory from config
     oh_my_zsh_dir: Path = (
-        context.app_config.project.paths.install.dependencies.oh_my_zsh.path
+        context.app_config.project.paths.install.dependencies["oh-my-zsh"].path
     )
 
     # Handle already installed case
@@ -1159,8 +1159,10 @@ def extract_wallpapers(context: PipelineContext) -> PipelineContext:
     wallpaper_dir: Path = (
         context.app_config.project.paths.install.dotfiles.wallpapers.path
     )
-    wallpapers: Path = context.app_config.project.paths.source.dotfiles.assets.wallpapers.file(
-        "wallpapers.tar.gz"
+    wallpapers: Path = (
+        context.app_config.project.paths.source.dotfiles.assets.wallpapers.file(
+            "wallpapers.tar.gz"
+        )
     )
     logger.debug(f"Extracting wallpapers to path: {wallpaper_dir}")
     logger.debug(f"Wallpapers archive path: {wallpapers}")
@@ -1240,9 +1242,34 @@ def install_component(
                 f"Source {component} not found: {module_path}"
             )
 
-        # 3. Copy component
+        # 3. Copy component (ignore venv, cache, and build artifacts)
         logger.debug(f"Copying {component}...")
-        shutil.copytree(module_path, install_path, dirs_exist_ok=True)
+
+        def ignore_patterns(_directory, files):
+            """Ignore virtual environments, cache, and build artifacts."""
+            ignore = set()
+            for f in files:
+                if f in {
+                    ".venv",
+                    "venv",
+                    "__pycache__",
+                    ".pytest_cache",
+                    ".mypy_cache",
+                    ".ruff_cache",
+                    "node_modules",
+                    "dist",
+                    "build",
+                    "*.egg-info",
+                }:
+                    ignore.add(f)
+            return ignore
+
+        shutil.copytree(
+            module_path,
+            install_path,
+            dirs_exist_ok=True,
+            ignore=ignore_patterns,
+        )
         logger.debug(f"{component.capitalize()} copied successfully")
 
         # 4. Apply settings overrides if provided

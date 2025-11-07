@@ -57,13 +57,16 @@ def create_install_builder(root: Path, strict: bool = True) -> PathsBuilder:
     # Directory for dependencies files
     builder.add_path("dependencies", hidden=True)
     # Directory for scripts
-    builder.add_path("scripts")
+    builder.add_path("modules")
+    # Directory for tools
+    builder.add_path("tools")
 
     # =====================Second level directories ======================= #
     # ----------------------------- Dotfiles ------------------------------ #
     builder.add_path("dotfiles.starship")
     builder.add_path("dotfiles.zsh")
     builder.add_path("dotfiles.wallpapers")
+    builder.add_path("dotfiles.cache", hidden=True)
 
     # ----------------------------- Dependencies -------------------------- #
     builder.add_path("dependencies.nvm")
@@ -73,6 +76,11 @@ def create_install_builder(root: Path, strict: bool = True) -> PathsBuilder:
     builder.add_path("dotfiles.config")
     builder.add_path("dotfiles.config.hypr")
     # ----------------------------- scripts ------------------------------- #
+
+    builder.add_path("modules.logging")
+    builder.add_path("modules.hyprpaper-manager")
+
+    builder.add_path("tools.colorscheme-orchestrator")
 
     return builder
 

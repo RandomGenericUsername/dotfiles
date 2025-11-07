@@ -5,8 +5,8 @@ This allows install_component() to automatically validate settings overrides.
 """
 
 from typing import Literal
-from pydantic import BaseModel
 
+from pydantic import BaseModel
 
 ComponentType = Literal["module", "tool"]
 
@@ -110,9 +110,7 @@ def _register_known_modules():
 
     # Colorscheme Generator
     try:
-        from colorscheme_generator.config import (
-            AppConfig as ColorschemeConfig,
-        )
+        from colorscheme_generator.config import AppConfig as ColorschemeConfig
 
         ConfigModelRegistry.register_module(
             "colorscheme-generator", ColorschemeConfig
@@ -184,4 +182,3 @@ def _register_known_tools():
 # Initialize registry on module import
 _register_known_modules()
 _register_known_tools()
-

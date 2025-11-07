@@ -458,8 +458,13 @@ class InstallModuleStep(PipelineStep):
 class InstallToolStep(PipelineStep):
     """Pipeline step to install hyprpaper."""
 
-    def __init__(self, tool_name: str):
+    def __init__(
+        self,
+        tool_name: str,
+        settings_overrides: dict[str, any] | None = None,
+    ):
         self.tool_name = tool_name
+        self.settings_overrides = settings_overrides
 
     @property
     def step_id(self) -> str:
@@ -486,7 +491,8 @@ class InstallToolStep(PipelineStep):
             context=context,
             name=self.tool_name,
             component="tool",
-            install_path=context.app_config.project.paths.install.modules[
+            install_path=context.app_config.project.paths.install.tools[
                 self.tool_name
             ].path,
+            settings_overrides=self.settings_overrides,
         )

@@ -40,6 +40,7 @@ from src.pipeline_steps.pipeline import (
     InstallPyenvStep,
     InstallPythonStep,
     InstallStarshipStep,
+    InstallToolStep,
     InstallZshConfigStep,
     PrintInstallationMessageStep,
     UpdateSystemStep,
@@ -164,7 +165,12 @@ def install(
                     "hyprpaper.conf"
                 )
             ),
-        }
+        },
+        "colorscheme-orchestrator": {
+            "orchestrator.default_output_dir": str(
+                context.app_config.project.paths.install.dotfiles.cache.path
+            ),
+        },
     }
 
     steps: list[TaskStep] = [
@@ -188,6 +194,12 @@ def install(
         InstallModuleStep(
             module_name="hyprpaper-manager",
             settings_overrides=module_settings_overrides["hyprpaper-manager"],
+        ),
+        InstallToolStep(
+            tool_name="colorscheme-orchestrator",
+            settings_overrides=module_settings_overrides[
+                "colorscheme-orchestrator"
+            ],
         ),
         # InstallModuleStep(module_name="colorscheme-generator"),
         # InstallModuleStep(module_name="wallpaper-effects-processor"),
