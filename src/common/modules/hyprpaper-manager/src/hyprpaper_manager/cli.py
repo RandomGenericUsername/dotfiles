@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import builtins
+import logging
+import os
 from pathlib import Path
 from typing import Annotated
 
@@ -22,6 +24,29 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 console = Console()
+
+
+def setup_logging(verbose: bool = False) -> None:
+    """Setup logging configuration.
+
+    Args:
+        verbose: Enable debug logging
+    """
+    log_level = logging.DEBUG if verbose else logging.WARNING
+
+    # Check for environment variable override
+    env_level = os.environ.get("HYPRPAPER_MANAGER_LOG_LEVEL", "").upper()
+    if env_level in ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"):
+        log_level = getattr(logging, env_level)
+
+    logging.basicConfig(
+        level=log_level,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    # Suppress noisy libraries
+    logging.getLogger("PIL").setLevel(logging.WARNING)
 
 
 def _create_manager(
@@ -55,8 +80,13 @@ def _create_manager(
 
 
 @app.command()
-def status() -> None:
+def status(
+    verbose: Annotated[
+        bool, typer.Option("--verbose", "-v", help="Enable debug logging")
+    ] = False,
+) -> None:
     """Show hyprpaper status."""
+    setup_logging(verbose)
     try:
         manager = HyprpaperManager()
 
@@ -124,8 +154,12 @@ def set(
             help="Wallpaper directory (can be specified multiple times)",
         ),
     ] = None,
+    verbose: Annotated[
+        bool, typer.Option("--verbose", "-v", help="Enable debug logging")
+    ] = False,
 ) -> None:
     """Set wallpaper."""
+    setup_logging(verbose)
     try:
         manager = _create_manager(wallpaper_dir)
         manager.set_wallpaper(wallpaper, monitor, mode)
