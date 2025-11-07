@@ -6,6 +6,8 @@ Python API and CLI for managing hyprpaper wallpapers with full IPC control.
 
 - 🎨 **Type-Safe API**: Full Pydantic models and type hints
 - 🔌 **IPC Control**: Complete hyprctl wrapper with timeout/error handling
+- 🔄 **Auto-Retry Logic**: Automatic retry with exponential backoff for transient failures
+- 🚀 **Startup Race Fix**: Handles hyprpaper startup delays automatically (no more black wallpapers!)
 - 🖥️ **Monitor Management**: Query and manage multiple monitors
 - 🔍 **Smart Path Resolution**: Automatically resolves absolute paths, relative paths, or searches configured directories
 - 🧠 **Smart Pool Management**: Automatic memory management with configurable size limits
@@ -13,7 +15,8 @@ Python API and CLI for managing hyprpaper wallpapers with full IPC control.
 - 🎲 **Random Wallpapers**: Built-in random selection with exclusion
 - ⚙️ **Configuration**: Dynaconf-based config with sensible defaults
 - 🖥️ **CLI Tool**: Rich-based CLI for interactive use
-- ✅ **Error Handling**: Comprehensive exception hierarchy
+- 📝 **Comprehensive Logging**: Debug logging with `--verbose` flag
+- ✅ **Error Handling**: Comprehensive exception hierarchy with context-aware messages
 
 ## Installation
 
@@ -120,11 +123,20 @@ hyprpaper-manager preload wallpaper.jpg
 hyprpaper-manager unload wallpaper.jpg
 hyprpaper-manager unload unused
 hyprpaper-manager unload all
+
+# Enable debug logging (NEW in v0.2.0)
+hyprpaper-manager set wallpaper.jpg --verbose
+hyprpaper-manager status --verbose
+
+# Or use environment variable
+HYPRPAPER_MANAGER_LOG_LEVEL=DEBUG hyprpaper-manager set wallpaper.jpg
 ```
 
 **CLI Options:**
 
-All wallpaper-related commands (`set`, `random`, `list`, `preload`, `unload`) support the `--wallpaper-dir` / `-d` option to override configured wallpaper directories:
+All wallpaper-related commands (`set`, `random`, `list`, `preload`, `unload`) support:
+- `--wallpaper-dir` / `-d`: Override configured wallpaper directories
+- `--verbose` / `-v`: Enable debug logging (NEW in v0.2.0)
 
 ```bash
 # Use custom directories instead of configured ones
@@ -144,6 +156,10 @@ config_file = "~/.config/hypr/hyprpaper.conf"
 
 # IPC settings
 ipc_enabled = true
+ipc_timeout = 5              # Default command timeout in seconds (NEW in v0.2.0)
+ipc_retry_attempts = 3       # Number of retry attempts (NEW in v0.2.0)
+ipc_retry_delay = 0.5        # Initial retry delay in seconds (NEW in v0.2.0)
+ipc_startup_wait = 2.0       # Max wait for socket on startup (NEW in v0.2.0)
 
 # Splash settings
 splash_enabled = false
@@ -203,22 +219,82 @@ make all-checks
 make pre-commit-install
 ```
 
+## Troubleshooting
+
+### "hyprpaper is not running"
+
+**Solution**: Start hyprpaper in the background:
+```bash
+hyprpaper &
+```
+
+### "hyprpaper IPC socket not ready"
+
+**Cause**: hyprpaper is starting up or crashed.
+
+**Solution**:
+1. Check if hyprpaper is running: `pgrep hyprpaper`
+2. Check hyprpaper logs: `journalctl --user -u hyprpaper -f`
+3. Restart hyprpaper: `pkill hyprpaper && hyprpaper &`
+
+### Black wallpaper on first command
+
+**Fixed in v0.2.0!** This was caused by a race condition during hyprpaper startup.
+
+If you still experience this:
+1. Update to v0.2.0 or later
+2. Enable debug logging: `hyprpaper-manager set wallpaper.jpg --verbose`
+3. Check if socket readiness check is working
+
+### Commands taking too long
+
+**Cause**: Retry logic and socket readiness checks (added in v0.2.0 for reliability).
+
+**Solution**: Adjust configuration:
+```toml
+[hyprpaper]
+ipc_retry_attempts = 1    # Reduce retries
+ipc_startup_wait = 0.5    # Shorter wait
+```
+
+### Enable Debug Logging
+
+```bash
+# CLI
+hyprpaper-manager set wallpaper.jpg --verbose
+
+# Environment variable
+HYPRPAPER_MANAGER_LOG_LEVEL=DEBUG hyprpaper-manager set wallpaper.jpg
+
+# Python API
+import logging
+logging.basicConfig(level=logging.DEBUG)
+```
+
 ## API Reference
 
 See [docs/api.md](docs/api.md) for detailed API documentation.
 
 ## Changelog
 
-### Recent Fixes
+See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
-**Bug Fixes:**
-- Fixed critical bug where wallpapers were never actually preloaded to hyprpaper (wallpaper was added to pool tracking before checking if it needed preloading, causing the preload check to always pass)
-- Fixed IPC response parsing to properly handle "no wallpapers loaded" and "no wallpapers active" responses from hyprpaper
-- Fixed black background issue on first command (caused by wallpapers not being preloaded)
+### v0.2.0 - Major Reliability Update
 
-**Enhancements:**
-- Added `--wallpaper-dir` / `-d` CLI option to all wallpaper-related commands (`set`, `random`, `list`, `preload`, `unload`) to override configured wallpaper directories
-- Improved CLI flexibility for users who don't want to rely on configuration files
+**Critical Fixes:**
+- 🔴 Fixed race condition on hyprpaper startup (no more black wallpapers!)
+- 🔴 Fixed empty error messages when IPC commands fail
+- 🟡 Added automatic retry logic with exponential backoff
+- 🟡 Added comprehensive logging support
+- 🟡 Made timeouts configurable per-command
+
+**New Features:**
+- `HyprpaperIPC.is_ready()` - Check if socket is ready
+- Per-command timeout overrides
+- `--verbose` / `-v` CLI flag for debug logging
+- `HYPRPAPER_MANAGER_LOG_LEVEL` environment variable
+
+See [MIGRATION_v0.2.md](docs/MIGRATION_v0.2.md) for migration guide.
 
 ## License
 
