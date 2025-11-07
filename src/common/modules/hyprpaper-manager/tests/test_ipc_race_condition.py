@@ -180,14 +180,26 @@ class TestImprovedErrorMessages:
     """Test improved error messages."""
 
     @patch("hyprpaper_manager.ipc.client.subprocess.run")
-    def test_error_message_when_socket_not_ready(self, mock_run, ipc):
-        """Test error message when socket is not ready."""
-        mock_run.side_effect = [
-            Mock(returncode=0),  # is_running
-            Mock(returncode=1),  # is_ready fails (socket not ready)
-            Mock(returncode=1),
-            Mock(returncode=1),
-        ]
+    @patch("hyprpaper_manager.ipc.client.time.sleep")
+    def test_error_message_when_socket_not_ready(
+        self, mock_sleep, mock_run, ipc
+    ):
+        """Test error when socket not ready but process running."""
+        # Process is running but socket never becomes ready
+        # is_running=True, listloaded=fail, final is_running=True
+        mock_run.return_value = Mock(
+            returncode=0
+        )  # is_running always returns True
+
+        # Override for listloaded checks to fail
+        def side_effect(*args, **kwargs):
+            cmd = args[0]
+            if "listloaded" in cmd:
+                return Mock(returncode=1)  # Socket not ready
+            else:
+                return Mock(returncode=0)  # Process running
+
+        mock_run.side_effect = side_effect
 
         with pytest.raises(HyprpaperIPCError) as exc_info:
             ipc._execute("preload", "/test/wallpaper.png")

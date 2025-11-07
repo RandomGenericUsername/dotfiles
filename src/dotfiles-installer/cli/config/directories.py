@@ -81,6 +81,7 @@ def create_install_builder(root: Path, strict: bool = True) -> PathsBuilder:
     builder.add_path("modules.hyprpaper-manager")
 
     builder.add_path("tools.colorscheme-orchestrator")
+    builder.add_path("tools.wallpaper-effects-orchestrator")
 
     return builder
 

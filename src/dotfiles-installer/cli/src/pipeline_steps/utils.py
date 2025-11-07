@@ -86,13 +86,22 @@ def handle_previous_installation(context: PipelineContext) -> PipelineContext:
     dotfiles_directory: Path = (
         context.app_config.project.paths.install.dotfiles.path
     )
+    modules_directory: Path = (
+        context.app_config.project.paths.install.modules.path
+    )
+    tools_directory: Path = context.app_config.project.paths.install.tools.path
+    directories_to_delete = [
+        dotfiles_directory,
+        modules_directory,
+        tools_directory,
+    ]
     try:
         match install_type:
             case InstallType.clean:
                 context = handle_clean_installation(context, install_directory)
             case InstallType.update:
                 context = handle_update_installation(
-                    context, dotfiles_directory
+                    context, directories_to_delete
                 )
             case _:
                 raise ValueError(f"Unknown install type: {install_type}")
@@ -191,15 +200,18 @@ def handle_clean_installation(
 
 
 def handle_update_installation(
-    context: PipelineContext, dir_to_delete: Path
+    context: PipelineContext, dirs_to_delete: list[Path]
 ) -> PipelineContext:
     install_type = context.app_config.cli_settings.install_type
     context.logger_instance.debug(
         f"Performing {install_type.value} installation"
     )
     try:
-        context.logger_instance.debug(f"Deleting directory: {dir_to_delete}")
-        file_manager.delete_directory_safe(dir_to_delete)
+        for dir_to_delete in dirs_to_delete:
+            context.logger_instance.debug(
+                f"Deleting directory: {dir_to_delete}"
+            )
+            file_manager.delete_directory_safe(dir_to_delete)
     except FileNotFoundError:
         pass
     except Exception as e:

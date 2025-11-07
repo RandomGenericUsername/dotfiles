@@ -171,6 +171,9 @@ def install(
                 context.app_config.project.paths.install.dotfiles.cache.path
             ),
         },
+        "wallpaper-effects-orchestrator": {
+            "logging.level": "DEBUG",
+        },
     }
 
     steps: list[TaskStep] = [
@@ -201,8 +204,12 @@ def install(
                 "colorscheme-orchestrator"
             ],
         ),
-        # InstallModuleStep(module_name="colorscheme-generator"),
-        # InstallModuleStep(module_name="wallpaper-effects-processor"),
+        InstallToolStep(
+            tool_name="wallpaper-effects-orchestrator",
+            settings_overrides=module_settings_overrides[
+                "wallpaper-effects-orchestrator"
+            ],
+        ),
     ]
     pipeline: Pipeline = Pipeline.create(steps)
     pipeline.run(context)

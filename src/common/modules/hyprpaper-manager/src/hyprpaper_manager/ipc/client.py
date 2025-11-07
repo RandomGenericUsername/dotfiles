@@ -178,21 +178,21 @@ class HyprpaperIPC:
         if timeout is None:
             timeout = self.timeout
 
-        # Check if hyprpaper is running
-        if not self.is_running():
-            logger.error("hyprpaper process not running")
-            raise HyprpaperNotRunningError(
-                "hyprpaper is not running. Start it with 'hyprpaper &'"
-            )
-
-        # Wait for socket to be ready (handles startup race condition)
+        # Check if socket is ready (this also checks if process is running)
         if not self.is_ready():
-            logger.error("hyprpaper socket not ready")
-            raise HyprpaperIPCError(
-                "hyprpaper IPC socket is not ready. "
-                "The process may be starting up or experiencing issues.",
-                command=f"hyprctl hyprpaper {command}",
-            )
+            # Re-check process to provide better error message
+            if not self.is_running():
+                logger.error("hyprpaper process not running")
+                raise HyprpaperNotRunningError(
+                    "hyprpaper is not running. Start it with 'hyprpaper &'"
+                )
+            else:
+                logger.error("hyprpaper socket not ready")
+                raise HyprpaperIPCError(
+                    "hyprpaper IPC socket is not ready. "
+                    "The process may be starting up or experiencing issues.",
+                    command=f"hyprctl hyprpaper {command}",
+                )
 
         cmd = ["hyprctl", "hyprpaper", command, *args]
         cmd_str = " ".join(cmd)
