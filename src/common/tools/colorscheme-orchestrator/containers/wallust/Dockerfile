@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install nightly toolchain for edition2024 support
+# Note: moxcms 0.7.9 (a dependency of wallust) requires Rust edition 2024,
+# which is not yet stable. This is a temporary workaround until moxcms
+# publishes a fixed version without edition2024.
 RUN rustup toolchain install nightly && \
     rustup default nightly
 
