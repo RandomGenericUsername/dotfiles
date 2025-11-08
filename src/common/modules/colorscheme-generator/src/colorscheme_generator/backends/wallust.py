@@ -1,7 +1,7 @@
 """Wallust backend for color scheme generation.
 
 This backend uses wallust (Rust binary) to extract colors from images.
-Wallust outputs JSON to stdout, which we parse.
+Wallust writes JSON files to a cache directory, which we read from.
 """
 
 import json
@@ -26,11 +26,13 @@ from colorscheme_generator.core.types import (
 class WallustGenerator(ColorSchemeGenerator):
     """Wallust backend for color extraction.
 
-    Uses wallust (Rust binary) to generate colors. Wallust outputs JSON
-    to stdout, which we parse directly without file I/O.
+    Uses wallust (Rust binary) to generate colors. Wallust writes to a
+    cache directory (~/.cache/wallust/), which we read from to extract
+    the ColorScheme.
 
     Attributes:
         settings: Application configuration
+        cache_dir: Directory where wallust writes its output
         output_format: Output format for wallust (json or plain)
         backend_type: Wallust backend type (resized, full, thumb)
     """
@@ -42,6 +44,7 @@ class WallustGenerator(ColorSchemeGenerator):
             settings: Application configuration
         """
         self.settings = settings
+        self.cache_dir = Path.home() / ".cache" / "wallust"
         self.output_format = settings.backends.wallust.output_format
         self.backend_type = settings.backends.wallust.backend_type
 
@@ -85,24 +88,34 @@ class WallustGenerator(ColorSchemeGenerator):
         if not image_path.is_file():
             raise InvalidImageError(image_path, "Not a file")
 
-        # Run wallust
+        # Run wallust (writes to cache)
         try:
-            wallust_output = self._run_wallust(image_path, config)
+            self._run_wallust(image_path, config)
         except Exception as e:
             raise ColorExtractionError(
-                f"Failed to run wallust: {e}",
-                backend=self.backend_name,
-                image_path=image_path,
+                f"Failed to run wallust on {image_path}: {e}"
             ) from e
 
-        # Parse JSON output
+        # Find and read the cache file
         try:
-            wallust_colors = json.loads(wallust_output)
-        except json.JSONDecodeError as e:
+            cache_file = self._find_cache_file(image_path, config)
+        except Exception as e:
             raise ColorExtractionError(
-                f"Failed to parse wallust JSON output: {e}",
-                backend=self.backend_name,
-                image_path=image_path,
+                f"Failed to find wallust cache file for {image_path}: {e}"
+            ) from e
+
+        if not cache_file.exists():
+            raise ColorExtractionError(
+                f"Wallust cache file not found: {cache_file}"
+            )
+
+        # Parse JSON from cache file
+        try:
+            with cache_file.open() as f:
+                wallust_colors = json.load(f)
+        except Exception as e:
+            raise ColorExtractionError(
+                f"Failed to read wallust output from {cache_file}: {e}"
             ) from e
 
         # Convert to ColorScheme
@@ -112,15 +125,16 @@ class WallustGenerator(ColorSchemeGenerator):
         self,
         image_path: Path,
         config: GeneratorConfig,  # noqa: ARG002
-    ) -> str:
-        """Run wallust command and return JSON output.
+    ) -> None:
+        """Run wallust command to generate colors (writes to cache).
 
         Args:
             image_path: Path to source image
             config: Runtime configuration (reserved for future use)
 
-        Returns:
-            JSON output from wallust
+        Raises:
+            ColorExtractionError: If wallust command fails
+            BackendNotAvailableError: If wallust is not installed
         """
         cmd = [
             "wallust",
@@ -128,22 +142,22 @@ class WallustGenerator(ColorSchemeGenerator):
             str(image_path),
             "--backend",
             self.backend_type,
-            "--json",  # Output JSON to stdout
+            "-s",  # Skip terminal sequences
+            "-T",  # Skip templates
+            "-N",  # No config file
+            "-q",  # Quiet mode
         ]
 
         try:
-            result = subprocess.run(
+            subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
                 check=True,
             )
-            return result.stdout
         except subprocess.CalledProcessError as e:
             raise ColorExtractionError(
-                f"Wallust command failed: {e.stderr}",
-                backend=self.backend_name,
-                image_path=image_path,
+                f"Wallust command failed: {e.stderr}"
             ) from e
         except FileNotFoundError as e:
             raise BackendNotAvailableError(
@@ -151,6 +165,60 @@ class WallustGenerator(ColorSchemeGenerator):
                 "wallust command not found. "
                 "Install with: cargo install wallust",
             ) from e
+
+    def _find_cache_file(
+        self,
+        image_path: Path,  # noqa: ARG002
+        config: GeneratorConfig,  # noqa: ARG002
+    ) -> Path:
+        """Find the wallust cache file for the given image.
+
+        Args:
+            image_path: Path to source image
+            config: Runtime configuration (reserved for future use)
+
+        Returns:
+            Path to the cache file
+
+        Raises:
+            FileNotFoundError: If cache file cannot be found
+        """
+        if not self.cache_dir.exists():
+            raise FileNotFoundError(
+                f"Wallust cache directory not found: {self.cache_dir}"
+            )
+
+        # Get all cache directories
+        cache_dirs = [d for d in self.cache_dir.iterdir() if d.is_dir()]
+        if not cache_dirs:
+            raise FileNotFoundError(
+                f"No cache directories found in {self.cache_dir}"
+            )
+
+        # Get the most recently modified directory (handles the hash)
+        latest_cache_dir = max(cache_dirs, key=lambda d: d.stat().st_mtime)
+
+        # Build expected filename: <Backend>_<Colorspace>_<Threshold>_<Palette>
+        backend = self.backend_type.capitalize()
+        colorspace = "Lch"  # Default colorspace
+        threshold = "auto"  # Default threshold
+        palette = "Dark"  # Default palette
+
+        filename = f"{backend}_{colorspace}_{threshold}_{palette}"
+        cache_file = latest_cache_dir / filename
+
+        # Fallback: if exact filename doesn't exist, try to find any
+        # Dark palette file
+        if not cache_file.exists():
+            dark_files = list(latest_cache_dir.glob("*_Dark"))
+            if dark_files:
+                cache_file = dark_files[0]
+            else:
+                raise FileNotFoundError(
+                    f"No cache file found in {latest_cache_dir}"
+                )
+
+        return cache_file
 
     def _parse_wallust_output(
         self, wallust_colors: dict, image_path: Path
@@ -164,28 +232,31 @@ class WallustGenerator(ColorSchemeGenerator):
         Returns:
             ColorScheme object
         """
-        # Wallust format (similar to pywal):
+        # Wallust format (flat structure):
         # {
-        #   "special": {
-        #     "background": "#...", "foreground": "#...", "cursor": "#..."
-        #   },
-        #   "colors": {"color0": "#...", "color1": "#...", ...}
+        #   "background": "#...",
+        #   "foreground": "#...",
+        #   "cursor": "#...",
+        #   "color0": "#...", "color1": "#...", ...
         # }
 
-        special = wallust_colors.get("special", {})
-        colors_dict = wallust_colors.get("colors", {})
+        # Extract special colors directly from root
+        background = self._parse_color(
+            wallust_colors.get("background", "#000000")
+        )
+        foreground = self._parse_color(
+            wallust_colors.get("foreground", "#ffffff")
+        )
+        cursor = self._parse_color(
+            wallust_colors.get("cursor", foreground.hex)
+        )
 
-        # Extract special colors
-        background = self._parse_color(special.get("background", "#000000"))
-        foreground = self._parse_color(special.get("foreground", "#ffffff"))
-        cursor = self._parse_color(special.get("cursor", foreground.hex))
-
-        # Extract terminal colors (0-15)
+        # Extract terminal colors (0-15) directly from root
         colors = []
         for i in range(16):
             color_key = f"color{i}"
-            if color_key in colors_dict:
-                colors.append(self._parse_color(colors_dict[color_key]))
+            if color_key in wallust_colors:
+                colors.append(self._parse_color(wallust_colors[color_key]))
             else:
                 # Fallback if color missing
                 colors.append(Color(hex="#000000", rgb=(0, 0, 0)))
