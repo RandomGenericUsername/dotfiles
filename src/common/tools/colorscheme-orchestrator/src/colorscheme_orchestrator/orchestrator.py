@@ -1,6 +1,5 @@
 """Main orchestrator for colorscheme generation."""
 
-import json
 from pathlib import Path
 from typing import Any
 
@@ -20,93 +19,6 @@ from colorscheme_orchestrator.exceptions import (
     ImageNotFoundError,
     InvalidBackendError,
 )
-
-
-def _ansi_color_block(rgb: tuple[int, int, int], width: int = 8) -> str:
-    """Create an ANSI colored block for terminal display.
-
-    Args:
-        rgb: RGB tuple (r, g, b)
-        width: Width of the color block in characters
-
-    Returns:
-        ANSI escape sequence for colored block
-    """
-    r, g, b = rgb
-    # Use 24-bit true color ANSI escape codes
-    return f"\033[48;2;{r};{g};{b}m{' ' * width}\033[0m"
-
-
-def _display_colorscheme(json_path: Path) -> None:
-    """Display colorscheme from JSON file with colored blocks.
-
-    Args:
-        json_path: Path to colors.json file
-    """
-    try:
-        with json_path.open() as f:
-            data = json.load(f)
-
-        # Get metadata
-        metadata = data.get("metadata", {})
-        source_image = metadata.get("source_image", "unknown")
-        backend = metadata.get("backend", "unknown")
-
-        # Get colors
-        special = data.get("special", {})
-        rgb_data = data.get("rgb", {})
-        colors_dict = data.get("colors", {})
-        rgb_colors = rgb_data.get("colors", [])
-
-        # Print header
-        print("\n" + "=" * 60)
-        print("Color Scheme")
-        print("=" * 60)
-        print(f"Source:  {source_image}")
-        print(f"Backend: {backend}")
-        print("=" * 60)
-
-        # Print special colors
-        print("\nSpecial Colors:")
-        print("-" * 60)
-
-        special_colors = [
-            (
-                "background",
-                special.get("background"),
-                rgb_data.get("background"),
-            ),
-            (
-                "foreground",
-                special.get("foreground"),
-                rgb_data.get("foreground"),
-            ),
-            ("cursor", special.get("cursor"), rgb_data.get("cursor")),
-        ]
-
-        for name, hex_color, rgb in special_colors:
-            if hex_color and rgb:
-                block = _ansi_color_block(tuple(rgb))
-                print(f"{name:12} {block}  {hex_color}")
-
-        # Print terminal colors
-        print("\nTerminal Colors:")
-        print("-" * 60)
-
-        for i in range(16):
-            color_key = f"color{i}"
-            hex_color = colors_dict.get(color_key)
-            rgb = rgb_colors[i] if i < len(rgb_colors) else None
-
-            if hex_color and rgb:
-                block = _ansi_color_block(tuple(rgb))
-                print(f"{color_key:<7} {block}  {hex_color}")
-
-        print("=" * 60 + "\n")
-
-    except Exception:
-        # Silently fail - color display is optional
-        pass
 
 
 class ColorSchemeOrchestrator:
@@ -275,10 +187,6 @@ class ColorSchemeOrchestrator:
         print(f"\n{'=' * 60}")
         print("✓ Colorscheme Generation Complete")
         print(f"{'=' * 60}\n")
-
-        # Display the generated colorscheme
-        if "json" in output_files:
-            _display_colorscheme(output_files["json"])
 
         return output_files
 
