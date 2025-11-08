@@ -3,11 +3,16 @@ MAKEFLAGS += --no-print-directory
 # Standard Makefile for colorscheme-orchestrator
 # Provides consistent development workflows
 
-.PHONY: help sync-check ensure-sync dev-shell format lint type-check test test-cov clean clean-venv install build pre-commit-install pre-commit-run all-checks
+.PHONY: help sync-check ensure-sync dev-shell format lint type-check test test-cov clean clean-venv install build pre-commit-install pre-commit-run all-checks rebuild-wallust rebuild-pywal rebuild-all-backends list-backends
 
 help: ## Show this help message
 	@echo "Available commands:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
+	@echo ""
+	@echo "Development:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -v "container\|backend" | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
+	@echo ""
+	@echo "Container Management:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep "container\|backend" | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
 
 sync-check: ## Check if environment sync is needed
 	@if ! uv run python -c "import sys; sys.exit(0)" 2>/dev/null; then \
@@ -96,3 +101,23 @@ pre-commit-run: ensure-sync ## Run pre-commit on all files
 
 all-checks: format lint type-check test ## Run all checks (format, lint, type-check, test)
 	@echo "✅ All checks passed!"
+
+# Container management targets
+rebuild-wallust: ensure-sync ## Rebuild wallust container image
+	@echo "Rebuilding wallust container..."
+	@uv run python scripts/rebuild_backend.py wallust
+	@echo "✅ Wallust container rebuilt"
+
+rebuild-pywal: ensure-sync ## Rebuild pywal container image
+	@echo "Rebuilding pywal container..."
+	@uv run python scripts/rebuild_backend.py pywal
+	@echo "✅ Pywal container rebuilt"
+
+rebuild-all-backends: ensure-sync ## Rebuild all backend container images
+	@echo "Rebuilding all backend containers..."
+	@uv run python scripts/rebuild_backend.py --all
+	@echo "✅ All backend containers rebuilt"
+
+list-backends: ensure-sync ## List available colorscheme backends
+	@echo "Available backends:"
+	@uv run python -c "from colorscheme_orchestrator import ColorSchemeOrchestrator; print('\n'.join(f'  - {b}' for b in ColorSchemeOrchestrator().list_backends()))"
