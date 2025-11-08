@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from colorscheme_generator import (
+    ColorFormat,
     GeneratorConfig,
     OutputManager,
     WallustGenerator,
@@ -18,7 +19,9 @@ def main():
     # Get environment variables
     image_path = os.getenv("IMAGE_PATH")
     output_dir = os.getenv("OUTPUT_DIR", "/output")
-    formats = os.getenv("FORMATS", "json,css,yaml,sh").split(",")
+    formats_str = os.getenv("FORMATS", "json,css,yaml,sh").split(",")
+    # Convert format strings to ColorFormat enums
+    formats = [ColorFormat(fmt.strip()) for fmt in formats_str]
     color_count = int(os.getenv("COLOR_COUNT", "16"))
     backend_type = os.getenv("BACKEND_TYPE", "resized")
     output_format = os.getenv("OUTPUT_FORMAT", "json")
@@ -50,32 +53,40 @@ def main():
 
     try:
         # Create configuration
-        config = GeneratorConfig(
+        gen_config = GeneratorConfig(
             output_dir=output_dir,
             formats=formats,
         )
 
+        # Create app config with wallust settings
+        from colorscheme_generator.config.config import AppConfig
+
+        app_config = AppConfig()
+        # Override wallust settings
+        app_config.backends.wallust.backend_type = backend_type
+        app_config.backends.wallust.output_format = output_format
+
         # Create generator
         print("\n→ Initializing wallust generator...")
-        generator = WallustGenerator(
-            config=config,
-            backend_type=backend_type,
-            output_format=output_format,
-        )
+        generator = WallustGenerator(app_config)
 
         # Generate colorscheme
         print("→ Extracting colors from image...")
-        colorscheme = generator.generate(image_path, color_count=color_count)
+        colorscheme = generator.generate(image_path, gen_config)
 
         print(f"✓ Extracted {len(colorscheme.colors)} colors")
-        print(f"  Special colors: {colorscheme.special}")
+        print(f"  Background: {colorscheme.background.hex}")
+        print(f"  Foreground: {colorscheme.foreground.hex}")
+        print(f"  Cursor: {colorscheme.cursor.hex}")
 
         # Create output manager
         print("\n→ Writing output files...")
-        output_manager = OutputManager(config=config)
+        output_manager = OutputManager(app_config)
 
         # Write output files
-        output_files = output_manager.write_all(colorscheme)
+        output_files = output_manager.write_outputs(
+            colorscheme, output_dir, formats
+        )
 
         print(f"✓ Generated {len(output_files)} files:")
         for fmt, path in output_files.items():
