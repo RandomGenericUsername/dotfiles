@@ -109,6 +109,11 @@ def main():
         print("✓ Pywal backend completed successfully")
         print(f"{'=' * 60}")
 
+        # Display the color scheme with colored blocks
+        from colorscheme_generator.cli import _show_colorscheme
+
+        _show_colorscheme(colorscheme)
+
         sys.exit(0)
 
     except Exception as e:
