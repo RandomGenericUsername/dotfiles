@@ -78,10 +78,16 @@ def create_install_builder(root: Path, strict: bool = True) -> PathsBuilder:
     # ----------------------------- scripts ------------------------------- #
 
     builder.add_path("modules.logging")
+    builder.add_path("modules.pipeline")
+    builder.add_path("modules.package-manager")
+    builder.add_path("modules.container-manager")
+    builder.add_path("modules.colorscheme-generator")
+    builder.add_path("modules.wallpaper-effects-processor")
     builder.add_path("modules.hyprpaper-manager")
 
     builder.add_path("tools.colorscheme-orchestrator")
     builder.add_path("tools.wallpaper-effects-orchestrator")
+    builder.add_path("tools.wallpaper-orchestrator")
 
     return builder
 

@@ -67,14 +67,26 @@ class ColorSchemeOrchestrator:
         self.containers_dir = orchestrator_root / "containers"
 
         # Get colorscheme-generator module path
-        # From orchestrator root, go up to tools/, then to common/modules/
-        # orchestrator_root = .../colorscheme-orchestrator/
-        # .parent = .../tools/
-        # .parent.parent = .../common/
-        common_dir = orchestrator_root.parent.parent
-        self.colorscheme_generator_path = (
-            common_dir / "modules" / "colorscheme-generator"
+        # Get colorscheme-generator module path from configuration
+        # This is set by the installer or defaults to
+        # src/common/modules/colorscheme-generator for dev
+        colorscheme_generator_path = (
+            self.config.paths.colorscheme_generator_module
         )
+
+        # If relative path, resolve it relative to the tool root or
+        # workspace root
+        if not colorscheme_generator_path.is_absolute():
+            # __file__ is in:
+            # .../colorscheme-orchestrator/src/colorscheme_orchestrator/
+            # orchestrator.py
+            # 3 parents up gets us to the tool root
+            tool_root = Path(__file__).parent.parent.parent
+            colorscheme_generator_path = (
+                tool_root / colorscheme_generator_path
+            ).resolve()
+
+        self.colorscheme_generator_path = colorscheme_generator_path
 
         # Initialize components
         self.registry = BackendRegistry(self.containers_dir)

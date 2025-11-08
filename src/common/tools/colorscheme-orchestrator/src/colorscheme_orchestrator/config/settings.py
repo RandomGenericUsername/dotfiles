@@ -7,6 +7,17 @@ from dynaconf import Dynaconf
 from pydantic import BaseModel, Field
 
 
+class PathsConfig(BaseModel):
+    """Paths configuration."""
+
+    colorscheme_generator_module: Path = Field(
+        default=Path("src/common/modules/colorscheme-generator"),
+        description=(
+            "Path to colorscheme-generator module for container builds"
+        ),
+    )
+
+
 class OrchestratorSettings(BaseModel):
     """Main orchestrator configuration."""
 
@@ -110,6 +121,7 @@ class BackendSettings(BaseModel):
 class OrchestratorConfig(BaseModel):
     """Complete orchestrator configuration."""
 
+    paths: PathsConfig
     orchestrator: OrchestratorSettings
     backends: BackendSettings
 
@@ -121,7 +133,11 @@ def load_settings() -> OrchestratorConfig:
         OrchestratorConfig: Loaded configuration
     """
     # Get the directory where this file is located
-    config_dir = Path(__file__).parent
+    # __file__ is in:
+    # .../colorscheme-orchestrator/src/colorscheme_orchestrator/config/
+    # settings.py
+    # Need to go up 3 levels to get to tool root
+    config_dir = Path(__file__).parent.parent.parent.parent / "config"
 
     # Load settings using Dynaconf
     settings = Dynaconf(
@@ -131,6 +147,15 @@ def load_settings() -> OrchestratorConfig:
     )
 
     # Convert to Pydantic models
+    paths_config = PathsConfig(
+        colorscheme_generator_module=Path(
+            settings.get("paths", {}).get(
+                "colorscheme_generator_module",
+                "src/common/modules/colorscheme-generator",
+            )
+        ),
+    )
+
     orchestrator_settings = OrchestratorSettings(
         default_backend=settings.orchestrator.default_backend,
         default_output_dir=Path(
@@ -167,6 +192,7 @@ def load_settings() -> OrchestratorConfig:
     )
 
     return OrchestratorConfig(
+        paths=paths_config,
         orchestrator=orchestrator_settings,
         backends=backend_settings,
     )

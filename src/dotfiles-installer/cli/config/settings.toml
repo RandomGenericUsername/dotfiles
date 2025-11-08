@@ -1,6 +1,6 @@
 [package_manager]
 prefer_third_party = true
-update_system = true
+update_system = false
 remove_dependencies = true
 dry_run = false
 

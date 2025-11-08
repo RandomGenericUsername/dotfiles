@@ -1,6 +1,12 @@
 # Colorscheme Orchestrator Settings
 # These are defaults that can be overridden by CLI parameters
 
+[paths]
+# Directory containing the colorscheme-generator module
+# This is used when building container images
+# Default for development: relative to workspace root
+colorscheme_generator_module = "src/common/modules/colorscheme-generator"
+
 [orchestrator]
 # Default backend to use if not specified
 default_backend = "pywal"

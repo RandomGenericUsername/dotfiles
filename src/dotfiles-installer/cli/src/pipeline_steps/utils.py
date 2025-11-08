@@ -90,7 +90,7 @@ def handle_previous_installation(context: PipelineContext) -> PipelineContext:
         context.app_config.project.paths.install.modules.path
     )
     tools_directory: Path = context.app_config.project.paths.install.tools.path
-    directories_to_delete = [
+    directories_to_delete_update_install = [
         dotfiles_directory,
         modules_directory,
         tools_directory,
@@ -101,7 +101,7 @@ def handle_previous_installation(context: PipelineContext) -> PipelineContext:
                 context = handle_clean_installation(context, install_directory)
             case InstallType.update:
                 context = handle_update_installation(
-                    context, directories_to_delete
+                    context, directories_to_delete_update_install
                 )
             case _:
                 raise ValueError(f"Unknown install type: {install_type}")

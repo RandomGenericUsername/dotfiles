@@ -1,5 +1,11 @@
 # Wallpaper Effects Orchestrator Configuration
 
+[paths]
+# Directory containing shared modules (dotfiles_logging, wallpaper_processor, etc.)
+# This is used when building the container image
+# Default for development: relative to workspace root
+modules_directory = "src/common/modules"
+
 [container]
 # Container runtime: "docker" or "podman"
 runtime = "docker"

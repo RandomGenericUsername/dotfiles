@@ -170,9 +170,28 @@ def install(
             "orchestrator.default_output_dir": str(
                 context.app_config.project.paths.install.dotfiles.cache.path
             ),
+            "paths.colorscheme_generator_module": str(
+                context.app_config.project.paths.install.modules.path
+                / "colorscheme-generator"
+            ),
         },
         "wallpaper-effects-orchestrator": {
             "logging.level": "DEBUG",
+            "paths.modules_directory": str(
+                context.app_config.project.paths.install.modules.path
+            ),
+        },
+        "wallpaper-orchestrator": {
+            "orchestrator.effects_output_dir": str(
+                context.app_config.project.paths.install.dotfiles.cache.path
+                / "wallpaper-effects"
+            ),
+            "orchestrator.colorscheme_output_dir": str(
+                context.app_config.project.paths.install.dotfiles.cache.path
+                / "colorschemes"
+            ),
+            "colorscheme.backend": "pywal",
+            "hyprpaper.monitor": "all",
         },
     }
 
@@ -194,6 +213,11 @@ def install(
         InstallPipPackagesStep(),
         ExtractWallpapersStep(),
         InstallModuleStep(module_name="logging"),
+        InstallModuleStep(module_name="pipeline"),
+        InstallModuleStep(module_name="package-manager"),
+        InstallModuleStep(module_name="container-manager"),
+        InstallModuleStep(module_name="colorscheme-generator"),
+        InstallModuleStep(module_name="wallpaper-effects-processor"),
         InstallModuleStep(
             module_name="hyprpaper-manager",
             settings_overrides=module_settings_overrides["hyprpaper-manager"],
@@ -208,6 +232,12 @@ def install(
             tool_name="wallpaper-effects-orchestrator",
             settings_overrides=module_settings_overrides[
                 "wallpaper-effects-orchestrator"
+            ],
+        ),
+        InstallToolStep(
+            tool_name="wallpaper-orchestrator",
+            settings_overrides=module_settings_overrides[
+                "wallpaper-orchestrator"
             ],
         ),
     ]
