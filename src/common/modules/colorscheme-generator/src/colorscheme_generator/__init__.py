@@ -33,6 +33,8 @@ __version__ = "0.1.0"
 
 # Core exports
 # Configuration exports
+# Backends
+from colorscheme_generator.backends.wallust import WallustGenerator
 from colorscheme_generator.config import (
     AppConfig,
     Backend,
@@ -64,6 +66,8 @@ __all__ = [
     "Backend",
     "ColorFormat",
     "Settings",
+    # Backends
+    "WallustGenerator",
     # Factory
     "ColorSchemeGeneratorFactory",
 ]
