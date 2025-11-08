@@ -131,9 +131,17 @@ class DockerContainerManager(ContainerManager):
             cmd.extend(config.entrypoint[1:])
 
         try:
-            result = run_docker_command(cmd)
-            container_id = result.stdout.decode("utf-8").strip()
-            return container_id
+            # Use streaming mode if requested
+            result = run_docker_command(cmd, stream=config.stream_output)
+
+            # If streaming, stdout will be empty
+            if config.stream_output:
+                # For streaming mode, we can't get the container ID from stdout
+                # This is expected - streaming is for non-detached containers
+                return ""
+            else:
+                container_id = result.stdout.decode("utf-8").strip()
+                return container_id
 
         except Exception as e:
             raise ContainerRuntimeError(

@@ -14,6 +14,7 @@ def run_docker_command(
     command: list[str],
     timeout: int | None = None,
     input_data: bytes | None = None,
+    stream: bool = False,
 ) -> subprocess.CompletedProcess:
     """
     Run a Docker command.
@@ -22,28 +23,47 @@ def run_docker_command(
         command: Command to run
         timeout: Timeout in seconds
         input_data: Data to pipe to stdin
+        stream: Stream output to terminal (preserves ANSI codes)
 
     Returns:
-        CompletedProcess result
+        CompletedProcess result (stdout/stderr will be empty if stream=True)
 
     Raises:
         ContainerError: If command fails
     """
     try:
-        result = subprocess.run(
-            command,
-            capture_output=True,
-            timeout=timeout,
-            input=input_data,
-            check=False,
-        )
+        if stream:
+            # Stream output directly to terminal without capturing
+            result = subprocess.run(
+                command,
+                timeout=timeout,
+                input=input_data,
+                check=False,
+                # Don't capture output - let it stream to terminal
+                stdout=None,
+                stderr=None,
+            )
+        else:
+            # Capture output
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                timeout=timeout,
+                input=input_data,
+                check=False,
+            )
 
         if result.returncode != 0:
+            stderr_msg = (
+                result.stderr.decode("utf-8", errors="replace")
+                if result.stderr
+                else "Command failed (output was streamed)"
+            )
             raise ContainerError(
                 message="Docker command failed",
                 command=command,
                 exit_code=result.returncode,
-                stderr=result.stderr.decode("utf-8", errors="replace"),
+                stderr=stderr_msg,
             )
 
         return result

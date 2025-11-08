@@ -127,63 +127,29 @@ class ContainerRunner:
                 )
 
             # Create RunConfig
-            # Don't use remove=True because we need to get logs after exit
+            # Use stream_output to preserve ANSI codes for color display
             config = RunConfig(
                 image=f"{metadata.image_name}:{metadata.image_tag}",
                 name=container_name,
                 volumes=volumes,
                 environment=environment,
-                detach=True,  # Run in background
-                remove=False,  # Don't auto-remove so we can get logs
+                detach=False,  # Run in foreground
+                remove=True,  # Auto-remove after completion
+                stream_output=True,  # Stream output (preserves ANSI)
             )
 
-            # Run container
+            # Run container - output will stream directly to terminal
             print("  Starting container...")
             try:
-                container_id = self.engine.containers.run(config)
-                print(f"  Container ID: {container_id[:12]}")
-
-                # Wait for container to finish
-                print("  Waiting for completion...")
-                while True:
-                    info = self.engine.containers.inspect(container_id)
-                    # Check if container is no longer running
-                    if info.state in ("exited", "dead", "stopped"):
-                        break
-                    time.sleep(0.5)
-
+                self.engine.containers.run(config)
                 print("  Container completed")
-
-                # Get final exit code
-                exit_code = info.exit_code if info.exit_code is not None else 0
-
-                # Get logs
-                logs = self.engine.containers.logs(container_id)
-            finally:
-                # Clean up container if auto_cleanup is enabled
-                if self.auto_cleanup and not keep_container:
-                    try:
-                        self.engine.containers.remove(container_id, force=True)
-                        print("  Container removed")
-                    except Exception:
-                        pass  # Ignore cleanup errors
-            print("\n  Container output:")
-            print("  " + "-" * 58)
-            for line in logs.split("\n"):
-                if line.strip():
-                    print(f"  {line}")
-            print("  " + "-" * 58)
-
-            # Check exit code
-            if exit_code != 0:
+            except Exception as e:
+                # Container failed
                 raise ContainerRuntimeError(
-                    f"Container exited with code {exit_code}"
-                )
+                    f"Container execution failed: {e}"
+                ) from e
 
-            # Clean up container if needed
-            if not keep_container and not self.auto_cleanup:
-                print("  Removing container...")
-                self.engine.containers.remove(container_id)
+            # Note: Container is auto-removed due to remove=True in config
 
             # Collect output files
             output_files = {}

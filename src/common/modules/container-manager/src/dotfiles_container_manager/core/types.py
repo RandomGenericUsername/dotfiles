@@ -109,6 +109,9 @@ class RunConfig:
     remove: bool = False
     """Remove container when it exits"""
 
+    stream_output: bool = False
+    """Stream output to terminal (preserves ANSI, disables log capture)"""
+
     user: str | None = None
     """User to run as"""
 
