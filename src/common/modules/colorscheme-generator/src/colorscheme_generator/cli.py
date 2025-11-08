@@ -1,6 +1,7 @@
 """Command-line interface for colorscheme generator."""
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -14,86 +15,213 @@ from colorscheme_generator.core.exceptions import (
     OutputWriteError,
 )
 from colorscheme_generator.core.managers import OutputManager
-from colorscheme_generator.core.types import GeneratorConfig
+from colorscheme_generator.core.types import (
+    Color,
+    ColorScheme,
+    GeneratorConfig,
+)
 
 
-def main() -> int:
-    """Main CLI entry point.
+def _ansi_color_block(color: Color, width: int = 8) -> str:
+    """Create an ANSI colored block for terminal display.
+
+    Args:
+        color: Color to display
+        width: Width of the color block in characters
+
+    Returns:
+        ANSI escape sequence for colored block
+    """
+    r, g, b = color.rgb
+    # Use 24-bit true color ANSI escape codes
+    return f"\033[48;2;{r};{g};{b}m{' ' * width}\033[0m"
+
+
+def _load_colorscheme_from_json(path: Path) -> ColorScheme:
+    """Load ColorScheme from JSON file.
+
+    Args:
+        path: Path to JSON file
+
+    Returns:
+        ColorScheme object
+
+    Raises:
+        ValueError: If file format is invalid
+    """
+    with path.open() as f:
+        data = json.load(f)
+
+    # Parse metadata
+    metadata = data.get("metadata", {})
+    source_image = Path(metadata.get("source_image", "unknown"))
+    backend = metadata.get("backend", "unknown")
+
+    # Parse special colors
+    special = data.get("special", {})
+    rgb_data = data.get("rgb", {})
+
+    background = Color(
+        hex=special["background"],
+        rgb=tuple(rgb_data["background"]),  # type: ignore
+    )
+    foreground = Color(
+        hex=special["foreground"],
+        rgb=tuple(rgb_data["foreground"]),  # type: ignore
+    )
+    cursor = Color(
+        hex=special["cursor"],
+        rgb=tuple(rgb_data["cursor"]),  # type: ignore
+    )
+
+    # Parse colors - RGB data is in a nested array
+    colors_dict = data.get("colors", {})
+    rgb_colors = rgb_data.get("colors", [])
+
+    colors = []
+    for i in range(16):
+        color_key = f"color{i}"
+        if color_key not in colors_dict:
+            raise ValueError(f"Missing {color_key} in colors")
+        if i >= len(rgb_colors):
+            raise ValueError(f"Missing RGB data for {color_key}")
+
+        colors.append(
+            Color(
+                hex=colors_dict[color_key],
+                rgb=tuple(rgb_colors[i]),  # type: ignore
+            )
+        )
+
+    return ColorScheme(
+        background=background,
+        foreground=foreground,
+        cursor=cursor,
+        colors=colors,
+        source_image=source_image,
+        backend=backend,
+    )
+
+
+def _show_colorscheme(scheme: ColorScheme) -> None:
+    """Display colorscheme in terminal with colored blocks.
+
+    Args:
+        scheme: ColorScheme to display
+    """
+    # Print header
+    print("\n" + "=" * 60)
+    print("Color Scheme")
+    print("=" * 60)
+    print(f"Source:  {scheme.source_image}")
+    print(f"Backend: {scheme.backend}")
+    print("=" * 60)
+
+    # Print special colors
+    print("\nSpecial Colors:")
+    print("-" * 60)
+
+    special_colors = [
+        ("background", scheme.background),
+        ("foreground", scheme.foreground),
+        ("cursor", scheme.cursor),
+    ]
+
+    for name, color in special_colors:
+        block = _ansi_color_block(color)
+        print(f"{name:12} {block}  {color.hex}")
+
+    # Print terminal colors
+    print("\nTerminal Colors:")
+    print("-" * 60)
+
+    for i, color in enumerate(scheme.colors):
+        block = _ansi_color_block(color)
+        print(f"color{i:<7} {block}  {color.hex}")
+
+    print("=" * 60 + "\n")
+
+
+def _find_last_colorscheme() -> Path | None:
+    """Find the most recently generated colorscheme file.
+
+    Looks in the default output directory from settings.
+
+    Returns:
+        Path to most recent colors.json file, or None if not found
+    """
+    try:
+        settings = Settings.get()
+        output_dir = settings.output.directory
+
+        # Look for colors.json in output directory
+        json_file = output_dir / "colors.json"
+        if json_file.exists():
+            return json_file
+
+        return None
+    except Exception:
+        return None
+
+
+def cmd_show(args: argparse.Namespace) -> int:
+    """Show colorscheme with colored blocks in terminal.
+
+    Args:
+        args: Parsed command-line arguments
 
     Returns:
         Exit code (0 for success, 1 for error)
     """
-    parser = argparse.ArgumentParser(
-        description="Generate color schemes from images",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  # Generate with auto-detected backend
-  colorscheme-gen wallpaper.png
+    # Determine which file to show
+    if args.last:
+        colors_file = _find_last_colorscheme()
+        if not colors_file:
+            print(
+                "Error: No recent colorscheme found. "
+                "Generate one first or specify a file.",
+                file=sys.stderr,
+            )
+            return 1
+        if args.verbose:
+            print(f"Using last generated: {colors_file}")
+    else:
+        colors_file = args.file
+        if not colors_file:
+            print(
+                "Error: Either --file or --last must be specified",
+                file=sys.stderr,
+            )
+            return 1
 
-  # Use specific backend
-  colorscheme-gen wallpaper.png --backend pywal
+    # Check file exists
+    if not colors_file.exists():
+        print(f"Error: File not found: {colors_file}", file=sys.stderr)
+        return 1
 
-  # Custom output directory and formats
-  colorscheme-gen wallpaper.png -o ~/.config/colors -f json css
+    # Load and display colorscheme
+    try:
+        scheme = _load_colorscheme_from_json(colors_file)
+        _show_colorscheme(scheme)
+        return 0
+    except Exception as e:
+        print(f"Error: Failed to load colorscheme: {e}", file=sys.stderr)
+        if args.verbose:
+            import traceback
 
-  # List available backends
-  colorscheme-gen --list-backends
-        """,
-    )
+            traceback.print_exc()
+        return 1
 
-    parser.add_argument(
-        "image",
-        type=Path,
-        nargs="?",
-        help="Path to source image",
-    )
 
-    parser.add_argument(
-        "-b",
-        "--backend",
-        type=str,
-        choices=["pywal", "wallust", "custom", "auto"],
-        default="auto",
-        help="Backend to use (default: auto-detect)",
-    )
+def cmd_generate(args: argparse.Namespace) -> int:
+    """Generate colorscheme from image.
 
-    parser.add_argument(
-        "-o",
-        "--output-dir",
-        type=Path,
-        help="Output directory (default: from settings)",
-    )
+    Args:
+        args: Parsed command-line arguments
 
-    parser.add_argument(
-        "-f",
-        "--formats",
-        nargs="+",
-        choices=["json", "sh", "css", "yaml", "toml"],
-        help="Output formats (default: from settings)",
-    )
-
-    parser.add_argument(
-        "-c",
-        "--color-count",
-        type=int,
-        help="Number of colors to extract (default: 16)",
-    )
-
-    parser.add_argument(
-        "--list-backends",
-        action="store_true",
-        help="List available backends and exit",
-    )
-
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Verbose output",
-    )
-
-    args = parser.parse_args()
+    Returns:
+        Exit code (0 for success, 1 for error)
+    """
 
     # Load settings
     try:
@@ -103,7 +231,7 @@ Examples:
         return 1
 
     # List backends if requested
-    if args.list_backends:
+    if hasattr(args, "list_backends") and args.list_backends:
         available = ColorSchemeGeneratorFactory.list_available(settings)
         print("Available backends:")
         for backend in available:
@@ -112,7 +240,8 @@ Examples:
 
     # Require image argument
     if not args.image:
-        parser.error("image argument is required")
+        print("Error: image argument is required", file=sys.stderr)
+        return 1
 
     # Create runtime config
     config_kwargs = {}
@@ -201,6 +330,157 @@ Examples:
         return 1
 
     return 0
+
+
+def main() -> int:
+    """Main CLI entry point with subcommands.
+
+    Returns:
+        Exit code (0 for success, 1 for error)
+    """
+    parser = argparse.ArgumentParser(
+        description="Generate and display color schemes from images",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+
+    # Create subparsers
+    subparsers = parser.add_subparsers(
+        dest="command",
+        help="Available commands",
+        required=False,
+    )
+
+    # Generate command (default)
+    generate_parser = subparsers.add_parser(
+        "generate",
+        help="Generate color scheme from image",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Generate with auto-detected backend
+  colorscheme-gen generate wallpaper.png
+
+  # Use specific backend
+  colorscheme-gen generate wallpaper.png --backend pywal
+
+  # Custom output directory and formats
+  colorscheme-gen generate wallpaper.png -o ~/.config/colors -f json css
+
+  # List available backends
+  colorscheme-gen generate --list-backends
+        """,
+    )
+
+    generate_parser.add_argument(
+        "image",
+        type=Path,
+        nargs="?",
+        help="Path to source image",
+    )
+
+    generate_parser.add_argument(
+        "-b",
+        "--backend",
+        type=str,
+        choices=["pywal", "wallust", "custom", "auto"],
+        default="auto",
+        help="Backend to use (default: auto-detect)",
+    )
+
+    generate_parser.add_argument(
+        "-o",
+        "--output-dir",
+        type=Path,
+        help="Output directory (default: from settings)",
+    )
+
+    generate_parser.add_argument(
+        "-f",
+        "--formats",
+        nargs="+",
+        choices=["json", "sh", "css", "yaml", "toml"],
+        help="Output formats (default: from settings)",
+    )
+
+    generate_parser.add_argument(
+        "-c",
+        "--color-count",
+        type=int,
+        help="Number of colors to extract (default: 16)",
+    )
+
+    generate_parser.add_argument(
+        "--list-backends",
+        action="store_true",
+        help="List available backends and exit",
+    )
+
+    generate_parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Verbose output",
+    )
+
+    # Show command
+    show_parser = subparsers.add_parser(
+        "show",
+        help="Display color scheme with colored blocks",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Show specific color scheme file
+  colorscheme-gen show colors.json
+  colorscheme-gen show --file ~/.config/colors/colors.json
+
+  # Show last generated color scheme
+  colorscheme-gen show --last
+        """,
+    )
+
+    show_parser.add_argument(
+        "file",
+        type=Path,
+        nargs="?",
+        help="Path to color scheme JSON file",
+    )
+
+    show_parser.add_argument(
+        "--last",
+        action="store_true",
+        help="Show last generated color scheme",
+    )
+
+    show_parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Verbose output",
+    )
+
+    # Check if first arg is a file path (backward compatibility)
+    if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
+        first_arg = sys.argv[1]
+        # If it's not a known command, treat as generate
+        if first_arg not in ["generate", "show"]:
+            sys.argv.insert(1, "generate")
+
+    # Parse arguments
+    args = parser.parse_args()
+
+    # If no command specified, show help
+    if not args.command:
+        parser.print_help()
+        return 0
+
+    # Route to appropriate command
+    if args.command == "generate":
+        return cmd_generate(args)
+    elif args.command == "show":
+        return cmd_show(args)
+    else:
+        parser.print_help()
+        return 0
 
 
 if __name__ == "__main__":
