@@ -1,0 +1,54 @@
+# Wallpaper Orchestrator Settings
+# Complete wallpaper setup: effects generation, color scheme, and wallpaper setting
+
+[orchestrator]
+# Default output directories
+effects_output_dir = "~/.cache/wallpaper/effects"
+colorscheme_output_dir = "~/.cache/colorscheme"
+
+# Logging
+log_level = "INFO"
+verbose = false
+
+[colorscheme]
+# Color scheme generation settings
+backend = "pywal"  # pywal, wallust, or custom
+formats = ["json", "css", "yaml", "sh"]
+color_count = 16
+
+# Container runtime for colorscheme generation
+container_runtime = "docker"
+container_prefix = "colorscheme"
+auto_cleanup = true
+
+[wallpaper_effects]
+# Wallpaper effects processing settings
+container_runtime = "docker"
+image_name = "wallpaper-effects-processor"
+image_tag = "latest"
+
+# Processing mode
+processing_mode = "memory"
+output_format = "png"
+quality = 95
+
+[hyprpaper]
+# Hyprpaper wallpaper manager settings
+monitor = "all"  # "all", "focused", or specific monitor name
+mode = "cover"  # cover, contain, tile
+autostart = true
+
+# Memory management
+max_preload_pool_mb = 100
+max_wallpaper_size_multiplier = 2.0
+
+# IPC settings
+ipc_timeout = 5
+ipc_retry_attempts = 3
+ipc_retry_delay = 0.5
+ipc_startup_wait = 2.0
+
+[pipeline]
+# Pipeline execution settings
+fail_fast = true
+parallel_enabled = false  # Currently all steps run serially
