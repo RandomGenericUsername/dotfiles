@@ -9,10 +9,13 @@ dependencies = [
     "rich>=13.0.0",
     "pydantic>=2.11.9",
     "dynaconf>=3.2.0",
+    "colorscheme-generator",
+    "dotfiles-container-manager",
+    "dotfiles-logging",
 ]
 
 [project.scripts]
-colorscheme-gen = "colorscheme_orchestrator.cli:app"
+colorscheme-orch = "colorscheme_orchestrator.cli:app"
 
 [dependency-groups]
 dev = [
@@ -31,6 +34,14 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/colorscheme_orchestrator"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.uv.sources]
+colorscheme-generator = { path = "../../modules/colorscheme-generator", editable = true }
+dotfiles-container-manager = { path = "../../modules/container-manager", editable = true }
+dotfiles-logging = { path = "../../modules/logging", editable = true }
 
 [tool.black]
 line-length = 79
