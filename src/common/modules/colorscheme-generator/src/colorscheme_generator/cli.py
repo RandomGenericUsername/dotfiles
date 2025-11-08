@@ -329,6 +329,9 @@ def cmd_generate(args: argparse.Namespace) -> int:
             traceback.print_exc()
         return 1
 
+    # Display the color scheme
+    _show_colorscheme(scheme)
+
     return 0
 
 
