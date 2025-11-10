@@ -421,14 +421,12 @@ version = "0.1.0"
 source = { editable = "../../common/modules/pipeline" }
 dependencies = [
     { name = "dotfiles-logging" },
-    { name = "dotfiles-package-manager" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=24.0.0" },
     { name = "dotfiles-logging", editable = "../../common/modules/logging" },
-    { name = "dotfiles-package-manager", editable = "../../common/modules/package-manager" },
     { name = "isort", marker = "extra == 'dev'", specifier = ">=5.13.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.8.0" },
