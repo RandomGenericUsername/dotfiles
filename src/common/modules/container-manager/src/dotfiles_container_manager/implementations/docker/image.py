@@ -175,6 +175,9 @@ class DockerImageManager(ImageManager):
                 labels=img_data.get("Config", {}).get("Labels") or {},
             )
 
+        except ImageNotFoundError:
+            # Re-raise ImageNotFoundError without wrapping
+            raise
         except json.JSONDecodeError as e:
             raise ImageError(
                 message=f"Failed to parse image info for '{image}': {e}",
