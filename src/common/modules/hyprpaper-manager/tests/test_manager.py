@@ -19,7 +19,8 @@ def mock_config():
     return HyprpaperConfig(
         wallpaper_dirs=[Path("/tmp/wallpapers")],
         auto_unload_unused=True,
-        preload_on_set=False,
+        auto_create_config=False,  # Don't create config file in tests
+        max_preload_pool_mb=100,
     )
 
 
@@ -95,3 +96,78 @@ def test_find_wallpaper_not_found(manager):
     """Test find_wallpaper raises when not found."""
     with pytest.raises(WallpaperNotFoundError):
         manager.find_wallpaper("nonexistent.png")
+
+
+@patch("hyprpaper_manager.ipc.client.subprocess.run")
+def test_get_status(mock_run, manager):
+    """Test get_status returns current status."""
+    # Mock IPC responses
+    mock_run.return_value = Mock(
+        returncode=0,
+        stdout="/test/wp1.jpg\nDP-1 = /test/wp1.jpg\n[]",
+    )
+
+    status = manager.get_status()
+
+    assert status is not None
+    assert hasattr(status, "loaded_wallpapers")
+    assert hasattr(status, "active_wallpapers")
+    assert hasattr(status, "monitors")
+
+
+@patch("hyprpaper_manager.ipc.client.subprocess.run")
+def test_preload_wallpaper(mock_run, manager, tmp_path):
+    """Test preloading a wallpaper."""
+    wallpaper = tmp_path / "test.png"
+    wallpaper.touch()
+
+    # Mock IPC responses
+    mock_run.return_value = Mock(returncode=0, stdout="ok")
+
+    manager.preload(wallpaper)
+
+    # Verify wallpaper is in pool
+    assert manager.pool.contains(wallpaper)
+
+
+@patch("hyprpaper_manager.ipc.client.subprocess.run")
+def test_preload_wallpaper_not_found(mock_run, manager):
+    """Test preloading nonexistent wallpaper raises error."""
+    with pytest.raises(WallpaperNotFoundError):
+        manager.preload("/nonexistent/wallpaper.png")
+
+
+@patch("hyprpaper_manager.ipc.client.subprocess.run")
+def test_preload_batch(mock_run, manager, tmp_path):
+    """Test preloading multiple wallpapers."""
+    wp1 = tmp_path / "test1.png"
+    wp2 = tmp_path / "test2.png"
+    wp1.touch()
+    wp2.touch()
+
+    # Mock IPC responses
+    mock_run.return_value = Mock(returncode=0, stdout="ok")
+
+    manager.preload_batch([wp1, wp2])
+
+    # Verify both wallpapers are in pool
+    assert manager.pool.contains(wp1)
+    assert manager.pool.contains(wp2)
+
+
+def test_get_pool_status(manager):
+    """Test getting pool status."""
+    status = manager.get_pool_status()
+
+    assert "preloaded_wallpapers" in status
+    assert "total_size_mb" in status
+    assert "max_size_mb" in status
+    assert "usage_percent" in status
+
+
+def test_get_monitors(manager):
+    """Test getting monitors."""
+    monitors = manager.get_monitors()
+
+    # Should return list (may be empty in test environment)
+    assert isinstance(monitors, list)

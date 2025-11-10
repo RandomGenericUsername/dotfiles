@@ -12,8 +12,12 @@ def test_hyprpaper_config_defaults():
     assert config.ipc_enabled is True
     assert config.splash_enabled is False
     assert config.auto_unload_unused is True
-    assert config.preload_on_set is False
+    assert config.auto_create_config is True
+    assert config.autostart is True
     assert len(config.wallpaper_dirs) > 0
+    assert config.ipc_timeout == 5
+    assert config.ipc_retry_attempts == 3
+    assert config.max_preload_pool_mb == 100
 
 
 def test_hyprpaper_config_custom():
