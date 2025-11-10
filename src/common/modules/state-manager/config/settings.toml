@@ -1,0 +1,36 @@
+[state_manager]
+# Backend to use: "sqlite" or "redis"
+backend = "sqlite"
+
+# State directory (for file-based backends)
+state_dir = "~/.local/share/dotfiles"
+
+[state_manager.sqlite]
+# SQLite database file path
+db_path = "~/.local/share/dotfiles/state.db"
+
+# Enable WAL mode for better concurrency
+wal_mode = true
+
+# Automatic cleanup settings
+auto_cleanup_enabled = true
+cleanup_interval_days = 7
+
+[state_manager.redis]
+# Redis connection settings
+host = "localhost"
+port = 6379
+db = 0
+password = ""
+
+# Connection pool settings
+max_connections = 10
+socket_timeout = 5
+socket_connect_timeout = 5
+
+# Key prefix for all state manager keys
+key_prefix = "dotfiles:"
+
+# Default TTL for keys (in seconds, 0 = no expiration)
+default_ttl = 0
+
