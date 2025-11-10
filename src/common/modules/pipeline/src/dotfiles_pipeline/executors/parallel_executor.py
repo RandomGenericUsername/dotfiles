@@ -105,49 +105,68 @@ class ParallelTaskExecutor:
 
         for step_context in step_contexts:
             # Merge results if both contexts have results attribute
-            if hasattr(merged, "results") and hasattr(step_context, "results"):
-                if isinstance(merged.results, dict) and isinstance(
-                    step_context.results, dict
-                ):
-                    # Dict-style results - merge with special handling
-                    # for numeric values
-                    for key, value in step_context.results.items():
-                        original_value = (
+            if (
+                hasattr(merged, "results")
+                and hasattr(step_context, "results")
+                and isinstance(merged.results, dict)
+                and isinstance(step_context.results, dict)
+            ):
+                # Dict-style results - merge with special handling
+                # for numeric values and lists
+                for key, value in step_context.results.items():
+                    original_value = (
+                        original_context.results.get(key, [])
+                        if hasattr(original_context, "results")
+                        and isinstance(value, list)
+                        else (
                             original_context.results.get(key, 0)
                             if hasattr(original_context, "results")
                             else 0
                         )
-
-                        if isinstance(value, (int, float)) and isinstance(
-                            original_value, (int, float)
-                        ):
-                            # For numeric values, calculate the increment
-                            # from this step
-                            step_increment = value - original_value
-                            if (
-                                step_increment > 0
-                            ):  # Only add positive increments
-                                merged.results[key] = (
-                                    merged.results.get(key, original_value)
-                                    + step_increment
-                                )
-                        else:
-                            # For non-numeric values, just update
-                            merged.results[key] = value
-                elif isinstance(merged.results, list) and isinstance(
-                    step_context.results, list
-                ):
-                    # List-style results - only add new items
-                    # (items not in original)
-                    original_len = (
-                        len(original_context.results)
-                        if hasattr(original_context, "results")
-                        else 0
                     )
-                    new_items = step_context.results[
-                        original_len:
-                    ]  # Only new items added by this step
-                    merged.results.extend(new_items)
+
+                    # Check if value is a list - merge lists by extending
+                    if isinstance(value, list):
+                        # Only merge items that were added by this step
+                        # (not present in original)
+                        if isinstance(original_value, list):
+                            original_len = len(original_value)
+                            new_items = value[
+                                original_len:
+                            ]  # Only items added by this step
+                            if new_items:  # Only extend if there are new items
+                                if key in merged.results and isinstance(
+                                    merged.results[key], list
+                                ):
+                                    merged.results[key].extend(new_items)
+                                else:
+                                    merged.results[key] = (
+                                        original_value.copy() + new_items
+                                    )
+                            elif key not in merged.results:
+                                # No new items, set original
+                                merged.results[key] = original_value.copy()
+                        else:
+                            # Original wasn't a list, just set the value
+                            merged.results[key] = value.copy()
+                    # Check if value is numeric (but not boolean)
+                    elif (
+                        isinstance(value, (int, float))
+                        and not isinstance(value, bool)
+                        and isinstance(original_value, (int, float))
+                        and not isinstance(original_value, bool)
+                    ):
+                        # For numeric values, calculate the increment
+                        # from this step
+                        step_increment = value - original_value
+                        if step_increment > 0:  # Only add positive increments
+                            merged.results[key] = (
+                                merged.results.get(key, original_value)
+                                + step_increment
+                            )
+                    else:
+                        # For all other values (booleans), update
+                        merged.results[key] = value
 
             # Merge errors if both contexts have errors attribute
             if hasattr(merged, "errors") and hasattr(step_context, "errors"):

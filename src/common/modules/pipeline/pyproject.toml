@@ -6,7 +6,6 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "dotfiles-logging",
-    "dotfiles-package-manager",
 ]
 
 [project.optional-dependencies]
@@ -32,7 +31,6 @@ allow-direct-references = true
 
 [tool.uv.sources]
 dotfiles-logging = { path = "../logging", editable = true }
-dotfiles-package-manager = { path = "../package-manager", editable = true }
 
 [tool.black]
 line-length = 79

@@ -143,7 +143,7 @@ wheels = [
 [[package]]
 name = "dotfiles-logging"
 version = "0.1.0"
-source = { directory = "../logging" }
+source = { editable = "../logging" }
 dependencies = [
     { name = "rich" },
 ]
@@ -162,29 +162,11 @@ requires-dist = [
 provides-extras = ["dev"]
 
 [[package]]
-name = "dotfiles-package-manager"
-version = "0.2.0"
-source = { directory = "../package-manager" }
-
-[package.metadata]
-requires-dist = [
-    { name = "black", marker = "extra == 'dev'", specifier = ">=24.0.0" },
-    { name = "isort", marker = "extra == 'dev'", specifier = ">=5.13.0" },
-    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.8.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
-]
-provides-extras = ["dev"]
-
-[[package]]
 name = "dotfiles-pipeline"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "dotfiles-logging" },
-    { name = "dotfiles-package-manager" },
 ]
 
 [package.optional-dependencies]
@@ -201,8 +183,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=24.0.0" },
-    { name = "dotfiles-logging", directory = "../logging" },
-    { name = "dotfiles-package-manager", directory = "../package-manager" },
+    { name = "dotfiles-logging", editable = "../logging" },
     { name = "isort", marker = "extra == 'dev'", specifier = ">=5.13.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.8.0" },

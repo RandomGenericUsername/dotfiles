@@ -40,5 +40,4 @@ result = pipeline.run(context)
 
 ## Dependencies
 
-- `dotfiles-logging` - Logging infrastructure
-- `dotfiles-package-manager` - Package management (used in PipelineContext)
+- `dotfiles-logging` - Logging infrastructure (RichLogger used in PipelineContext)
