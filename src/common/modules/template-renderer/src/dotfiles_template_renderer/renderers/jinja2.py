@@ -8,6 +8,7 @@ from jinja2 import (
     FileSystemLoader,
     StrictUndefined,
     TemplateNotFound,
+    Undefined,
     UndefinedError,
 )
 
@@ -45,7 +46,9 @@ class Jinja2Renderer(TemplateRenderer):
             trim_blocks=self.config.trim_blocks,
             lstrip_blocks=self.config.lstrip_blocks,
             keep_trailing_newline=self.config.keep_trailing_newline,
-            undefined=StrictUndefined if self.config.strict_mode else None,
+            undefined=(
+                StrictUndefined if self.config.strict_mode else Undefined
+            ),
         )
 
         # Add custom filters, tests, and globals
