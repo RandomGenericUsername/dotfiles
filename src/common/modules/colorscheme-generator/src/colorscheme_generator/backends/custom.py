@@ -109,17 +109,9 @@ class CustomGenerator(ColorSchemeGenerator):
             elif algorithm == ColorAlgorithm.OCTREE.value:
                 colors = self._extract_octree(img, n_clusters)
             else:
-                raise ColorExtractionError(
-                    f"Unknown algorithm: {algorithm}",
-                    backend=self.backend_name,
-                    image_path=image_path,
-                )
+                raise ColorExtractionError(f"Unknown algorithm: {algorithm}")
         except Exception as e:
-            raise ColorExtractionError(
-                f"Color extraction failed: {e}",
-                backend=self.backend_name,
-                image_path=image_path,
-            ) from e
+            raise ColorExtractionError(f"Color extraction failed: {e}") from e
 
         # Convert to ColorScheme
         return self._create_color_scheme(colors, image_path)

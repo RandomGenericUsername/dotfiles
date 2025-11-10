@@ -105,9 +105,7 @@ class PywalGenerator(ColorSchemeGenerator):
         colors_file = self.cache_dir / "colors.json"
         if not colors_file.exists():
             raise ColorExtractionError(
-                f"Pywal output file not found: {colors_file}",
-                backend=self.backend_name,
-                image_path=image_path,
+                f"Pywal output file not found: {colors_file}"
             )
 
         try:
@@ -115,9 +113,7 @@ class PywalGenerator(ColorSchemeGenerator):
                 pywal_colors = json.load(f)
         except Exception as e:
             raise ColorExtractionError(
-                f"Failed to read pywal output: {e}",
-                backend=self.backend_name,
-                image_path=image_path,
+                f"Failed to read pywal output: {e}"
             ) from e
 
         # Convert to ColorScheme
@@ -172,9 +168,7 @@ class PywalGenerator(ColorSchemeGenerator):
             )
         except subprocess.CalledProcessError as e:
             raise ColorExtractionError(
-                f"Pywal command failed: {e.stderr}",
-                backend=self.backend_name,
-                image_path=image_path,
+                f"Pywal command failed: {e.stderr}"
             ) from e
         except FileNotFoundError as e:
             raise BackendNotAvailableError(
