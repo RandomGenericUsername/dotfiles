@@ -42,7 +42,7 @@ class WallpaperOrchestrator:
         """Initialize orchestrator.
 
         Args:
-            config: Application configuration (loads from settings.toml if None)
+            config: Application configuration (loads from settings.toml)
             logger: Logger instance (creates one if None)
         """
         self.config = config or load_settings()
@@ -77,20 +77,47 @@ class WallpaperOrchestrator:
         else:
             self.logger = logger
 
+        # Initialize cache manager (if caching is enabled)
+        self.cache_manager = None
+        if self.config.cache.enabled:
+            from dotfiles_state_manager import (
+                SQLiteBackend,
+                StateManager,
+            )
+
+            from wallpaper_orchestrator.cache import WallpaperCacheManager
+
+            # Create state manager with SQLite backend
+            backend = SQLiteBackend(
+                db_path=self.config.cache.state_manager.db_path
+            )
+            state_manager = StateManager(backend=backend)
+
+            # Create cache manager
+            self.cache_manager = WallpaperCacheManager(
+                state_manager=state_manager,
+                effects_base_dir=self.config.orchestrator.effects_output_dir,
+                colorscheme_cache_dir=self.config.cache.colorscheme_cache_dir,
+                colorscheme_active_dir=self.config.orchestrator.colorscheme_output_dir,
+            )
+
     def process(
         self,
         wallpaper_path: Path,
         effects_output_dir: Path | None = None,
         colorscheme_output_dir: Path | None = None,
         monitor: str | None = None,
+        force_rebuild: bool = False,
     ) -> WallpaperResult:
-        """Process wallpaper: generate effects, color scheme, and set wallpaper.
+        """Process wallpaper: generate effects, colorscheme, set wallpaper.
 
         Args:
             wallpaper_path: Path to wallpaper image
-            effects_output_dir: Output directory for effects (uses config default if None)
-            colorscheme_output_dir: Output directory for color schemes (uses config default if None)
-            monitor: Monitor to set wallpaper on (uses config default if None)
+            effects_output_dir: Output directory for effects (config default)
+            colorscheme_output_dir: Output directory for colorscheme
+                (config default)
+            monitor: Monitor to set wallpaper on (config default)
+            force_rebuild: Force regeneration even if cached
 
         Returns:
             WallpaperResult: Complete result metadata with all paths
@@ -137,6 +164,10 @@ class WallpaperOrchestrator:
         )
         context.results["wallpaper_result"] = result
 
+        # Add cache manager and force_rebuild flag to results
+        context.results["cache_manager"] = self.cache_manager
+        context.results["force_rebuild"] = force_rebuild
+
         # Create pipeline configuration
         pipeline_config = PipelineConfig(
             fail_fast=self.config.pipeline.fail_fast,
@@ -158,8 +189,9 @@ class WallpaperOrchestrator:
             # Check for errors
             if final_context.errors:
                 result.success = False
+                error_count = len(final_context.errors)
                 self.logger.error(
-                    f"Pipeline completed with {len(final_context.errors)} errors"
+                    f"Pipeline completed with {error_count} errors"
                 )
             else:
                 result.success = True
@@ -182,6 +214,7 @@ class WallpaperOrchestrator:
         effects_output_dir: Path | None = None,
         colorscheme_output_dir: Path | None = None,
         monitor: str | None = None,
+        force_rebuild: bool = False,
         continue_on_error: bool = True,
     ) -> list[WallpaperResult]:
         """Process multiple wallpapers.
@@ -191,6 +224,7 @@ class WallpaperOrchestrator:
             effects_output_dir: Output directory for effects
             colorscheme_output_dir: Output directory for color schemes
             monitor: Monitor to set wallpaper on
+            force_rebuild: Force regeneration even if cached
             continue_on_error: Continue processing if one fails
 
         Returns:
@@ -205,6 +239,7 @@ class WallpaperOrchestrator:
                     effects_output_dir=effects_output_dir,
                     colorscheme_output_dir=colorscheme_output_dir,
                     monitor=monitor,
+                    force_rebuild=force_rebuild,
                 )
                 results.append(result)
             except Exception as e:

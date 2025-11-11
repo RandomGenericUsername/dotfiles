@@ -10,6 +10,21 @@ colorscheme_output_dir = "~/.cache/colorscheme"
 log_level = "INFO"
 verbose = false
 
+[cache]
+# Enable caching
+enabled = true
+
+# Validate cache before using (check files exist)
+validate_before_use = true
+
+# Cache directories
+colorscheme_cache_dir = "~/.cache/wallpaper/colorschemes"
+
+# State manager configuration
+[cache.state_manager]
+backend = "sqlite"
+db_path = "~/.cache/wallpaper/cache.db"
+
 [colorscheme]
 # Color scheme generation settings
 backend = "pywal"  # pywal, wallust, or custom

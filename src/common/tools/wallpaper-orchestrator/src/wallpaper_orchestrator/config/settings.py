@@ -93,7 +93,7 @@ class HyprpaperSettings(BaseModel):
 
     monitor: str = Field(
         default="all",
-        description="Monitor to set wallpaper on (all, focused, or monitor name)",
+        description="Monitor to set wallpaper on (all, focused, or name)",
     )
     mode: Literal["cover", "contain", "tile"] = Field(
         default="cover",
@@ -148,6 +148,37 @@ class PipelineSettings(BaseModel):
     )
 
 
+class StateManagerSettings(BaseModel):
+    """State manager configuration for cache."""
+
+    backend: Literal["sqlite", "redis"] = Field(
+        default="sqlite",
+        description="State manager backend",
+    )
+    db_path: Path = Field(
+        default=Path.home() / ".cache/wallpaper/cache.db",
+        description="SQLite database path (for sqlite backend)",
+    )
+
+
+class CacheSettings(BaseModel):
+    """Cache configuration."""
+
+    enabled: bool = Field(
+        default=True,
+        description="Enable caching",
+    )
+    validate_before_use: bool = Field(
+        default=True,
+        description="Validate cache before using (check files exist)",
+    )
+    colorscheme_cache_dir: Path = Field(
+        default=Path.home() / ".cache/wallpaper/colorschemes",
+        description="Cache directory for colorschemes",
+    )
+    state_manager: StateManagerSettings
+
+
 class AppConfig(BaseModel):
     """Complete application configuration."""
 
@@ -156,6 +187,7 @@ class AppConfig(BaseModel):
     wallpaper_effects: WallpaperEffectsSettings
     hyprpaper: HyprpaperSettings
     pipeline: PipelineSettings
+    cache: CacheSettings
 
 
 def load_settings() -> AppConfig:
@@ -209,7 +241,9 @@ def load_settings() -> AppConfig:
         mode=settings.hyprpaper.mode,
         autostart=settings.hyprpaper.autostart,
         max_preload_pool_mb=settings.hyprpaper.max_preload_pool_mb,
-        max_wallpaper_size_multiplier=settings.hyprpaper.max_wallpaper_size_multiplier,
+        max_wallpaper_size_multiplier=(
+            settings.hyprpaper.max_wallpaper_size_multiplier
+        ),
         ipc_timeout=settings.hyprpaper.ipc_timeout,
         ipc_retry_attempts=settings.hyprpaper.ipc_retry_attempts,
         ipc_retry_delay=settings.hyprpaper.ipc_retry_delay,
@@ -221,10 +255,25 @@ def load_settings() -> AppConfig:
         parallel_enabled=settings.pipeline.parallel_enabled,
     )
 
+    state_manager_settings = StateManagerSettings(
+        backend=settings.cache.state_manager.backend,
+        db_path=Path(settings.cache.state_manager.db_path).expanduser(),
+    )
+
+    cache_settings = CacheSettings(
+        enabled=settings.cache.enabled,
+        validate_before_use=settings.cache.validate_before_use,
+        colorscheme_cache_dir=Path(
+            settings.cache.colorscheme_cache_dir
+        ).expanduser(),
+        state_manager=state_manager_settings,
+    )
+
     return AppConfig(
         orchestrator=orchestrator_settings,
         colorscheme=colorscheme_settings,
         wallpaper_effects=wallpaper_effects_settings,
         hyprpaper=hyprpaper_settings,
         pipeline=pipeline_settings,
+        cache=cache_settings,
     )

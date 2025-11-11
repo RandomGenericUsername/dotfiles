@@ -28,7 +28,7 @@ class GenerateEffectsStep(PipelineStep):
         return "Generate wallpaper effect variants"
 
     def run(self, context: PipelineContext) -> PipelineContext:
-        """Execute the effects generation step.
+        """Execute the effects generation step with caching.
 
         Args:
             context: Pipeline context containing app_config and wallpaper path
@@ -42,6 +42,42 @@ class GenerateEffectsStep(PipelineStep):
         if not result:
             raise ValueError("No wallpaper_result found in context")
 
+        # Get cache manager and force_rebuild flag from context
+        cache_manager = context.results.get("cache_manager")
+        force_rebuild = context.results.get("force_rebuild", False)
+
+        # Get expected effects from processor
+        from wallpaper_processor.factory import EffectFactory
+
+        expected_effects = EffectFactory.get_all_effect_names()
+
+        # Check cache first (if enabled and cache manager available)
+        if (
+            cache_manager
+            and config.cache.enabled
+            and not force_rebuild
+            and cache_manager.is_effects_cached(
+                result.original_wallpaper, expected_effects
+            )
+        ):
+            context.logger_instance.info(
+                "✓ Effects already cached, skipping generation"
+            )
+
+            # Get cached effect paths
+            cached_variants = cache_manager.get_cached_effects(
+                result.original_wallpaper, expected_effects
+            )
+
+            result.effect_variants = cached_variants
+            context.results["effect_variants"] = cached_variants
+
+            context.logger_instance.info(
+                f"  Loaded {len(cached_variants)} cached variants"
+            )
+            return context
+
+        # Generate effects (cache miss or disabled)
         context.logger_instance.info(
             f"Generating effect variants for: {result.original_wallpaper}"
         )
@@ -76,6 +112,18 @@ class GenerateEffectsStep(PipelineStep):
                 input_path=result.original_wallpaper,
                 output_dir=result.effects_output_dir,
             )
+
+            # Mark as cached (if cache manager available)
+            if cache_manager and config.cache.enabled:
+                effects_dir = (
+                    result.effects_output_dir / result.original_wallpaper.stem
+                )
+                cache_manager.mark_effects_cached(
+                    result.original_wallpaper,
+                    effects_dir,
+                    effect_variants,
+                )
+                context.logger_instance.debug("  Marked effects as cached")
 
             # Store results
             result.effect_variants = effect_variants

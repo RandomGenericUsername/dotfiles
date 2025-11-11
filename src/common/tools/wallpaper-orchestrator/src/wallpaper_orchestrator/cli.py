@@ -13,7 +13,7 @@ from wallpaper_orchestrator.config import load_settings
 # Create Typer app
 app = typer.Typer(
     name="wallpaper-orchestrator",
-    help="Complete wallpaper setup: effects, color scheme, and wallpaper setting",
+    help="Complete wallpaper setup: effects, color scheme, and setting",
     add_completion=False,
 )
 
@@ -37,12 +37,12 @@ def process(
     effects_output: Path | None = typer.Option(
         None,
         "--effects-output",
-        help="Output directory for effect variants (uses config default if not specified)",
+        help="Output directory for effect variants (uses config default)",
     ),
     colorscheme_output: Path | None = typer.Option(
         None,
         "--colorscheme-output",
-        help="Output directory for color scheme files (uses config default if not specified)",
+        help="Output directory for colorscheme files (uses config default)",
     ),
     backend: str | None = typer.Option(
         None,
@@ -62,13 +62,25 @@ def process(
         "--verbose",
         help="Enable verbose output",
     ),
+    force_rebuild: bool = typer.Option(
+        False,
+        "--force-rebuild",
+        "-f",
+        help="Force regeneration even if cached",
+    ),
+    no_cache: bool = typer.Option(
+        False,
+        "--no-cache",
+        help="Disable caching for this run",
+    ),
 ) -> None:
     """Process wallpaper: generate effects, color scheme, and set wallpaper.
 
     This command orchestrates the complete wallpaper setup process:
 
     1. Generates ALL effect variants using wallpaper-effects-orchestrator
-    2. Generates color scheme from original wallpaper using colorscheme-orchestrator
+    2. Generates color scheme from original wallpaper using
+       colorscheme-orchestrator
     3. Sets the original wallpaper using hyprpaper-manager
 
     Examples:
@@ -98,6 +110,8 @@ def process(
         if verbose:
             config.orchestrator.verbose = True
             config.orchestrator.log_level = "DEBUG"
+        if no_cache:
+            config.cache.enabled = False
 
         # Create orchestrator
         orchestrator = WallpaperOrchestrator(config=config)
@@ -112,6 +126,7 @@ def process(
             effects_output_dir=effects_output,
             colorscheme_output_dir=colorscheme_output,
             monitor=monitor,
+            force_rebuild=force_rebuild,
         )
 
         # Display results
@@ -214,13 +229,25 @@ def batch(
         "--verbose",
         help="Enable verbose output",
     ),
+    force_rebuild: bool = typer.Option(
+        False,
+        "--force-rebuild",
+        "-f",
+        help="Force regeneration even if cached",
+    ),
+    no_cache: bool = typer.Option(
+        False,
+        "--no-cache",
+        help="Disable caching for this run",
+    ),
 ) -> None:
     """Process multiple wallpapers in batch.
 
     Examples:
 
         # Process multiple wallpapers
-        wallpaper-orchestrator batch wallpaper1.png wallpaper2.png wallpaper3.png
+        wallpaper-orchestrator batch wallpaper1.png wallpaper2.png \\
+            wallpaper3.png
 
         # With custom settings
         wallpaper-orchestrator batch *.png --backend pywal --monitor DP-1
@@ -235,6 +262,8 @@ def batch(
         if verbose:
             config.orchestrator.verbose = True
             config.orchestrator.log_level = "DEBUG"
+        if no_cache:
+            config.cache.enabled = False
 
         # Create orchestrator
         orchestrator = WallpaperOrchestrator(config=config)
@@ -249,6 +278,7 @@ def batch(
             effects_output_dir=effects_output,
             colorscheme_output_dir=colorscheme_output,
             monitor=monitor,
+            force_rebuild=force_rebuild,
             continue_on_error=continue_on_error,
         )
 

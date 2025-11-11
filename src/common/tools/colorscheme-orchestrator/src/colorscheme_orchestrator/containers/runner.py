@@ -143,6 +143,11 @@ class ContainerRunner:
             try:
                 self.engine.containers.run(config)
                 print("  Container completed")
+
+                # Note: Files created by container will be owned by root
+                # This is expected Docker behavior when container runs as root
+                # Files are still readable by all users
+
             except Exception as e:
                 # Container failed
                 raise ContainerRuntimeError(
