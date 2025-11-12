@@ -165,6 +165,50 @@ def copy_directory(src_path: Path, dest_path: Path) -> None:
         ) from e
 
 
+def copy_file(src_path: Path, dest_path: Path) -> None:
+    """
+    Copy a file from source to destination.
+
+    Args:
+        src_path: Source file path
+        dest_path: Destination file path
+
+    Raises:
+        FileNotFoundError: If source file doesn't exist
+        NotADirectoryError: If source path is not a file
+        ValueError: If source and destination are the same
+        PermissionError: If permission denied during copy
+        OSError: For other OS-level errors
+    """
+    if not src_path.exists():
+        raise FileNotFoundError(f"Source file {src_path} does not exist")
+
+    if not src_path.is_file():
+        raise ValueError(f"Source path {src_path} is not a file")
+
+    if src_path == dest_path:
+        raise ValueError("Source and destination paths must be different")
+
+    # Ensure destination directory exists
+    dest_path.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        shutil.copy2(src_path, dest_path)
+    except PermissionError as e:
+        raise PermissionError(
+            f"Permission denied while copying from {src_path} to "
+            f"{dest_path}: {e}"
+        ) from e
+    except FileNotFoundError as e:
+        raise FileNotFoundError(
+            f"Source or destination path not found: {e}"
+        ) from e
+    except OSError as e:
+        raise OSError(
+            f"OS error while copying {src_path} to {dest_path}: {e}"
+        ) from e
+
+
 def is_safe_to_delete(directory_path: Path) -> tuple[bool, str]:
     """
     Validate if a directory is safe to delete using configuration-based checks.

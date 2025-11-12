@@ -66,6 +66,7 @@ def create_install_builder(root: Path, strict: bool = True) -> PathsBuilder:
     builder.add_path("dotfiles.starship")
     builder.add_path("dotfiles.zsh")
     builder.add_path("dotfiles.wallpapers")
+    builder.add_path("dotfiles.wlogout")
     builder.add_path("dotfiles.cache", hidden=True)
 
     # ----------------------------- Dependencies -------------------------- #
@@ -91,6 +92,9 @@ def create_install_builder(root: Path, strict: bool = True) -> PathsBuilder:
     builder.add_path("dependencies.tools.colorscheme-orchestrator")
     builder.add_path("dependencies.tools.wallpaper-effects-orchestrator")
     builder.add_path("dependencies.tools.wallpaper-orchestrator")
+
+    builder.add_path("dotfiles.wlogout.templates")
+    builder.add_path("dotfiles.wlogout.templates.icons")
 
     return builder
 

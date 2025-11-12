@@ -507,3 +507,30 @@ class InstallToolStep(PipelineStep):
             settings_overrides=self.settings_overrides,
             run_makefile_install=self.run_makefile_install,
         )
+
+
+class InstallWlogoutConfigStep(PipelineStep):
+    """Pipeline step to install wlogout configuration."""
+
+    @property
+    def step_id(self) -> str:
+        return "install_wlogout_config"
+
+    @property
+    def description(self) -> str:
+        return "Install wlogout configuration"
+
+    @property
+    def timeout(self) -> float | None:
+        """Step timeout in seconds."""
+        return 300.0
+
+    @property
+    def critical(self) -> bool:
+        return True
+
+    def run(self, context: PipelineContext) -> PipelineContext:
+        """Install wlogout configuration."""
+        from src.pipeline_steps.utils import install_wlogout_config
+
+        return install_wlogout_config(context)

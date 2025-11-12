@@ -21,6 +21,8 @@ from src.tasks.install_starship import (
 from src.utils import file_manager
 from src.utils.config_model_registry import ConfigModelRegistry
 from src.utils.file_manager import (
+    copy_directory,
+    copy_file,
     delete_directory_safe,
     get_file_hash,
 )
@@ -1189,6 +1191,86 @@ def extract_wallpapers(context: PipelineContext) -> PipelineContext:
         logger.error(f"Failed to extract wallpapers: {e}")
         context.errors.append(e)
         context.results["wallpapers_extracted"] = False
+    return context
+
+
+def install_wlogout_config(context: PipelineContext) -> PipelineContext:
+    """Install wlogout configuration files.
+
+    Copies layout and style.css.tpl files from source to installation directory.
+
+    Args:
+        context: The pipeline context
+
+    Returns:
+        Updated pipeline context with installation results
+    """
+    logger: RichLogger = context.logger_instance
+    logger.debug("Installing wlogout configuration")
+
+    # Get source paths
+    layout_file_source: Path = (
+        context.app_config.project.paths.source.dotfiles[
+            "config-files"
+        ].wlogout.file("layout")
+    )
+    style_template_source: Path = (
+        context.app_config.project.paths.source.dotfiles[
+            "config-files"
+        ].wlogout.file("style.css.tpl")
+    )
+
+    # Get destination paths
+    layout_file_dest: Path = (
+        context.app_config.project.paths.install.dotfiles.wlogout.file(
+            "layout"
+        )
+    )
+    style_template_dest: Path = (
+        context.app_config.project.paths.install.dotfiles.wlogout.templates.file(
+            "style.css.tpl"
+        )
+    )
+
+    icon_templates_source_dir: Path = (
+        context.app_config.project.paths.source.dotfiles.assets[
+            "wlogout-icons"
+        ].path
+    )
+    icon_templates_dest_dir: Path = (
+        context.app_config.project.paths.install.dotfiles.wlogout.templates.icons.path
+    )
+
+    try:
+        # Copy layout file
+        logger.debug(
+            f"Copying layout file: {layout_file_source} -> {layout_file_dest}"
+        )
+        copy_file(layout_file_source, layout_file_dest)
+
+        # Copy style template
+        logger.debug(
+            f"Copying style template: {style_template_source} -> "
+            f"{style_template_dest}"
+        )
+        copy_file(style_template_source, style_template_dest)
+
+        # Copy icon templates
+        logger.debug(
+            f"Copying icon templates from {icon_templates_source_dir} "
+            f"to {icon_templates_dest_dir}"
+        )
+        copy_directory(icon_templates_source_dir, icon_templates_dest_dir)
+
+        logger.debug("Wlogout configuration installed successfully")
+        context.results["wlogout_config_installed"] = True
+
+    except Exception as e:
+        logger.error(f"Failed to install wlogout configuration: {e}")
+        context.errors.append(e)
+        context.results["wlogout_config_installed"] = False
+        raise
+
     return context
 
 

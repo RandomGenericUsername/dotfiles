@@ -1,17 +1,17 @@
-@import url("{{COLORS_FILE}}");
+@import url("{{COLORS_FILE_PATH}}");
 
 * {
     font-family: {% raw %}{{SYSTEM_FONT_FAMILY}}{% endraw %};
 	transition: 20ms;
 	box-shadow: none;
-	font-size: {% raw %}{{FONT_SIZE}}{% endraw %}px;
+	font-size: {% raw %}{{FONT_SIZE_PX}}{% endraw %}px; /* Only supports px */
     background-image: none;
 	background: none;
 }
 
 window {
     background-image: none;
-	background: url("{% raw %}{{WLOGOUT_BACKGROUND_IMAGE}}{% endraw %}");
+	background: url("{% raw %}{{BACKGROUND_IMAGE}}{% endraw %}");
 	background-size: cover;
     font-size: 1em;
 }
@@ -42,25 +42,25 @@ button span {
 }
 
 #lock {
-    background-image: image(url("{{cookiecutter.WLOGOUT_LOCK_ICON}}"));
+    background-image: image(url("{{ICONS_DIR}}/lock.svg"));
 }
 
 #logout {
-    background-image: image(url("{{cookiecutter.WLOGOUT_LOGOUT_ICON}}"));
+    background-image: image(url("{{ICONS_DIR}}/logout.svg"));
 }
 
 #suspend {
-    background-image: image(url("{{cookiecutter.WLOGOUT_SUSPEND_ICON}}"));
+    background-image: image(url("{{ICONS_DIR}}/suspend.svg"));
 }
 
 #hibernate {
-    background-image: image(url("{{cookiecutter.WLOGOUT_HIBERNATE_ICON}}"));
+    background-image: image(url("{{ICONS_DIR}}/hibernate.svg"));
 }
 
 #shutdown {
-    background-image: image(url("{{cookiecutter.WLOGOUT_SHUTDOWN_ICON}}"));
+    background-image: image(url("{{ICONS_DIR}}/shutdown.svg"));
 }
 
 #reboot {
-    background-image: image(url("{{cookiecutter.WLOGOUT_REBOOT_ICON}}"));
+    background-image: image(url("{{ICONS_DIR}}/reboot.svg"));
 }
