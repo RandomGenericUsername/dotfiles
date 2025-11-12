@@ -1196,6 +1196,7 @@ def install_component(
     component: Literal["module", "tool"],
     install_path: Path,
     settings_overrides: dict[str, Any] | None = None,
+    run_makefile_install: bool = False,
 ) -> PipelineContext:
     """Install a module/tool with optional settings customization.
 
@@ -1203,7 +1204,8 @@ def install_component(
     1. Copies the component from source to installation directory
     2. Applies settings overrides to config/settings.toml (if provided)
     3. Validates settings against Pydantic models (always enabled)
-    4. Creates backups and supports rollback on failure
+    4. Runs 'make install' in component directory (if requested)
+    5. Creates backups and supports rollback on failure
 
     Args:
         context: Pipeline context
@@ -1216,6 +1218,10 @@ def install_component(
                               "hyprpaper.wallpaper_dirs": ["~/custom"],
                               "hyprpaper.max_preload_pool_mb": 200,
                           }
+        run_makefile_install: If True, runs 'make install' in the component
+                            directory after copying and configuration.
+                            Used for components that need to build containers
+                            or install dependencies.
 
     Returns:
         Updated pipeline context with installation results
@@ -1338,7 +1344,69 @@ def install_component(
                     for error in result.errors:
                         context.errors.append(SettingsOverrideError(error))
 
-        # 5. Mark installation as successful
+        # 5. Run 'make install' if requested
+        if run_makefile_install:
+            logger.info(f"Running 'make install' for {component} '{name}'...")
+            logger.debug(f"Working directory: {install_path}")
+
+            import subprocess
+
+            try:
+                # Run make install in the component directory
+                make_result = subprocess.run(
+                    ["make", "install"],
+                    cwd=install_path,
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
+
+                # Log output
+                if make_result.stdout:
+                    for line in make_result.stdout.strip().split("\n"):
+                        logger.debug(f"  {line}")
+
+                logger.info(
+                    f"✓ Successfully ran 'make install' for {component}: {name}"
+                )
+                context.results[f"{name}_makefile_install_success"] = True
+
+            except subprocess.CalledProcessError as e:
+                error_msg = (
+                    f"'make install' failed for {component} '{name}': "
+                    f"{e.stderr or e.stdout or str(e)}"
+                )
+                logger.error(f"✗ {error_msg}")
+
+                # Log stderr if available
+                if e.stderr:
+                    logger.error("Error output:")
+                    for line in e.stderr.strip().split("\n"):
+                        logger.error(f"  {line}")
+
+                # Log stdout if available
+                if e.stdout:
+                    logger.debug("Standard output:")
+                    for line in e.stdout.strip().split("\n"):
+                        logger.debug(f"  {line}")
+
+                context.results[f"{name}_makefile_install_success"] = False
+                context.errors.append(e)
+                # Re-raise to fail the pipeline step
+                raise RuntimeError(error_msg) from e
+
+            except FileNotFoundError as e:
+                error_msg = (
+                    f"'make' command not found. Cannot run 'make install' "
+                    f"for {component} '{name}'"
+                )
+                logger.error(f"✗ {error_msg}")
+                context.results[f"{name}_makefile_install_success"] = False
+                context.errors.append(e)
+                # Re-raise to fail the pipeline step
+                raise RuntimeError(error_msg) from e
+
+        # 6. Mark installation as successful
         context.results[f"{name}_installed"] = True
         logger.debug(f"✓ Successfully installed {component}: {name}")
 

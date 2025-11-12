@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 from dotfiles_pipeline import PipelineStep
 from dotfiles_pipeline.core.types import PipelineContext
@@ -413,35 +414,39 @@ class ExtractWallpapersStep(PipelineStep):
 
 
 class InstallModuleStep(PipelineStep):
-    """Pipeline step to install hyprpaper."""
+    """Pipeline step to install a module."""
 
     def __init__(
         self,
         module_name: str,
-        settings_overrides: dict[str, any] | None = None,
+        settings_overrides: dict[str, Any] | None = None,
+        run_makefile_install: bool = False,
+        timeout: float | None = None,
     ):
         self.module_name = module_name
         self.settings_overrides = settings_overrides
+        self.run_makefile_install = run_makefile_install
+        self._timeout = timeout
 
     @property
     def step_id(self) -> str:
-        return "install_hyprpaper"
+        return f"install_module_{self.module_name}"
 
     @property
     def description(self) -> str:
-        return "Install hyprpaper"
+        return f"Install module: {self.module_name}"
 
     @property
     def timeout(self) -> float | None:
         """Step timeout in seconds."""
-        return 300.0
+        return self._timeout if self._timeout is not None else 300.0
 
     @property
     def critical(self) -> bool:
         return True
 
     def run(self, context: PipelineContext) -> PipelineContext:
-        """Install hyprpaper."""
+        """Install module."""
         from src.pipeline_steps.utils import install_component
 
         return install_component(
@@ -452,39 +457,44 @@ class InstallModuleStep(PipelineStep):
                 self.module_name
             ].path,
             settings_overrides=self.settings_overrides,
+            run_makefile_install=self.run_makefile_install,
         )
 
 
 class InstallToolStep(PipelineStep):
-    """Pipeline step to install hyprpaper."""
+    """Pipeline step to install a tool."""
 
     def __init__(
         self,
         tool_name: str,
-        settings_overrides: dict[str, any] | None = None,
+        settings_overrides: dict[str, Any] | None = None,
+        run_makefile_install: bool = False,
+        timeout: float | None = None,
     ):
         self.tool_name = tool_name
         self.settings_overrides = settings_overrides
+        self.run_makefile_install = run_makefile_install
+        self._timeout = timeout
 
     @property
     def step_id(self) -> str:
-        return "install_hyprpaper"
+        return f"install_tool_{self.tool_name}"
 
     @property
     def description(self) -> str:
-        return "Install hyprpaper"
+        return f"Install tool: {self.tool_name}"
 
     @property
     def timeout(self) -> float | None:
         """Step timeout in seconds."""
-        return 300.0
+        return self._timeout if self._timeout is not None else 300.0
 
     @property
     def critical(self) -> bool:
         return True
 
     def run(self, context: PipelineContext) -> PipelineContext:
-        """Install hyprpaper."""
+        """Install tool."""
         from src.pipeline_steps.utils import install_component
 
         return install_component(
@@ -495,4 +505,5 @@ class InstallToolStep(PipelineStep):
                 self.tool_name
             ].path,
             settings_overrides=self.settings_overrides,
+            run_makefile_install=self.run_makefile_install,
         )
