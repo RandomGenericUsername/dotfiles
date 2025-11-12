@@ -28,7 +28,7 @@ class PrintInstallationMessageStep(PipelineStep):
         """Print the installation message."""
         import subprocess
 
-        install_root = context.app_config.project.paths.install.path
+        install_root = context.app_config.project.paths.install["_root"]
         subprocess.run(["clear"])
         context.logger_instance.panel(
             f"Starting installation in [bold green]"
@@ -50,7 +50,9 @@ class CheckPreviousInstallStep(PipelineStep):
 
     def run(self, context: PipelineContext) -> PipelineContext:
         """Check for previous installation."""
-        install_directory: Path = context.app_config.project.paths.install.path
+        install_directory: Path = context.app_config.project.paths.install[
+            "_root"
+        ]
         context.logger_instance.debug(
             f"Checking for previous installation at '{install_directory}'"
         )
@@ -453,9 +455,10 @@ class InstallModuleStep(PipelineStep):
             context=context,
             name=self.module_name,
             component="module",
-            install_path=context.app_config.project.paths.install.dependencies.modules[
-                self.module_name
-            ].path,
+            install_path=context.app_config.project.paths.install[
+                "dependencies_modules"
+            ]
+            / self.module_name,
             settings_overrides=self.settings_overrides,
             run_makefile_install=self.run_makefile_install,
         )
@@ -501,9 +504,10 @@ class InstallToolStep(PipelineStep):
             context=context,
             name=self.tool_name,
             component="tool",
-            install_path=context.app_config.project.paths.install.dependencies.tools[
-                self.tool_name
-            ].path,
+            install_path=context.app_config.project.paths.install[
+                "dependencies_tools"
+            ]
+            / self.tool_name,
             settings_overrides=self.settings_overrides,
             run_makefile_install=self.run_makefile_install,
         )

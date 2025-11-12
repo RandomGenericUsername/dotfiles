@@ -100,7 +100,12 @@ def load_paths_from_toml(
             )
 
     # Convert to Path objects with base_path prepended
-    return {key: base_path / value for key, value in resolved_paths.items()}
+    result = {key: base_path / value for key, value in resolved_paths.items()}
+
+    # Add special _root key for the base path
+    result["_root"] = base_path
+
+    return result
 
 
 # ============================================================================

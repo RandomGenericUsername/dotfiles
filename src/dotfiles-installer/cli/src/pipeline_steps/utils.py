@@ -84,16 +84,16 @@ def detect_and_initialize_package_manager(
 def handle_previous_installation(context: PipelineContext) -> PipelineContext:
     """Handle previous installation based on install type."""
     install_type: InstallType = context.app_config.cli_settings.install_type
-    install_directory: Path = context.app_config.project.paths.install.path
-    dotfiles_directory: Path = (
-        context.app_config.project.paths.install.dotfiles.path
-    )
-    modules_directory: Path = (
-        context.app_config.project.paths.install.dependencies.modules.path
-    )
-    tools_directory: Path = (
-        context.app_config.project.paths.install.dependencies.tools.path
-    )
+    install_directory: Path = context.app_config.project.paths.install["_root"]
+    dotfiles_directory: Path = context.app_config.project.paths.install[
+        "dotfiles"
+    ]
+    modules_directory: Path = context.app_config.project.paths.install[
+        "dependencies_modules"
+    ]
+    tools_directory: Path = context.app_config.project.paths.install[
+        "dependencies_tools"
+    ]
     directories_to_delete_update_install = [
         dotfiles_directory,
         modules_directory,
@@ -121,7 +121,7 @@ def handle_previous_installation(context: PipelineContext) -> PipelineContext:
 
 
 def backup_previous_installation(context: PipelineContext) -> PipelineContext:
-    install_directory: Path = context.app_config.project.paths.install.path
+    install_directory: Path = context.app_config.project.paths.install["_root"]
     backup_directory: Path = context.app_config.cli_settings.backup_directory
 
     try:
@@ -141,7 +141,7 @@ def backup_previous_installation(context: PipelineContext) -> PipelineContext:
 
 
 def confirm_overwrite_previous_installation(context: PipelineContext) -> bool:
-    install_directory: Path = context.app_config.project.paths.install.path
+    install_directory: Path = context.app_config.project.paths.install["_root"]
 
     confirmation_message = (
         f"[bold yellow]Overwrite previous installation at "
@@ -467,9 +467,8 @@ def install_starship_prompt(
     )
     config_source: Path = starship_config.path
     config_dest: Path = (
-        context.app_config.project.paths.install.dotfiles.starship.file(
-            "starship.toml"
-        )
+        context.app_config.project.paths.install["dotfiles_starship"]
+        / "starship.toml"
     )
 
     # Handle already installed case
@@ -525,22 +524,21 @@ def render_zsh_config(context: PipelineContext) -> PipelineContext:
     template_name: str = template_path.name
 
     zshrc_path: Path = (
-        context.app_config.project.paths.install.dotfiles.zsh.file("zshrc")
+        context.app_config.project.paths.install["dotfiles_zsh"] / "zshrc"
     )
-    oh_my_zsh_path: Path = (
-        context.app_config.project.paths.install.dependencies["oh-my-zsh"].path
-    )
-    cache_dir: Path = context.app_config.project.paths.host.cache.path
-    nvm_path: Path = (
-        context.app_config.project.paths.install.dependencies.nvm.path
-    )
-    pyenv_path: Path = (
-        context.app_config.project.paths.install.dependencies.pyenv.path
-    )
+    oh_my_zsh_path: Path = context.app_config.project.paths.install[
+        "dependencies_oh_my_zsh"
+    ]
+    cache_dir: Path = context.app_config.project.paths.host["cache"]
+    nvm_path: Path = context.app_config.project.paths.install[
+        "dependencies_nvm"
+    ]
+    pyenv_path: Path = context.app_config.project.paths.install[
+        "dependencies_pyenv"
+    ]
     starship_config_path: Path = (
-        context.app_config.project.paths.install.dotfiles.starship.file(
-            "starship.toml"
-        )
+        context.app_config.project.paths.install["dotfiles_starship"]
+        / "starship.toml"
     )
 
     # Get distro-specific plugin paths
@@ -651,9 +649,9 @@ def install_oh_my_zsh_framework(
     logger = context.logger_instance
 
     # Get Oh My Zsh directory from config
-    oh_my_zsh_dir: Path = (
-        context.app_config.project.paths.install.dependencies["oh-my-zsh"].path
-    )
+    oh_my_zsh_dir: Path = context.app_config.project.paths.install[
+        "dependencies_oh_my_zsh"
+    ]
 
     # Handle already installed case
     if not force and check_oh_my_zsh_installed(oh_my_zsh_dir):
@@ -725,9 +723,9 @@ def install_nvm_manager(
         return context
 
     nvm_version = features["nvm"].version
-    nvm_dir: Path = (
-        context.app_config.project.paths.install.dependencies.nvm.path
-    )
+    nvm_dir: Path = context.app_config.project.paths.install[
+        "dependencies_nvm"
+    ]
 
     # Handle already installed case
     if not force and check_nvm_installed(nvm_dir):
@@ -832,9 +830,9 @@ def install_nodejs_runtime(
         return context
 
     nodejs_version = features["nodejs"].version
-    nvm_dir: Path = (
-        context.app_config.project.paths.install.dependencies.nvm.path
-    )
+    nvm_dir: Path = context.app_config.project.paths.install[
+        "dependencies_nvm"
+    ]
 
     # Handle already installed case
     if check_nodejs_installed(nvm_dir, nodejs_version):
@@ -909,9 +907,9 @@ def install_pyenv_manager(
         context.results["pyenv_skipped"] = True
         return context
 
-    pyenv_dir: Path = (
-        context.app_config.project.paths.install.dependencies.pyenv.path
-    )
+    pyenv_dir: Path = context.app_config.project.paths.install[
+        "dependencies_pyenv"
+    ]
 
     # Handle already installed case
     if not force and check_pyenv_installed(pyenv_dir):
@@ -1016,9 +1014,9 @@ def install_python_runtime(
         return context
 
     python_version = features["python"].version
-    pyenv_dir: Path = (
-        context.app_config.project.paths.install.dependencies.pyenv.path
-    )
+    pyenv_dir: Path = context.app_config.project.paths.install[
+        "dependencies_pyenv"
+    ]
 
     # Handle already installed case
     if check_python_installed(pyenv_dir, python_version):
@@ -1101,9 +1099,9 @@ def install_pip_packages_runtime(
         return context
 
     # Get pyenv directory
-    pyenv_dir: Path = (
-        context.app_config.project.paths.install.dependencies.pyenv.path
-    )
+    pyenv_dir: Path = context.app_config.project.paths.install[
+        "dependencies_pyenv"
+    ]
 
     # Check if Python is installed
     if not context.results.get("python_installed", False):
@@ -1172,13 +1170,12 @@ def extract_wallpapers(context: PipelineContext) -> PipelineContext:
     import tarfile
 
     logger: RichLogger = context.logger_instance
-    wallpaper_dir: Path = (
-        context.app_config.project.paths.install.dotfiles.wallpapers.path
-    )
+    wallpaper_dir: Path = context.app_config.project.paths.install[
+        "dotfiles_wallpapers"
+    ]
     wallpapers: Path = (
-        context.app_config.project.paths.source.dotfiles.assets.wallpapers.file(
-            "wallpapers.tar.gz"
-        )
+        context.app_config.project.paths.source["dotfiles_assets_wallpapers"]
+        / "wallpapers.tar.gz"
     )
     logger.debug(f"Extracting wallpapers to path: {wallpaper_dir}")
     logger.debug(f"Wallpapers archive path: {wallpapers}")
@@ -1210,36 +1207,33 @@ def install_wlogout_config(context: PipelineContext) -> PipelineContext:
 
     # Get source paths
     layout_file_source: Path = (
-        context.app_config.project.paths.source.dotfiles[
-            "config-files"
-        ].wlogout.file("layout")
+        context.app_config.project.paths.source[
+            "dotfiles_config_files_wlogout"
+        ]
+        / "layout"
     )
     style_template_source: Path = (
-        context.app_config.project.paths.source.dotfiles[
-            "config-files"
-        ].wlogout.file("style.css.tpl")
+        context.app_config.project.paths.source[
+            "dotfiles_config_files_wlogout"
+        ]
+        / "style.css.tpl"
     )
 
     # Get destination paths
     layout_file_dest: Path = (
-        context.app_config.project.paths.install.dotfiles.wlogout.file(
-            "layout"
-        )
+        context.app_config.project.paths.install["dotfiles_wlogout"] / "layout"
     )
     style_template_dest: Path = (
-        context.app_config.project.paths.install.dotfiles.wlogout.templates.file(
-            "style.css.tpl"
-        )
+        context.app_config.project.paths.install["dotfiles_wlogout_templates"]
+        / "style.css.tpl"
     )
 
-    icon_templates_source_dir: Path = (
-        context.app_config.project.paths.source.dotfiles.assets[
-            "wlogout-icons"
-        ].path
-    )
-    icon_templates_dest_dir: Path = (
-        context.app_config.project.paths.install.dotfiles.wlogout.templates.icons.path
-    )
+    icon_templates_source_dir: Path = context.app_config.project.paths.source[
+        "dotfiles_assets_wlogout_icons"
+    ]
+    icon_templates_dest_dir: Path = context.app_config.project.paths.install[
+        "dotfiles_wlogout_templates_icons"
+    ]
 
     try:
         # Copy layout file
@@ -1331,9 +1325,9 @@ def install_component(
 
     try:
         # 1. Get source path
-        module_path = context.app_config.project.paths.source.common[
-            component_type
-        ][name].path
+        # Convert component name to key format (e.g., "hyprpaper-manager" -> "common_modules_hyprpaper_manager")
+        component_key = f"common_{component_type}_{name.replace('-', '_')}"
+        module_path = context.app_config.project.paths.source[component_key]
 
         logger.debug(f"Source: {module_path}")
         logger.debug(f"Destination: {install_path}")

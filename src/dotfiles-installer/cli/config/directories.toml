@@ -22,6 +22,11 @@
 # ============================================================================
 [host]
 cache = ".cache"
+# XDG user directories (common locations)
+Pictures = "Pictures"
+Wallpapers = "Pictures/Wallpapers"
+Downloads = "Downloads"
+Documents = "Documents"
 
 # ============================================================================
 # Installation Paths (Where dotfiles will be installed)

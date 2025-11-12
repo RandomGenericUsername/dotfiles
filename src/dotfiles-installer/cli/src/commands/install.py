@@ -166,36 +166,41 @@ def install(
     module_settings_overrides = {
         "hyprpaper-manager": {
             "hyprpaper.wallpaper_dirs": [
-                str(context.app_config.project.paths.host["Wallpapers"].path)
+                str(context.app_config.project.paths.host["Wallpapers"])
             ],
             "hyprpaper.config_file": str(
-                context.app_config.project.paths.install.dotfiles.config.hypr.file(
-                    "hyprpaper.conf"
-                )
+                context.app_config.project.paths.install[
+                    "dotfiles_config_hypr"
+                ]
+                / "hyprpaper.conf"
             ),
         },
         "colorscheme-orchestrator": {
             "orchestrator.default_output_dir": str(
-                context.app_config.project.paths.install.dotfiles.cache.path
+                context.app_config.project.paths.install["dotfiles_cache"]
             ),
             "paths.colorscheme_generator_module": str(
-                context.app_config.project.paths.install.dependencies.modules.path
+                context.app_config.project.paths.install[
+                    "dependencies_modules"
+                ]
                 / "colorscheme-generator"
             ),
         },
         "wallpaper-effects-orchestrator": {
             "logging.level": "DEBUG",
             "paths.modules_directory": str(
-                context.app_config.project.paths.install.dependencies.modules.path
+                context.app_config.project.paths.install[
+                    "dependencies_modules"
+                ]
             ),
         },
         "wallpaper-orchestrator": {
             "orchestrator.effects_output_dir": str(
-                context.app_config.project.paths.install.dotfiles.cache.path
+                context.app_config.project.paths.install["dotfiles_cache"]
                 / "wallpaper-effects"
             ),
             "orchestrator.colorscheme_output_dir": str(
-                context.app_config.project.paths.install.dotfiles.cache.path
+                context.app_config.project.paths.install["dotfiles_cache"]
                 / "colorschemes"
             ),
             "colorscheme.backend": "pywal",
