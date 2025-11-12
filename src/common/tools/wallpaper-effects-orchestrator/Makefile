@@ -74,10 +74,20 @@ clean-venv: ## Remove virtual environment
 	@echo "✅ Virtual environment removed"
 	@echo "Run 'make install' or 'uv sync' to recreate"
 
-install: ## Install project in editable mode
+install: ## Install project in editable mode and build container
 	@echo "Installing project..."
 	@uv sync
+	@echo "✅ Package installation complete"
+	@echo ""
+	@echo "Building container image..."
+	@.venv/bin/python -m wallpaper_effects_orchestrator.cli build
+	@echo "✅ Container built successfully"
 	@echo "✅ Installation complete"
+
+rebuild-containers: ensure-sync ## Rebuild container image (force rebuild)
+	@echo "Rebuilding container image (forced)..."
+	@.venv/bin/python -m wallpaper_effects_orchestrator.cli build --force
+	@echo "✅ Container rebuilt successfully"
 
 build: ensure-sync ## Build the package
 	@echo "Building package..."

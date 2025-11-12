@@ -79,10 +79,20 @@ clean-venv: ## Remove virtual environment
 	@echo "✅ Virtual environment removed"
 	@echo "Run 'make install' or 'uv sync' to recreate"
 
-install: ## Install project in editable mode
+install: ## Install project in editable mode and build containers
 	@echo "Installing project..."
 	@uv sync
+	@echo "✅ Package installation complete"
+	@echo ""
+	@echo "Building container images..."
+	@.venv/bin/python -m colorscheme_orchestrator.cli build --all
+	@echo "✅ All containers built successfully"
 	@echo "✅ Installation complete"
+
+rebuild-containers: ensure-sync ## Rebuild all container images (force rebuild)
+	@echo "Rebuilding container images (forced)..."
+	@.venv/bin/python -m colorscheme_orchestrator.cli build --all --force
+	@echo "✅ All containers rebuilt successfully"
 
 build: ensure-sync ## Build the package
 	@echo "Building package..."

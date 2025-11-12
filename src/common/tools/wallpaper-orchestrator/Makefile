@@ -100,12 +100,12 @@ build-containers: ensure-sync ## Build all container images (effects + colorsche
 	@cd ../colorscheme-orchestrator && .venv/bin/python -m colorscheme_orchestrator.cli build --all
 	@echo "✅ All containers built successfully"
 
-rebuild-containers: ensure-sync ## Rebuild all container images (no cache)
-	@echo "Rebuilding container images (no cache)..."
+rebuild-containers: ensure-sync ## Rebuild all container images (force rebuild)
+	@echo "Rebuilding container images (forced)..."
 	@echo "→ Rebuilding wallpaper-effects-orchestrator container..."
-	@cd ../wallpaper-effects-orchestrator && .venv/bin/python -m wallpaper_effects_orchestrator.cli build --no-cache
+	@cd ../wallpaper-effects-orchestrator && .venv/bin/python -m wallpaper_effects_orchestrator.cli build --force
 	@echo "→ Rebuilding colorscheme-orchestrator containers..."
-	@cd ../colorscheme-orchestrator && .venv/bin/python -m colorscheme_orchestrator.cli build --all --no-cache
+	@cd ../colorscheme-orchestrator && .venv/bin/python -m colorscheme_orchestrator.cli build --all --force
 	@echo "✅ All containers rebuilt successfully"
 
 pre-commit-install: ensure-sync ## Install pre-commit hooks
