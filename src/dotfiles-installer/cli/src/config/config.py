@@ -525,6 +525,10 @@ class CliSettings(BaseModel):
         default=True,
         description="Hide the installation directory",
     )
+    rebuild_containers: bool = Field(
+        default=False,
+        description="Force rebuild of container images during installation",
+    )
     debug: InstallDebugSettings = Field(
         default_factory=InstallDebugSettings,
         description="Debug settings (log level, output to file, etc.)",

@@ -1346,15 +1346,31 @@ def install_component(
 
         # 5. Run 'make install' if requested
         if run_makefile_install:
-            logger.info(f"Running 'make install' for {component} '{name}'...")
-            logger.debug(f"Working directory: {install_path}")
-
             import subprocess
 
+            # Determine which make target to use based on rebuild_containers setting
+            rebuild_containers = (
+                context.app_config.cli_settings.rebuild_containers
+            )
+
+            if rebuild_containers:
+                make_target = "rebuild-containers"
+                logger.info(
+                    f"Running 'make {make_target}' for {component} '{name}' "
+                    "(forcing container rebuild)..."
+                )
+            else:
+                make_target = "install"
+                logger.info(
+                    f"Running 'make {make_target}' for {component} '{name}'..."
+                )
+
+            logger.debug(f"Working directory: {install_path}")
+
             try:
-                # Run make install in the component directory
+                # Run make target in the component directory
                 make_result = subprocess.run(
-                    ["make", "install"],
+                    ["make", make_target],
                     cwd=install_path,
                     capture_output=True,
                     text=True,

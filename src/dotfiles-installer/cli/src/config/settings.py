@@ -129,6 +129,7 @@ class SettingsModel:
         backup_directory: Path | None = None,
         install_type: InstallType | None = None,
         hide: bool | None = None,
+        rebuild_containers: bool | None = None,
         log_to_file: bool | None = None,
         log_directory: Path | None = None,
     ) -> PydanticAppConfig:
@@ -150,6 +151,8 @@ class SettingsModel:
             cli_settings_updates["install_type"] = install_type
         if hide is not None:
             cli_settings_updates["hidden"] = hide
+        if rebuild_containers is not None:
+            cli_settings_updates["rebuild_containers"] = rebuild_containers
 
         if debug_updates:
             cli_settings_updates["debug"] = (
@@ -202,6 +205,7 @@ class _SettingsProxy:
         backup_directory: Path | None = None,
         install_type: InstallType | None = None,
         hide: bool | None = None,
+        rebuild_containers: bool | None = None,
         log_to_file: bool | None = None,
         log_directory: Path | None = None,
     ) -> PydanticAppConfig:
@@ -212,6 +216,7 @@ class _SettingsProxy:
             backup_directory=backup_directory,
             install_type=install_type,
             hide=hide,
+            rebuild_containers=rebuild_containers,
             log_to_file=log_to_file,
             log_directory=log_directory,
         )

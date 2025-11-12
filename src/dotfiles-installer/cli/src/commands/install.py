@@ -69,6 +69,10 @@ def install(
     hide: Annotated[
         bool | None, Option(help="Hide the installation directory")
     ] = None,
+    rebuild_containers: Annotated[
+        bool | None,
+        Option("--rebuild-containers", help="Force rebuild container images"),
+    ] = None,
     log_to_file: Annotated[
         bool | None, Option(help="Output log to file")
     ] = None,
@@ -89,6 +93,8 @@ def install(
         install_type = default_config.cli_settings.install_type
     if hide is None:
         hide = default_config.cli_settings.hidden
+    if rebuild_containers is None:
+        rebuild_containers = default_config.cli_settings.rebuild_containers
     if log_to_file is None:
         log_to_file = default_config.cli_settings.debug.output_to_file
     if log_directory is None:
@@ -146,6 +152,7 @@ def install(
         backup_directory=backup_directory,
         install_type=install_type,
         hide=hide,
+        rebuild_containers=rebuild_containers,
         log_to_file=log_to_file,
         log_directory=log_directory,
     )

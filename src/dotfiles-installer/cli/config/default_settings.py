@@ -22,6 +22,7 @@ CLI_SETTINGS_DEFAULTS: dict[str, Any] = {
     "backup_directory": Path.home() / "backup",
     "install_type": "update",  # Options: "update" or "clean"
     "hidden": True,  # Prefix install directory with dot
+    "rebuild_containers": False,  # Force rebuild container images during installation
     "debug": {
         "log_level": "error",  # Options: "debug", "info", "warning", "error"
         "output_to_file": False,  # Write logs to file
