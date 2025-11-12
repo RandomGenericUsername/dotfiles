@@ -300,6 +300,9 @@ def build(
     runtime: str | None = typer.Option(
         None, "--runtime", help="Container runtime"
     ),
+    force: bool = typer.Option(
+        False, "--force", help="Force rebuild even if image exists"
+    ),
 ) -> None:
     """Build container image."""
     config = get_default_config()
@@ -312,8 +315,16 @@ def build(
     orchestrator = WallpaperOrchestrator(config)
 
     try:
+        # Check if image already exists
+        if not force and orchestrator.registry.image_exists():
+            image_name = orchestrator.registry.get_image_name()
+            console.print(
+                f"[green]✓ Image {image_name} already exists[/green]"
+            )
+            return
+
         console.print("[yellow]Building container image...[/yellow]")
-        orchestrator.ensure_image(force_rebuild=True)
+        orchestrator.ensure_image(force_rebuild=force)
         console.print("[green]✓ Build complete[/green]")
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")

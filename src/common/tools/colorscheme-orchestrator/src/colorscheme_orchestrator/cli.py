@@ -226,19 +226,24 @@ def build_command(
         "--no-cache",
         help="Build without using cache",
     ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Force rebuild even if images exist",
+    ),
 ):
     """Build container images for backends.
 
     Examples:
 
-        # Build specific backend
+        # Build specific backend (skips if exists)
         colorscheme-gen build -b pywal
 
-        # Build all backends
+        # Build all backends (skips if exist)
         colorscheme-gen build --all
 
-        # Build without cache
-        colorscheme-gen build -b pywal --no-cache
+        # Force rebuild without cache
+        colorscheme-gen build -b pywal --force --no-cache
     """
     try:
         # Load settings and create orchestrator
@@ -249,7 +254,7 @@ def build_command(
             console.print("[bold]Building all backend images...[/bold]\n")
             try:
                 orchestrator.builder.build_all_images(
-                    rebuild=True, no_cache=no_cache
+                    rebuild=force, no_cache=no_cache
                 )
                 console.print(
                     "\n[green]✓ All images built successfully![/green]"
@@ -265,7 +270,7 @@ def build_command(
             )
             try:
                 orchestrator.builder.build_backend_image(
-                    backend, rebuild=True, no_cache=no_cache
+                    backend, rebuild=force, no_cache=no_cache
                 )
                 console.print(
                     f"\n[green]✓ Image for '{backend}' built "
