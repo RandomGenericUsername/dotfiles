@@ -1,8 +1,107 @@
+import re
 from pathlib import Path
 
-from filesystem_path_builder import PathsBuilder
+import tomli
 
 from src.config.project_root import get_project_root
+
+# ============================================================================
+# Path Resolution with Template Variables
+# ============================================================================
+
+
+def load_paths_from_toml(
+    section: str, base_path: Path, toml_file: Path | None = None
+) -> dict[str, Path]:
+    """Load paths from TOML file with template variable resolution.
+
+    Template variables use {variable_name} syntax and are resolved iteratively.
+    Variables can reference other variables in the same section.
+
+    Args:
+        section: TOML section to load (e.g., "install", "source", "host")
+        base_path: Base directory to prepend to all paths
+        toml_file: Path to TOML file (defaults to config/directories.toml)
+
+    Returns:
+        Dictionary mapping semantic path names to resolved Path objects
+
+    Example:
+        >>> paths = load_paths_from_toml("install", Path("/home/user"))
+        >>> paths["dotfiles"]
+        PosixPath('/home/user/dotfiles')
+        >>> paths["dotfiles_starship"]  # Resolved from {dotfiles}/starship
+        PosixPath('/home/user/dotfiles/starship')
+    """
+    if toml_file is None:
+        toml_file = Path(__file__).parent / "directories.toml"
+
+    # Load TOML file
+    with toml_file.open("rb") as f:
+        config = tomli.load(f)
+
+    if section not in config:
+        raise ValueError(f"Section '{section}' not found in {toml_file}")
+
+    raw_paths = config[section]
+    resolved_paths: dict[str, str] = {}
+
+    # Iteratively resolve template variables
+    max_iterations = 100  # Prevent infinite loops
+    iteration = 0
+
+    while iteration < max_iterations:
+        iteration += 1
+        changed = False
+
+        for key, value in raw_paths.items():
+            if key in resolved_paths:
+                continue  # Already fully resolved
+
+            # Try to resolve template variables in this value
+            resolved_value = value
+            template_pattern = re.compile(r"\{([^}]+)\}")
+
+            # Find all template variables
+            matches = template_pattern.findall(value)
+
+            if not matches:
+                # No template variables, mark as resolved
+                resolved_paths[key] = value
+                changed = True
+                continue
+
+            # Try to substitute all template variables
+            all_resolved = True
+            for var_name in matches:
+                if var_name in resolved_paths:
+                    # Replace {var_name} with its resolved value
+                    resolved_value = resolved_value.replace(
+                        f"{{{var_name}}}", resolved_paths[var_name]
+                    )
+                else:
+                    # Variable not yet resolved
+                    all_resolved = False
+                    break
+
+            if all_resolved:
+                resolved_paths[key] = resolved_value
+                changed = True
+
+        # Check if all paths are resolved
+        if len(resolved_paths) == len(raw_paths):
+            break
+
+        # If nothing changed in this iteration, we have unresolvable variables
+        if not changed:
+            unresolved = set(raw_paths.keys()) - set(resolved_paths.keys())
+            raise ValueError(
+                f"Unable to resolve template variables in paths: {unresolved}"
+            )
+
+    # Convert to Path objects with base_path prepended
+    return {key: base_path / value for key, value in resolved_paths.items()}
+
 
 # ============================================================================
 # Host Paths (User's system directories)
@@ -11,24 +110,18 @@ from src.config.project_root import get_project_root
 HOST_ROOT = Path.home()
 
 
-def create_host_builder(root: Path, strict: bool = False) -> PathsBuilder:
-    """Create a PathsBuilder with all host system directories.
-
-    This is the SINGLE SOURCE OF TRUTH for host directory structure.
+def load_host_paths(root: Path | None = None) -> dict[str, Path]:
+    """Load host system paths from TOML configuration.
 
     Args:
-        root: Root directory for host paths (typically Path.home())
-        strict: If True, only registered paths can be accessed (catches typos)
+        root: Root directory for host paths (defaults to Path.home())
 
     Returns:
-        PathsBuilder configured with all host subdirectories
+        Dictionary mapping semantic path names to Path objects
     """
-    builder = PathsBuilder(root, strict=strict)
-
-    # Hidden cache directory
-    builder.add_path("cache", hidden=True)
-
-    return builder
+    if root is None:
+        root = HOST_ROOT
+    return load_paths_from_toml("host", root)
 
 
 # ============================================================================
@@ -36,67 +129,19 @@ def create_host_builder(root: Path, strict: bool = False) -> PathsBuilder:
 # ============================================================================
 
 
-def create_install_builder(root: Path, strict: bool = True) -> PathsBuilder:
-    """Create a PathsBuilder with all installation subdirectories.
+def load_install_paths(root: Path) -> dict[str, Path]:
+    """Load installation paths from TOML configuration.
 
     This is the SINGLE SOURCE OF TRUTH for installation directory structure.
+    Path definitions are in config/directories.toml.
 
     Args:
         root: Root directory for installation paths
-        strict: If True, only registered paths can be accessed (catches typos)
 
     Returns:
-        PathsBuilder configured with all installation subdirectories
+        Dictionary mapping semantic path names to Path objects
     """
-    builder = PathsBuilder(root, strict=strict)
-
-    # =====================First level directories ======================== #
-
-    # Directory for dotfiles (symlinks to original files)
-    builder.add_path("dotfiles")
-    # Directory for dependencies files
-    builder.add_path("dependencies", hidden=True)
-    # Directory for scripts
-    builder.add_path("modules")
-    # Directory for tools
-    builder.add_path("tools")
-
-    # =====================Second level directories ======================= #
-    # ----------------------------- Dotfiles ------------------------------ #
-    builder.add_path("dotfiles.starship")
-    builder.add_path("dotfiles.zsh")
-    builder.add_path("dotfiles.wallpapers")
-    builder.add_path("dotfiles.wlogout")
-    builder.add_path("dotfiles.cache", hidden=True)
-
-    # ----------------------------- Dependencies -------------------------- #
-    builder.add_path("dependencies.nvm")
-    builder.add_path("dependencies.pyenv")
-    builder.add_path("dependencies.oh-my-zsh")
-    builder.add_path("dependencies.modules")
-    builder.add_path("dependencies.tools")
-    # ----------------------------- config -------------------------------- #
-    builder.add_path("dotfiles.config")
-    builder.add_path("dotfiles.config.hypr")
-    # ----------------------------- scripts ------------------------------- #
-
-    builder.add_path("dependencies.modules.logging")
-    builder.add_path("dependencies.modules.pipeline")
-    builder.add_path("dependencies.modules.package-manager")
-    builder.add_path("dependencies.modules.container-manager")
-    builder.add_path("dependencies.modules.colorscheme-generator")
-    builder.add_path("dependencies.modules.wallpaper-effects-processor")
-    builder.add_path("dependencies.modules.state-manager")
-    builder.add_path("dependencies.modules.hyprpaper-manager")
-
-    builder.add_path("dependencies.tools.colorscheme-orchestrator")
-    builder.add_path("dependencies.tools.wallpaper-effects-orchestrator")
-    builder.add_path("dependencies.tools.wallpaper-orchestrator")
-
-    builder.add_path("dotfiles.wlogout.templates")
-    builder.add_path("dotfiles.wlogout.templates.icons")
-
-    return builder
+    return load_paths_from_toml("install", root)
 
 
 # ============================================================================
@@ -106,35 +151,18 @@ def create_install_builder(root: Path, strict: bool = True) -> PathsBuilder:
 SRC_ROOT = get_project_root() / "src"
 
 
-def create_src_builder(root: Path, strict: bool = False) -> PathsBuilder:
-    """Create a PathsBuilder with all project source directories.
+def load_source_paths(root: Path | None = None) -> dict[str, Path]:
+    """Load source paths from TOML configuration.
 
     This is the SINGLE SOURCE OF TRUTH for source directory structure.
+    Path definitions are in config/directories.toml.
 
     Args:
-        root: Root directory for source paths (typically project_root/src)
-        strict: If True, only registered paths can be accessed (catches typos)
+        root: Root directory for source paths (defaults to project_root/src)
 
     Returns:
-        PathsBuilder configured with all source subdirectories
+        Dictionary mapping semantic path names to Path objects
     """
-    builder = PathsBuilder(root, strict=strict)
-
-    # =====================First level directories ======================== #
-    builder.add_path("common")
-    builder.add_path("dotfiles")
-    builder.add_path("dotfiles-installer")
-
-    # =====================Second level directories ======================= #
-    builder.add_path("common.modules")
-    builder.add_path("common.tools")
-
-    builder.add_path("dotfiles.assets")
-    builder.add_path("dotfiles.config-files")
-    builder.add_path("dotfiles.modules")
-    builder.add_path("dotfiles.scripts")
-
-    # =====================Third level directories ======================== #
-    builder.add_path("dotfiles.assets.wallpapers")
-
-    return builder
+    if root is None:
+        root = SRC_ROOT
+    return load_paths_from_toml("source", root)

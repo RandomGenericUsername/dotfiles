@@ -1,0 +1,117 @@
+# ============================================================================
+# Directory Structure Configuration
+# ============================================================================
+# This file defines the directory structure for the dotfiles installer.
+#
+# Template Variables:
+#   Use {variable_name} to reference other paths defined in the same section.
+#   Variables are resolved iteratively, so you can nest references.
+#
+# Example:
+#   dependencies = ".dependencies"
+#   modules = "{dependencies}/modules"
+#   logging = "{modules}/logging"
+#
+# Hidden Directories:
+#   Prefix with "." to make a directory hidden (e.g., ".cache")
+#
+# ============================================================================
+
+# ============================================================================
+# Host Paths (User's system directories)
+# ============================================================================
+[host]
+cache = ".cache"
+
+# ============================================================================
+# Installation Paths (Where dotfiles will be installed)
+# ============================================================================
+[install]
+# Top-level directories
+dotfiles = "dotfiles"
+dependencies = ".dependencies"
+backup = ".backup"
+modules = "modules"
+tools = "tools"
+
+# Dotfiles subdirectories
+dotfiles_starship = "{dotfiles}/starship"
+dotfiles_zsh = "{dotfiles}/zsh"
+dotfiles_wallpapers = "{dotfiles}/wallpapers"
+dotfiles_wlogout = "{dotfiles}/wlogout"
+dotfiles_cache = "{dotfiles}/.cache"
+dotfiles_config = "{dotfiles}/config"
+dotfiles_config_hypr = "{dotfiles_config}/hypr"
+
+# Dotfiles assets
+dotfiles_assets = "{dotfiles}/assets"
+dotfiles_assets_wallpapers = "{dotfiles_assets}/wallpapers"
+
+# Wlogout subdirectories
+dotfiles_wlogout_templates = "{dotfiles_wlogout}/templates"
+dotfiles_wlogout_templates_icons = "{dotfiles_wlogout_templates}/icons"
+
+# Dependencies subdirectories
+dependencies_nvm = "{dependencies}/nvm"
+dependencies_pyenv = "{dependencies}/pyenv"
+dependencies_oh_my_zsh = "{dependencies}/oh-my-zsh"
+dependencies_modules = "{dependencies}/modules"
+dependencies_tools = "{dependencies}/tools"
+
+# Module paths
+dependencies_modules_logging = "{dependencies_modules}/logging"
+dependencies_modules_pipeline = "{dependencies_modules}/pipeline"
+dependencies_modules_package_manager = "{dependencies_modules}/package-manager"
+dependencies_modules_container_manager = "{dependencies_modules}/container-manager"
+dependencies_modules_colorscheme_generator = "{dependencies_modules}/colorscheme-generator"
+dependencies_modules_wallpaper_effects_processor = "{dependencies_modules}/wallpaper-effects-processor"
+dependencies_modules_state_manager = "{dependencies_modules}/state-manager"
+dependencies_modules_hyprpaper_manager = "{dependencies_modules}/hyprpaper-manager"
+
+# Tool paths
+dependencies_tools_colorscheme_orchestrator = "{dependencies_tools}/colorscheme-orchestrator"
+dependencies_tools_wallpaper_effects_orchestrator = "{dependencies_tools}/wallpaper-effects-orchestrator"
+dependencies_tools_wallpaper_orchestrator = "{dependencies_tools}/wallpaper-orchestrator"
+
+# ============================================================================
+# Source Paths (Project source files)
+# ============================================================================
+# Note: These paths are relative to SRC_ROOT (project_root/src)
+[source]
+# Top-level directories
+dotfiles = "dotfiles"
+common = "common"
+dotfiles_installer = "dotfiles-installer"
+
+# Dotfiles subdirectories
+dotfiles_config_files = "{dotfiles}/config-files"
+dotfiles_config_files_hypr = "{dotfiles_config_files}/hypr"
+dotfiles_config_files_starship = "{dotfiles_config_files}/starship"
+dotfiles_config_files_wlogout = "{dotfiles_config_files}/wlogout"
+dotfiles_config_files_wlogout_icons = "{dotfiles_config_files_wlogout}/icons"
+
+dotfiles_shell_files = "{dotfiles}/shell-files"
+dotfiles_shell_files_zsh = "{dotfiles_shell_files}/zsh"
+
+dotfiles_assets = "{dotfiles}/assets"
+dotfiles_assets_wallpapers = "{dotfiles_assets}/wallpapers"
+dotfiles_assets_wlogout_icons = "{dotfiles_assets}/wlogout-icons"
+
+# Common subdirectories
+common_modules = "{common}/modules"
+common_tools = "{common}/tools"
+
+# Module source paths
+common_modules_logging = "{common_modules}/logging"
+common_modules_pipeline = "{common_modules}/pipeline"
+common_modules_package_manager = "{common_modules}/package-manager"
+common_modules_container_manager = "{common_modules}/container-manager"
+common_modules_colorscheme_generator = "{common_modules}/colorscheme-generator"
+common_modules_wallpaper_effects_processor = "{common_modules}/wallpaper-effects-processor"
+common_modules_state_manager = "{common_modules}/state-manager"
+common_modules_hyprpaper_manager = "{common_modules}/hyprpaper-manager"
+
+# Tool source paths
+common_tools_colorscheme_orchestrator = "{common_tools}/colorscheme-orchestrator"
+common_tools_wallpaper_effects_orchestrator = "{common_tools}/wallpaper-effects-orchestrator"
+common_tools_wallpaper_orchestrator = "{common_tools}/wallpaper-orchestrator"

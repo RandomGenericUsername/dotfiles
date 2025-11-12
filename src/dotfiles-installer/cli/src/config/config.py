@@ -77,86 +77,120 @@ class InstallDebugSettings(BaseModel):
 # ============================================================================
 
 # Import defaults here to avoid circular dependency and IDE auto-removal
-# Import PathTree early for type hints
-from filesystem_path_builder import PathTree  # noqa: E402
-
 from config import default_settings as defaults  # noqa: E402
+
+
+class PathDict(dict):
+    """Dictionary wrapper that provides both dict and attribute access to paths.
+
+    This class wraps a dictionary of Path objects and provides:
+    - Dict-style access: paths["dotfiles"]
+    - Attribute-style access: paths.dotfiles (for backward compatibility)
+    - Nested navigation: paths.dotfiles_starship returns a Path
+    - file() method: Not supported in new system (use Path / "file.txt" instead)
+
+    Usage:
+        paths = PathDict({"dotfiles": Path("/home/user/dotfiles")})
+        paths["dotfiles"]  # PosixPath('/home/user/dotfiles')
+        paths.dotfiles  # PosixPath('/home/user/dotfiles') - backward compat
+    """
+
+    def __getattr__(self, name: str):
+        """Provide attribute-style access for backward compatibility."""
+        if name.startswith("_"):
+            # Don't intercept private attributes
+            raise AttributeError(
+                f"'{type(self).__name__}' object has no attribute '{name}'"
+            )
+
+        try:
+            return self[name]
+        except KeyError as e:
+            raise AttributeError(
+                f"Path '{name}' not found. Available paths: {list(self.keys())}"
+            ) from e
+
+    def __setattr__(self, name: str, value):
+        """Prevent setting attributes (use dict methods instead)."""
+        if name.startswith("_"):
+            super().__setattr__(name, value)
+        else:
+            self[name] = value
+
+    def create(self) -> None:
+        """Create all directories in this PathDict."""
+        for path in self.values():
+            if isinstance(path, Path):
+                path.mkdir(parents=True, exist_ok=True)
 
 
 class PathsConfig(BaseModel):
     """Unified paths configuration.
 
-    Paths use ManagedPathTree for navigation and directory creation.
+    Paths are loaded from config/directories.toml and stored as dictionaries.
 
-    Path definitions are defined in config/directories.py as the SINGLE
-    SOURCE OF TRUTH. AppConfig.model_post_init() copies these definitions
-    with the user's installation directory.
+    Path definitions are in config/directories.toml as the SINGLE SOURCE OF TRUTH.
+    AppConfig.model_post_init() loads these definitions with the user's
+    installation directory.
 
-    To add new paths, edit config/directories.py:
-        _install_builder.add_path("new_dir", hidden=True)
+    To add new paths, edit config/directories.toml:
+        dotfiles_new_dir = "{dotfiles}/new-dir"
 
     Usage:
-        # Navigate to paths
-        config.project.paths.install.dotfiles.starship.path
-        config.project.paths.install.dotfiles.nvim.lua.file("init.lua")
-        config.project.paths.host.Pictures.wallpapers.path
+        # Access paths by key
+        config.project.paths.install["dotfiles"]
+        config.project.paths.install["dotfiles_starship"]
+
+        # Backward compatible attribute access
+        config.project.paths.install.dotfiles  # Returns Path object
 
         # Create all installation directories at once
         config.project.paths.install.create()
-
-        # Get root installation path
-        config.project.paths.install.path
     """
 
     model_config = {
-        "arbitrary_types_allowed": True,  # Allow PathTree and ManagedPathTree
+        "arbitrary_types_allowed": True,  # Allow Path and PathDict
     }
 
-    source: PathTree = Field(
-        default=None,
+    source: PathDict = Field(
+        default_factory=PathDict,
         description="Source paths (relative to project root)",
     )
-    install: PathTree = Field(
-        default=None,
-        description=(
-            "Installation paths (ManagedPathTree with create() method)"
-        ),
+    install: PathDict = Field(
+        default_factory=PathDict,
+        description="Installation paths",
     )
-    host: PathTree = Field(
-        default=None,
+    host: PathDict = Field(
+        default_factory=PathDict,
         description="Host system paths",
     )
-    # runtime: PathTree = Field(
-    #    default=directories.runtime,
-    #    description="Runtime paths",
-    # )
 
     def model_post_init(self, __context: Any) -> None:
-        """Initialize all path trees using factory functions."""
+        """Initialize all path dictionaries using TOML configuration."""
         from config.directories import (
             HOST_ROOT,
             SRC_ROOT,
-            create_host_builder,
-            create_src_builder,
+            load_host_paths,
+            load_source_paths,
         )
 
-        # Create all path trees using factory functions
-        self.host = create_host_builder(HOST_ROOT).build()
-        self.source = create_src_builder(SRC_ROOT).build()
+        # Load all paths from TOML configuration
+        self.host = PathDict(load_host_paths(HOST_ROOT))
+        self.source = PathDict(load_source_paths(SRC_ROOT))
         # Note: install is created in AppConfig.model_post_init()
         # because it needs the user's installation directory
 
     @field_validator("install", "host", mode="before")
     @classmethod
     def ignore_dict_inputs(cls, v: Any) -> Any:
-        """Ignore dict inputs from TOML and use defaults from directories.py.
+        """Ignore dict inputs from TOML and use defaults from directories.toml.
 
         This validator ensures that any path configuration in TOML files
-        is ignored, since paths are auto-generated from directories.py.
+        is ignored, since paths are auto-generated from directories.toml.
         """
         if isinstance(v, dict):
             # Return dummy value - Field default will be used instead
-            return PathTree.from_str(Path.home())
+            return PathDict()
         return v
 
 
@@ -631,15 +665,12 @@ class AppConfig(BaseModel):
     def model_post_init(self, __context: Any) -> None:
         """Set up cross-references after initialization."""
         # Sync user's installation directory to project paths
-        from config.directories import create_install_builder
+        from config.directories import load_install_paths
 
         # Regenerate install paths with user's installation directory
         install_root = self.cli_settings.installation_directory
 
-        # Create builder with user's installation directory
-        # directories.create_install_builder is the SINGLE SOURCE OF TRUTH
-        # for installation directory structure and strict mode setting
-        builder = create_install_builder(install_root, strict=True)
-
-        # Build returns ManagedPathTree with create() and navigation
-        self.project.paths.install = builder.build()
+        # Load install paths from TOML configuration
+        # config/directories.toml is the SINGLE SOURCE OF TRUTH
+        # for installation directory structure
+        self.project.paths.install = PathDict(load_install_paths(install_root))
