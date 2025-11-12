@@ -12,6 +12,7 @@ installation_directory = "$HOME/.tmp/inumaki-dotfiles"
 backup_directory = "$HOME/.tmp/backup"
 install_type = "update"
 hidden = true
+rebuild_containers = true
 
 [cli_settings.debug]
 log_level = "info"
