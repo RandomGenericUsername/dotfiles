@@ -217,6 +217,7 @@ def install(
         InstallModuleStep(module_name="package-manager"),
         InstallModuleStep(module_name="container-manager"),
         InstallModuleStep(module_name="colorscheme-generator"),
+        InstallModuleStep(module_name="state-manager"),
         InstallModuleStep(module_name="wallpaper-effects-processor"),
         InstallModuleStep(
             module_name="hyprpaper-manager",
@@ -227,18 +228,24 @@ def install(
             settings_overrides=module_settings_overrides[
                 "colorscheme-orchestrator"
             ],
+            run_makefile_install=True,
+            timeout=60.0 * 5,
         ),
         InstallToolStep(
             tool_name="wallpaper-effects-orchestrator",
             settings_overrides=module_settings_overrides[
                 "wallpaper-effects-orchestrator"
             ],
+            run_makefile_install=True,
+            timeout=60.0 * 5,
         ),
         InstallToolStep(
             tool_name="wallpaper-orchestrator",
             settings_overrides=module_settings_overrides[
                 "wallpaper-orchestrator"
             ],
+            run_makefile_install=True,
+            timeout=60.0 * 5,
         ),
     ]
     pipeline: Pipeline = Pipeline.create(steps)

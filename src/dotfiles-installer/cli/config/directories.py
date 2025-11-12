@@ -83,6 +83,7 @@ def create_install_builder(root: Path, strict: bool = True) -> PathsBuilder:
     builder.add_path("modules.container-manager")
     builder.add_path("modules.colorscheme-generator")
     builder.add_path("modules.wallpaper-effects-processor")
+    builder.add_path("modules.state-manager")
     builder.add_path("modules.hyprpaper-manager")
 
     builder.add_path("tools.colorscheme-orchestrator")
