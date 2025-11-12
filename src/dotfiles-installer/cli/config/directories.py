@@ -72,23 +72,25 @@ def create_install_builder(root: Path, strict: bool = True) -> PathsBuilder:
     builder.add_path("dependencies.nvm")
     builder.add_path("dependencies.pyenv")
     builder.add_path("dependencies.oh-my-zsh")
+    builder.add_path("dependencies.modules")
+    builder.add_path("dependencies.tools")
     # ----------------------------- config -------------------------------- #
     builder.add_path("dotfiles.config")
     builder.add_path("dotfiles.config.hypr")
     # ----------------------------- scripts ------------------------------- #
 
-    builder.add_path("modules.logging")
-    builder.add_path("modules.pipeline")
-    builder.add_path("modules.package-manager")
-    builder.add_path("modules.container-manager")
-    builder.add_path("modules.colorscheme-generator")
-    builder.add_path("modules.wallpaper-effects-processor")
-    builder.add_path("modules.state-manager")
-    builder.add_path("modules.hyprpaper-manager")
+    builder.add_path("dependencies.modules.logging")
+    builder.add_path("dependencies.modules.pipeline")
+    builder.add_path("dependencies.modules.package-manager")
+    builder.add_path("dependencies.modules.container-manager")
+    builder.add_path("dependencies.modules.colorscheme-generator")
+    builder.add_path("dependencies.modules.wallpaper-effects-processor")
+    builder.add_path("dependencies.modules.state-manager")
+    builder.add_path("dependencies.modules.hyprpaper-manager")
 
-    builder.add_path("tools.colorscheme-orchestrator")
-    builder.add_path("tools.wallpaper-effects-orchestrator")
-    builder.add_path("tools.wallpaper-orchestrator")
+    builder.add_path("dependencies.tools.colorscheme-orchestrator")
+    builder.add_path("dependencies.tools.wallpaper-effects-orchestrator")
+    builder.add_path("dependencies.tools.wallpaper-orchestrator")
 
     return builder
 

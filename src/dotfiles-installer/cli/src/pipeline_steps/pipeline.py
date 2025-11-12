@@ -453,7 +453,7 @@ class InstallModuleStep(PipelineStep):
             context=context,
             name=self.module_name,
             component="module",
-            install_path=context.app_config.project.paths.install.modules[
+            install_path=context.app_config.project.paths.install.dependencies.modules[
                 self.module_name
             ].path,
             settings_overrides=self.settings_overrides,
@@ -501,7 +501,7 @@ class InstallToolStep(PipelineStep):
             context=context,
             name=self.tool_name,
             component="tool",
-            install_path=context.app_config.project.paths.install.tools[
+            install_path=context.app_config.project.paths.install.dependencies.tools[
                 self.tool_name
             ].path,
             settings_overrides=self.settings_overrides,

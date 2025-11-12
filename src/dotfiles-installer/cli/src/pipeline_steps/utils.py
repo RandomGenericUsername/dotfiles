@@ -87,9 +87,11 @@ def handle_previous_installation(context: PipelineContext) -> PipelineContext:
         context.app_config.project.paths.install.dotfiles.path
     )
     modules_directory: Path = (
-        context.app_config.project.paths.install.modules.path
+        context.app_config.project.paths.install.dependencies.modules.path
     )
-    tools_directory: Path = context.app_config.project.paths.install.tools.path
+    tools_directory: Path = (
+        context.app_config.project.paths.install.dependencies.tools.path
+    )
     directories_to_delete_update_install = [
         dotfiles_directory,
         modules_directory,

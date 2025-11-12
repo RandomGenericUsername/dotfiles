@@ -178,14 +178,14 @@ def install(
                 context.app_config.project.paths.install.dotfiles.cache.path
             ),
             "paths.colorscheme_generator_module": str(
-                context.app_config.project.paths.install.modules.path
+                context.app_config.project.paths.install.dependencies.modules.path
                 / "colorscheme-generator"
             ),
         },
         "wallpaper-effects-orchestrator": {
             "logging.level": "DEBUG",
             "paths.modules_directory": str(
-                context.app_config.project.paths.install.modules.path
+                context.app_config.project.paths.install.dependencies.modules.path
             ),
         },
         "wallpaper-orchestrator": {
