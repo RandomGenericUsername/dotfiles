@@ -77,7 +77,7 @@ class InstallDebugSettings(BaseModel):
 # ============================================================================
 
 # Import defaults here to avoid circular dependency and IDE auto-removal
-from config import default_settings as defaults  # noqa: E402
+from src.config import default_settings as defaults  # noqa: E402
 
 
 class PathDict(dict):

@@ -1,0 +1,9 @@
+# Default configuration for dotfiles-manager
+# User can override these in ~/.config/dotfiles-manager/settings.toml
+
+[manager]
+# Directory for storing manager data
+data_dir = "~/.local/share/dotfiles/manager"
+
+# Enable debug mode
+debug = false
