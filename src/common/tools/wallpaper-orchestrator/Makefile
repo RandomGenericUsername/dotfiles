@@ -3,7 +3,7 @@ MAKEFLAGS += --no-print-directory
 # Standard Makefile for wallpaper-orchestrator
 # Provides consistent development workflows
 
-.PHONY: help sync-check ensure-sync dev-shell format lint type-check test test-cov clean clean-venv install build pre-commit-install pre-commit-run all-checks
+.PHONY: help sync-check ensure-sync dev-shell format lint type-check test test-cov clean clean-venv install build build-containers rebuild-containers pre-commit-install pre-commit-run all-checks
 
 help: ## Show this help message
 	@echo "Available commands:"
@@ -74,15 +74,39 @@ clean-venv: ## Remove virtual environment
 	@echo "✅ Virtual environment removed"
 	@echo "Run 'make install' or 'uv sync' to recreate"
 
-install: ## Install project in editable mode
+install: ## Install project in editable mode and build containers
 	@echo "Installing project..."
 	@uv sync
+	@echo "✅ Package installation complete"
+	@echo ""
+	@echo "Building container images..."
+	@echo "→ Building wallpaper-effects-orchestrator container..."
+	@cd ../wallpaper-effects-orchestrator && .venv/bin/python -m wallpaper_effects_orchestrator.cli build
+	@echo "→ Building colorscheme-orchestrator containers..."
+	@cd ../colorscheme-orchestrator && .venv/bin/python -m colorscheme_orchestrator.cli build --all
+	@echo "✅ All containers built successfully"
 	@echo "✅ Installation complete"
 
 build: ensure-sync ## Build the package
 	@echo "Building package..."
 	@uv build
 	@echo "✅ Build complete"
+
+build-containers: ensure-sync ## Build all container images (effects + colorscheme backends)
+	@echo "Building container images..."
+	@echo "→ Building wallpaper-effects-orchestrator container..."
+	@cd ../wallpaper-effects-orchestrator && .venv/bin/python -m wallpaper_effects_orchestrator.cli build
+	@echo "→ Building colorscheme-orchestrator containers..."
+	@cd ../colorscheme-orchestrator && .venv/bin/python -m colorscheme_orchestrator.cli build --all
+	@echo "✅ All containers built successfully"
+
+rebuild-containers: ensure-sync ## Rebuild all container images (no cache)
+	@echo "Rebuilding container images (no cache)..."
+	@echo "→ Rebuilding wallpaper-effects-orchestrator container..."
+	@cd ../wallpaper-effects-orchestrator && .venv/bin/python -m wallpaper_effects_orchestrator.cli build --no-cache
+	@echo "→ Rebuilding colorscheme-orchestrator containers..."
+	@cd ../colorscheme-orchestrator && .venv/bin/python -m colorscheme_orchestrator.cli build --all --no-cache
+	@echo "✅ All containers rebuilt successfully"
 
 pre-commit-install: ensure-sync ## Install pre-commit hooks
 	@echo "Installing pre-commit hooks..."
