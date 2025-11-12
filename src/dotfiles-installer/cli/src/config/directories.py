@@ -34,7 +34,10 @@ def load_paths_from_toml(
         PosixPath('/home/user/dotfiles/starship')
     """
     if toml_file is None:
-        toml_file = Path(__file__).parent / "directories.toml"
+        # TOML file is in cli/config/, this file is in cli/src/config/
+        toml_file = (
+            Path(__file__).parent.parent.parent / "config" / "directories.toml"
+        )
 
     # Load TOML file
     with toml_file.open("rb") as f:

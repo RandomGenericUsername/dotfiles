@@ -167,7 +167,7 @@ class PathsConfig(BaseModel):
 
     def model_post_init(self, __context: Any) -> None:
         """Initialize all path dictionaries using TOML configuration."""
-        from config.directories import (
+        from src.config.directories import (
             HOST_ROOT,
             SRC_ROOT,
             load_host_paths,
@@ -665,7 +665,7 @@ class AppConfig(BaseModel):
     def model_post_init(self, __context: Any) -> None:
         """Set up cross-references after initialization."""
         # Sync user's installation directory to project paths
-        from config.directories import load_install_paths
+        from src.config.directories import load_install_paths
 
         # Regenerate install paths with user's installation directory
         install_root = self.cli_settings.installation_directory
