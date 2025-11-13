@@ -5,6 +5,7 @@ from dotfiles_pipeline import PipelineContext, PipelineStep
 
 from wallpaper_orchestrator.config.settings import AppConfig
 from wallpaper_orchestrator.types import WallpaperResult
+from wallpaper_orchestrator.utils.sequences import send_sequences_to_terminals
 
 
 class GenerateColorSchemeStep(PipelineStep):
@@ -67,6 +68,22 @@ class GenerateColorSchemeStep(PipelineStep):
             context.logger_instance.info(
                 f"  Restored {len(colorscheme_files)} colorscheme files"
             )
+
+            # Send sequences to all open terminals for instant color update
+            if "sequences" in colorscheme_files:
+                sequences_file = colorscheme_files["sequences"]
+                successful, failed = send_sequences_to_terminals(
+                    sequences_file
+                )
+                if successful > 0:
+                    context.logger_instance.debug(
+                        f"  Sent color sequences to {successful} terminal(s)"
+                    )
+                if failed > 0:
+                    context.logger_instance.debug(
+                        f"  Failed to send sequences to {failed} terminal(s)"
+                    )
+
             return context
 
         # Generate colorscheme (cache miss or disabled)
@@ -116,7 +133,7 @@ class GenerateColorSchemeStep(PipelineStep):
             # If caching enabled, activate the colorscheme and mark as cached
             if cache_manager and config.cache.enabled:
                 # Activate the colorscheme (copy to active directory)
-                cache_manager.activate_colorscheme(
+                active_files = cache_manager.activate_colorscheme(
                     result.original_wallpaper, colorscheme_files
                 )
                 context.logger_instance.debug("  Activated colorscheme")
@@ -127,6 +144,21 @@ class GenerateColorSchemeStep(PipelineStep):
                     colorscheme_files,
                 )
                 context.logger_instance.debug("  Marked colorscheme as cached")
+
+                # Send sequences to all open terminals for instant color update
+                if "sequences" in active_files:
+                    sequences_file = active_files["sequences"]
+                    successful, failed = send_sequences_to_terminals(
+                        sequences_file
+                    )
+                    if successful > 0:
+                        context.logger_instance.debug(
+                            f"  Sent color sequences to {successful} terminal(s)"
+                        )
+                    if failed > 0:
+                        context.logger_instance.debug(
+                            f"  Failed to send sequences to {failed} terminal(s)"
+                        )
 
             # Store results
             result.colorscheme_files = colorscheme_files

@@ -28,7 +28,7 @@ db_path = "~/.cache/wallpaper/cache.db"
 [colorscheme]
 # Color scheme generation settings
 backend = "pywal"  # pywal, wallust, or custom
-formats = ["json", "css", "yaml", "sh"]
+formats = ["json", "css", "yaml", "sh", "sequences"]
 color_count = 16
 
 # Container runtime for colorscheme generation
