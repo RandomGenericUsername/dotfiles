@@ -36,8 +36,6 @@ Documents = "Documents"
 dotfiles = "dotfiles"
 dependencies = ".dependencies"
 backup = ".backup"
-modules = "modules"
-tools = "tools"
 
 # Dotfiles subdirectories
 dotfiles_starship = "{dotfiles}/starship"
