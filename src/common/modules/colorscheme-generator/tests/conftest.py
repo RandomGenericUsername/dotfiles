@@ -30,7 +30,8 @@ def mock_settings(tmp_path):
 
     # Create minimal settings.toml
     settings_file = config_dir / "settings.toml"
-    settings_file.write_text("""
+    settings_file.write_text(
+        """
 [backends.pywal]
 use_library = false
 cache_dir = "$HOME/.cache/wal"
@@ -45,7 +46,8 @@ n_clusters = 16
 [output]
 default_formats = ["json", "css"]
 default_output_dir = "$HOME/.cache/colorscheme"
-""")
+"""
+    )
 
     # Load settings
     with patch.object(Settings, "_config_path", settings_file):
