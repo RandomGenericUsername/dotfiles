@@ -28,6 +28,7 @@ class ColorFormat(str, Enum):
     CSS = "css"
     YAML = "yaml"
     TOML = "toml"
+    SEQUENCES = "sequences"  # Terminal color sequences for dynamic updates
 
 
 class ColorAlgorithm(str, Enum):

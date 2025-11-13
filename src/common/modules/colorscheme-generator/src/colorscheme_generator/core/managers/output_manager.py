@@ -122,7 +122,14 @@ class OutputManager:
 
                 # Write to file
                 output_path = output_dir / f"colors.{fmt.value}"
-                self._write_file(output_path, content)
+
+                # Special handling for sequences format (binary file)
+                if fmt == ColorFormat.SEQUENCES:
+                    binary_content = self._convert_to_escape_sequences(content)
+                    self._write_binary_file(output_path, binary_content)
+                else:
+                    # Text file (existing behavior)
+                    self._write_file(output_path, content)
 
                 output_files[fmt.value] = output_path
 
@@ -180,6 +187,53 @@ class OutputManager:
             ) from e
         except Exception as e:
             raise TemplateRenderError(template_name, str(e)) from e
+
+    def _convert_to_escape_sequences(self, content: str) -> bytes:
+        """Convert template output to actual ANSI escape sequences.
+
+        Replaces placeholder characters with actual escape codes:
+        - ']' → ESC + ']' (OSC start)
+        - '\\' → ESC (sequence terminator)
+
+        Args:
+            content: Template-rendered content with placeholders
+
+        Returns:
+            Binary content with actual escape sequences
+
+        Example:
+            >>> content = "]4;0;#282A23\\]10;#F8F8F8\\"
+            >>> binary = self._convert_to_escape_sequences(content)
+            >>> assert b'\\x1b]4;0;#282A23' in binary
+        """
+        # Replace ] with ESC + ]
+        content = content.replace("]", "\x1b]")
+        # Replace \ with ESC
+        content = content.replace("\\", "\x1b\\")
+
+        return content.encode("utf-8")
+
+    def _write_binary_file(self, path: Path, content: bytes) -> None:
+        """Write binary content to file.
+
+        Args:
+            path: File path
+            content: Binary content to write
+
+        Raises:
+            OutputWriteError: If writing fails
+
+        Example:
+            >>> binary_content = b'\\x1b]4;0;#282A23\\x1b\\\\'
+            >>> path = Path("colors.sequences")
+            >>> self._write_binary_file(path, binary_content)
+        """
+        try:
+            path.write_bytes(content)
+        except PermissionError:
+            raise OutputWriteError(str(path), "Permission denied") from None
+        except OSError as e:
+            raise OutputWriteError(str(path), str(e)) from e
 
     def _write_file(self, path: Path, content: str) -> None:
         """Write content to file.
