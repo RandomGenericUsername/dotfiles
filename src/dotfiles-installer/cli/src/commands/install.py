@@ -202,7 +202,7 @@ def install(
             ),
             "orchestrator.colorscheme_output_dir": str(
                 context.app_config.project.paths.install["dotfiles_cache"]
-                / "colorschemes"
+                / "colorscheme"
             ),
             "colorscheme.backend": "pywal",
             "hyprpaper.monitor": "all",
