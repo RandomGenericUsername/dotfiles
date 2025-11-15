@@ -4,7 +4,7 @@ from pathlib import Path
 
 # Output defaults (OutputManager)
 output_directory = Path.home() / ".cache/colorscheme"
-default_formats = ["json", "sh", "css", "yaml"]
+default_formats = ["json", "sh", "css", "gtk.css", "yaml"]
 
 # Generation defaults
 default_backend = "pywal"

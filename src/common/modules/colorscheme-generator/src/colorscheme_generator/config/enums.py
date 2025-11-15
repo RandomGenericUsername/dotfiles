@@ -26,6 +26,7 @@ class ColorFormat(str, Enum):
     JSON = "json"
     SHELL = "sh"
     CSS = "css"
+    GTK_CSS = "gtk.css"  # GTK CSS with @define-color syntax
     YAML = "yaml"
     TOML = "toml"
     SEQUENCES = "sequences"  # Terminal color sequences for dynamic updates

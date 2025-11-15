@@ -401,7 +401,7 @@ Examples:
         "-f",
         "--formats",
         nargs="+",
-        choices=["json", "sh", "css", "yaml", "toml"],
+        choices=["json", "sh", "css", "gtk.css", "yaml", "toml", "sequences"],
         help="Output formats (default: from settings)",
     )
 
