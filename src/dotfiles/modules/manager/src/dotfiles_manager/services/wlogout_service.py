@@ -2,6 +2,10 @@
 
 from pathlib import Path
 
+from dotfiles_manager.services.svg_template_cache_manager import (
+    SVGTemplateCacheManager,
+)
+
 
 class WlogoutService:
     """Service for generating wlogout icons and styles."""
@@ -10,18 +14,23 @@ class WlogoutService:
         self,
         icons_templates_dir: Path,
         style_template_path: Path,
+        svg_cache_manager: SVGTemplateCacheManager | None = None,
     ):
         """Initialize wlogout service.
 
         Args:
             icons_templates_dir: Directory containing SVG icon templates
             style_template_path: Path to style.css.tpl template
+            svg_cache_manager: Optional SVG cache manager for caching rendered templates
         """
         self._icons_templates_dir = icons_templates_dir
         self._style_template_path = style_template_path
+        self._svg_cache = svg_cache_manager
 
     def generate_icons(self, color: str, output_dir: Path) -> dict[str, Path]:
         """Generate wlogout icons from SVG templates.
+
+        Uses SVG cache if available to avoid re-rendering templates with the same color.
 
         Args:
             color: Hex color to use (e.g., "#ffffff")
@@ -46,6 +55,14 @@ class WlogoutService:
 
         generated_icons = {}
 
+        # Compute colorscheme hash for cache key (use color as simple colorscheme)
+        colorscheme = {"icon_color": color}
+        colorscheme_hash = None
+        if self._svg_cache:
+            colorscheme_hash = self._svg_cache.compute_colorscheme_hash(
+                colorscheme
+            )
+
         # Create renderer for icon templates
         renderer = Jinja2Renderer(self._icons_templates_dir)
 
@@ -57,9 +74,23 @@ class WlogoutService:
             if not template_path.exists():
                 continue
 
-            # Render template with color
-            context = {"CURRENT_COLOR": color}
-            rendered = renderer.render(template_name, context)
+            # Try to get from cache first
+            rendered = None
+            if self._svg_cache and colorscheme_hash:
+                rendered = self._svg_cache.get_cached_svg(
+                    colorscheme_hash, template_name
+                )
+
+            # If not in cache, render template
+            if rendered is None:
+                context = {"CURRENT_COLOR": color}
+                rendered = renderer.render(template_name, context)
+
+                # Cache the rendered SVG
+                if self._svg_cache and colorscheme_hash:
+                    self._svg_cache.cache_svg(
+                        colorscheme_hash, template_name, rendered
+                    )
 
             # Write to file
             output_path.write_text(rendered)

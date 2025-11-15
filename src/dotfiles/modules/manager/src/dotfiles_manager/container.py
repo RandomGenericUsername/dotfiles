@@ -72,6 +72,7 @@ class Container(containers.DeclarativeContainer):
         WlogoutService,
         icons_templates_dir=config.provided.paths.wlogout_icons_templates_dir,
         style_template_path=config.provided.paths.wlogout_style_template_path,
+        svg_cache_manager=svg_cache_manager,
     )
 
     # Hook registry - convert HooksConfig to dict
