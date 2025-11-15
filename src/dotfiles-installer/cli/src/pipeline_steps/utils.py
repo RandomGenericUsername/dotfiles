@@ -1268,6 +1268,117 @@ def install_wlogout_config(context: PipelineContext) -> PipelineContext:
     return context
 
 
+def _update_pyproject_paths(
+    pyproject_path: Path,
+    logger: RichLogger,
+) -> None:
+    """Update pyproject.toml [tool.uv.sources] paths for installed location.
+
+    This function updates the relative paths in pyproject.toml to point to
+    the installed locations of dependencies instead of the source repository.
+
+    Args:
+        pyproject_path: Path to the pyproject.toml file to update
+        install_root: Root installation directory
+        logger: Logger instance for debug output
+    """
+    import tomli
+    import tomli_w
+
+    try:
+        # Read current pyproject.toml
+        with pyproject_path.open("rb") as f:
+            data = tomli.load(f)
+
+        # Check if [tool.uv.sources] exists
+        if (
+            "tool" not in data
+            or "uv" not in data["tool"]
+            or "sources" not in data["tool"]["uv"]
+        ):
+            logger.debug(
+                f"No [tool.uv.sources] found in {pyproject_path.name}"
+            )
+            return
+
+        sources = data["tool"]["uv"]["sources"]
+        updated_count = 0
+
+        # Determine if this is a module or tool based on install path
+        is_module = "/modules/" in str(pyproject_path)
+        is_tool = "/tools/" in str(pyproject_path)
+
+        # Update paths for each dependency
+        for dep_name, dep_config in sources.items():
+            if isinstance(dep_config, dict) and "path" in dep_config:
+                old_path = dep_config["path"]
+
+                # Determine new path based on dependency name and current component type
+                if dep_name.startswith("dotfiles-"):
+                    # Module dependency
+                    module_name = dep_name.replace("dotfiles-", "").replace(
+                        "_", "-"
+                    )
+                    if is_module:
+                        # Module -> Module: ../other-module
+                        new_path = f"../{module_name}"
+                    elif is_tool:
+                        # Tool -> Module: ../../modules/module-name
+                        new_path = f"../../modules/{module_name}"
+                    else:
+                        continue
+                elif dep_name in [
+                    "wallpaper-orchestrator",
+                    "colorscheme-orchestrator",
+                    "wallpaper-effects-orchestrator",
+                ]:
+                    # Tool dependency
+                    if is_module:
+                        # Module -> Tool: ../../tools/tool-name
+                        new_path = f"../../tools/{dep_name}"
+                    elif is_tool:
+                        # Tool -> Tool: ../other-tool
+                        new_path = f"../{dep_name}"
+                    else:
+                        continue
+                elif dep_name in [
+                    "hyprpaper-manager",
+                    "wallpaper-effects-processor",
+                ]:
+                    # Module dependency (not prefixed with dotfiles-)
+                    if is_module:
+                        # Module -> Module: ../other-module
+                        new_path = f"../{dep_name}"
+                    elif is_tool:
+                        # Tool -> Module: ../../modules/module-name
+                        new_path = f"../../modules/{dep_name}"
+                    else:
+                        continue
+                else:
+                    # Unknown dependency, skip
+                    continue
+
+                # Update the path
+                dep_config["path"] = new_path
+                updated_count += 1
+                logger.debug(f"Updated {dep_name}: {old_path} -> {new_path}")
+
+        if updated_count > 0:
+            # Write updated pyproject.toml
+            with pyproject_path.open("wb") as f:
+                tomli_w.dump(data, f)
+            logger.debug(
+                f"Updated {updated_count} dependency paths in {pyproject_path.name}"
+            )
+        else:
+            logger.debug(
+                f"No dependency paths to update in {pyproject_path.name}"
+            )
+
+    except Exception as e:
+        logger.warning(f"Failed to update pyproject.toml paths: {e}")
+
+
 def install_component(
     context: PipelineContext,
     name: str,
@@ -1367,6 +1478,14 @@ def install_component(
             ignore=ignore_patterns,
         )
         logger.debug(f"{component.capitalize()} copied successfully")
+
+        # 3.5. Update pyproject.toml paths for installed location
+        pyproject_path = install_path / "pyproject.toml"
+        if pyproject_path.exists():
+            _update_pyproject_paths(
+                pyproject_path=pyproject_path,
+                logger=logger,
+            )
 
         # 4. Apply settings overrides if provided
         if settings_overrides:
@@ -1508,5 +1627,144 @@ def install_component(
         logger.error(f"✗ Failed to install {component} '{name}': {e}")
         context.errors.append(e)
         context.results[f"{name}_installed"] = False
+
+    return context
+
+
+def configure_dotfiles_manager(
+    context: PipelineContext,
+    install_root: Path,
+) -> PipelineContext:
+    """Configure dotfiles manager with correct paths.
+
+    This function:
+    1. Creates state directory structure
+    2. Configures manager's settings.toml with correct paths
+    3. Configures wallpaper orchestrator's settings.toml with correct cache path
+
+    Args:
+        context: Pipeline context
+        install_root: Installation root directory
+
+    Returns:
+        Updated pipeline context
+
+    Example:
+        >>> configure_dotfiles_manager(
+        ...     context=context,
+        ...     install_root=Path("~/.local/share/dotfiles"),
+        ... )
+    """
+    logger: RichLogger = context.logger_instance
+
+    logger.debug("Configuring dotfiles manager...")
+
+    try:
+        # 1. Create state directory structure
+        state_dir = install_root / "state"
+        state_dir.mkdir(parents=True, exist_ok=True)
+
+        state_manager_dir = state_dir / "manager"
+        state_manager_dir.mkdir(exist_ok=True)
+
+        state_wallpaper_orch_dir = state_dir / "wallpaper-orchestrator"
+        state_wallpaper_orch_dir.mkdir(exist_ok=True)
+
+        logger.debug(f"Created state directories: {state_dir}")
+
+        # 2. Configure manager's settings.toml
+        manager_config_path = (
+            install_root / ".dependencies/modules/manager/config/settings.toml"
+        )
+
+        if not manager_config_path.exists():
+            logger.warning(f"Manager config not found: {manager_config_path}")
+        else:
+            manager_overrides = {
+                "manager.state_db_path": str(state_manager_dir / "system.db"),
+                "paths.install_root": str(install_root),
+                "paths.wallpaper_orchestrator_path": str(
+                    install_root / ".dependencies/tools/wallpaper-orchestrator"
+                ),
+                "paths.colorscheme_orchestrator_path": str(
+                    install_root
+                    / ".dependencies/tools/colorscheme-orchestrator"
+                ),
+                "paths.wlogout_icons_templates_dir": str(
+                    install_root / "dotfiles/wlogout/templates/icons"
+                ),
+                "paths.wlogout_style_template_path": str(
+                    install_root / "dotfiles/wlogout/templates/style.css.tpl"
+                ),
+                "paths.wlogout_icons_output_dir": str(
+                    install_root / "dotfiles/wlogout/icons"
+                ),
+                "paths.wlogout_style_output_path": str(
+                    install_root / "dotfiles/wlogout/style.css"
+                ),
+                "paths.wlogout_config_dir": str(
+                    install_root / "dotfiles/config/wlogout"
+                ),
+                "wallpaper_orchestrator.cache_db_path": str(
+                    state_wallpaper_orch_dir / "cache.db"
+                ),
+            }
+
+            # Apply overrides using SettingsOverrider
+            overrider = SettingsOverrider(logger=logger)
+            result = overrider.apply_overrides(
+                settings_file=manager_config_path,
+                overrides=manager_overrides,
+            )
+
+            if result.success:
+                logger.debug(
+                    f"Applied {len(result.overrides_applied)} manager configuration overrides"
+                )
+            else:
+                logger.warning(
+                    f"Failed to apply some manager overrides: {result.errors}"
+                )
+
+        # 3. Configure wallpaper orchestrator's settings.toml
+        orchestrator_config_path = (
+            install_root
+            / ".dependencies/tools/wallpaper-orchestrator/config/settings.toml"
+        )
+
+        if not orchestrator_config_path.exists():
+            logger.warning(
+                f"Orchestrator config not found: {orchestrator_config_path}"
+            )
+        else:
+            orchestrator_overrides = {
+                "cache.state_manager.db_path": str(
+                    state_wallpaper_orch_dir / "cache.db"
+                ),
+            }
+
+            # Apply overrides using SettingsOverrider
+            overrider = SettingsOverrider(logger=logger)
+            result = overrider.apply_overrides(
+                settings_file=orchestrator_config_path,
+                overrides=orchestrator_overrides,
+            )
+
+            if result.success:
+                logger.debug(
+                    f"Applied {len(result.overrides_applied)} wallpaper orchestrator configuration overrides"
+                )
+            else:
+                logger.warning(
+                    f"Failed to apply some orchestrator overrides: {result.errors}"
+                )
+
+        logger.info("✓ Dotfiles manager configured successfully")
+        context.results["dotfiles_manager_configured"] = True
+
+    except Exception as e:
+        logger.error(f"✗ Failed to configure dotfiles manager: {e}")
+        context.errors.append(e)
+        context.results["dotfiles_manager_configured"] = False
 
     return context

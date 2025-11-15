@@ -1,9 +1,92 @@
-# Default configuration for dotfiles-manager
-# User can override these in ~/.config/dotfiles-manager/settings.toml
+# ============================================================================
+# Dotfiles Manager Configuration
+# ============================================================================
+# This file defines the configuration for the dotfiles manager module.
+# It will be auto-configured by the installer during installation.
+#
+# Template Variables:
+#   Use {variable_name} to reference other paths defined in the same section.
+#   Variables are resolved iteratively, so you can nest references.
+# ============================================================================
 
 [manager]
-# Directory for storing manager data
-data_dir = "~/.local/share/dotfiles/manager"
+# State database path (auto-configured by installer)
+state_db_path = "~/.local/share/dotfiles/state/manager/system.db"
 
 # Enable debug mode
 debug = false
+
+# ============================================================================
+# System Attributes (User-configurable)
+# ============================================================================
+[system]
+# Font settings
+font_family = "JetBrains Mono"
+font_size = 14  # In pixels
+
+# Monitor configuration (auto-detected, can be overridden)
+monitors = []  # Empty = auto-detect, or specify: ["DP-1", "HDMI-1"]
+
+# ============================================================================
+# Paths (Auto-configured by installer)
+# ============================================================================
+[paths]
+# Installation root (set by installer)
+install_root = "~/.local/share/dotfiles"
+
+# Tool paths
+wallpaper_orchestrator_path = "{install_root}/.dependencies/tools/wallpaper-orchestrator"
+colorscheme_orchestrator_path = "{install_root}/.dependencies/tools/colorscheme-orchestrator"
+
+# Wlogout paths
+wlogout_icons_templates_dir = "{install_root}/dotfiles/wlogout/templates/icons"
+wlogout_style_template_path = "{install_root}/dotfiles/wlogout/templates/style.css.tpl"
+wlogout_icons_output_dir = "{install_root}/dotfiles/wlogout/icons"
+wlogout_style_output_path = "{install_root}/dotfiles/wlogout/style.css"
+wlogout_config_dir = "{install_root}/dotfiles/config/wlogout"
+
+# ============================================================================
+# Wallpaper Orchestrator Configuration Overrides
+# ============================================================================
+[wallpaper_orchestrator]
+# Cache database path (auto-configured by installer)
+cache_db_path = "~/.local/share/dotfiles/state/wallpaper-orchestrator/cache.db"
+
+# Enable caching
+enable_cache = true
+
+# Container rebuild options (user-configurable)
+force_rebuild_containers = false
+ignore_cache_on_rebuild = false
+
+# ============================================================================
+# Hook System Configuration
+# ============================================================================
+[hooks]
+# Enabled hooks
+enabled = ["wlogout_icons"]
+
+# Fail fast: stop execution if a critical hook fails
+fail_fast = false
+
+# Execution groups define order and parallelism
+# Each group can be serial or parallel
+[[hooks.execution_groups]]
+# First: Generate wlogout icons (must complete first)
+hooks = ["wlogout_icons"]
+mode = "serial"
+
+# Individual hook configurations
+[hooks.wlogout_icons]
+critical = false  # Don't stop if this fails
+colorscheme_color_key = "color15"  # Which color from colorscheme to use
+
+# ============================================================================
+# Validation Settings
+# ============================================================================
+[validation]
+# Validate configurations at startup
+validate_on_startup = true
+
+# Validate paths exist
+validate_paths = true
