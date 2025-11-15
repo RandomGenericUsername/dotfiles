@@ -1,17 +1,17 @@
 @import url("{{COLORS_FILE_PATH}}");
 
 * {
-    font-family: {% raw %}{{SYSTEM_FONT_FAMILY}}{% endraw %};
+    font-family: {{SYSTEM_FONT_FAMILY}};
 	transition: 20ms;
 	box-shadow: none;
-	font-size: {% raw %}{{FONT_SIZE_PX}}{% endraw %}px; /* Only supports px */
+	font-size: {{FONT_SIZE_PX}}px; /* Only supports px */
     background-image: none;
 	background: none;
 }
 
 window {
     background-image: none;
-	background: url("{% raw %}{{BACKGROUND_IMAGE}}{% endraw %}");
+	background: url("{{BACKGROUND_IMAGE}}");
 	background-size: cover;
     font-size: 1em;
 }
