@@ -30,7 +30,7 @@ class OrchestratorSettings(BaseModel):
         description="Default output directory for generated colorschemes",
     )
     default_formats: list[str] = Field(
-        default_factory=lambda: ["json", "css", "yaml", "sh"],
+        default_factory=lambda: ["json", "css", "gtk.css", "yaml", "sh"],
         description="Default output formats",
     )
     default_color_count: int = Field(

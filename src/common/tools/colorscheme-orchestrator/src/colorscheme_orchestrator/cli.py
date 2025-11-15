@@ -59,8 +59,11 @@ def generate_command(
         None,
         "--formats",
         "-f",
-        help="Comma-separated output formats (json,css,yaml,sh). Uses "
-        "default from settings if not specified.",
+        help=(
+            "Comma-separated output formats "
+            "(json,css,gtk.css,yaml,sh,sequences). "
+            "Uses default from settings if not specified."
+        ),
     ),
     colors: int | None = typer.Option(
         None,

@@ -84,7 +84,7 @@ Settings are in `src/colorscheme_orchestrator/config/settings.toml`:
 [orchestrator]
 default_backend = "pywal"
 default_output_dir = "$HOME/.cache/colorscheme"
-default_formats = ["json", "css", "yaml", "sh"]
+default_formats = ["json", "css", "gtk.css", "yaml", "sh"]
 default_color_count = 16
 container_runtime = "docker"  # or "podman"
 auto_cleanup = true

@@ -15,7 +15,7 @@ default_backend = "pywal"
 default_output_dir = "~/.cache/colorscheme"
 
 # Default output formats
-default_formats = ["json", "css", "yaml", "sh"]
+default_formats = ["json", "css", "gtk.css", "yaml", "sh"]
 
 # Default number of colors to extract
 default_color_count = 16
