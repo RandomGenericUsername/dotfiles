@@ -6,10 +6,16 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "dotfiles-logging",
+    "dotfiles-pipeline",
+    "dotfiles-state-manager",
+    "dotfiles-template-renderer",
+    "hyprpaper-manager",
+    "wallpaper-orchestrator",
     "dynaconf>=3.2.0",
     "pydantic>=2.0.0",
     "typer>=0.19.2",
     "rich>=13.0.0",
+    "dependency-injector>=4.41.0",
 ]
 
 [project.optional-dependencies]
@@ -38,6 +44,11 @@ allow-direct-references = true
 
 [tool.uv.sources]
 dotfiles-logging = { path = "../../../common/modules/logging", editable = true }
+dotfiles-pipeline = { path = "../../../common/modules/pipeline", editable = true }
+dotfiles-state-manager = { path = "../../../common/modules/state-manager", editable = true }
+dotfiles-template-renderer = { path = "../../../common/modules/template-renderer", editable = true }
+hyprpaper-manager = { path = "../../../common/modules/hyprpaper-manager", editable = true }
+wallpaper-orchestrator = { path = "../../../common/tools/wallpaper-orchestrator", editable = true }
 
 [tool.black]
 line-length = 79

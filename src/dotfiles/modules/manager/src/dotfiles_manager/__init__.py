@@ -1,37 +1,44 @@
-"""Dotfiles Manager - Generic manager module for dotfiles components.
+"""Dotfiles Manager - Central control point for dotfiles system.
 
-Provides a flexible framework for managing dotfiles components, configurations,
-and resources.
+Provides a flexible framework for managing wallpapers, system attributes,
+and executing hooks.
 
 Usage:
-    from dotfiles_manager import Manager
+    from dotfiles_manager.container import Container
 
-    # Create manager instance
-    manager = Manager()
+    # Initialize container
+    container = Container.initialize()
 
-    # Use manager functionality
-    # (Implementation details to be added based on specific requirements)
+    # Get services
+    wallpaper_service = container.wallpaper_service()
+    wallpaper_service.change_wallpaper(Path("~/wallpaper.png"), "DP-1")
 """
 
-# Configuration
-from dotfiles_manager.config import (
-    AppConfig,
-    ManagerConfig,
-    get_default_config,
-    get_manager_config,
+# Container
+from dotfiles_manager.container import Container
+
+# Models
+from dotfiles_manager.models import (
+    HookContext,
+    HookResult,
+    SystemAttributes,
+    WallpaperState,
 )
 
-# Main interface
-from dotfiles_manager.manager import Manager
+# Services
+from dotfiles_manager.services import WallpaperService, WlogoutService
 
 __all__ = [
-    # Main interface
-    "Manager",
-    # Configuration
-    "AppConfig",
-    "ManagerConfig",
-    "get_default_config",
-    "get_manager_config",
+    # Container
+    "Container",
+    # Models
+    "HookContext",
+    "HookResult",
+    "SystemAttributes",
+    "WallpaperState",
+    # Services
+    "WallpaperService",
+    "WlogoutService",
 ]
 
 __version__ = "0.1.0"

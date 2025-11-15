@@ -27,6 +27,7 @@ from src.config.enums import InstallType
 from src.config.settings import Settings
 from src.pipeline_steps.pipeline import (
     CheckPreviousInstallStep,
+    ConfigureDotfilesManagerStep,
     CreateDirectoriesStep,
     DetectPackageManagerStep,
     ExtractWallpapersStep,
@@ -232,6 +233,7 @@ def install(
         InstallModuleStep(module_name="container-manager"),
         InstallModuleStep(module_name="colorscheme-generator"),
         InstallModuleStep(module_name="state-manager"),
+        InstallModuleStep(module_name="template-renderer"),
         InstallModuleStep(module_name="wallpaper-effects-processor"),
         InstallModuleStep(
             module_name="hyprpaper-manager",
@@ -261,6 +263,8 @@ def install(
             run_makefile_install=True,
             timeout=60.0 * 5,
         ),
+        InstallModuleStep(module_name="manager"),
+        ConfigureDotfilesManagerStep(),
     ]
     pipeline: Pipeline = Pipeline.create(steps)
     pipeline.run(context)

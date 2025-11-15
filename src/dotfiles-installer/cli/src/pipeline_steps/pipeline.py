@@ -538,3 +538,31 @@ class InstallWlogoutConfigStep(PipelineStep):
         from src.pipeline_steps.utils import install_wlogout_config
 
         return install_wlogout_config(context)
+
+
+class ConfigureDotfilesManagerStep(PipelineStep):
+    """Pipeline step to configure dotfiles manager."""
+
+    @property
+    def step_id(self) -> str:
+        return "configure_dotfiles_manager"
+
+    @property
+    def description(self) -> str:
+        return "Configure dotfiles manager"
+
+    @property
+    def timeout(self) -> float | None:
+        """Step timeout in seconds."""
+        return 60.0
+
+    @property
+    def critical(self) -> bool:
+        return True
+
+    def run(self, context: PipelineContext) -> PipelineContext:
+        """Configure dotfiles manager."""
+        from src.pipeline_steps.utils import configure_dotfiles_manager
+
+        install_root = context.app_config.project.paths.install["_root"]
+        return configure_dotfiles_manager(context, install_root)
