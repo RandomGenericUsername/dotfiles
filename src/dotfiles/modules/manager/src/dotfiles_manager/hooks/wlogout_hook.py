@@ -44,9 +44,7 @@ class WlogoutIconsHook(Hook):
         """
         try:
             # Get colorscheme color key from config
-            color_key = context.config.get(
-                "colorscheme_color_key", "color15"
-            )
+            color_key = context.config.get("colorscheme_color_key", "color15")
 
             # Extract color from colorscheme JSON
             colorscheme_json_path = context.colorscheme_files.get("json")
@@ -58,12 +56,15 @@ class WlogoutIconsHook(Hook):
 
             color = self._extract_color(colorscheme_json_path, color_key)
 
-            # Get CSS path for style template
-            colorscheme_css_path = context.colorscheme_files.get("css")
-            if not colorscheme_css_path or not colorscheme_css_path.exists():
+            # Get GTK CSS colorscheme path for style template
+            colorscheme_gtk_css_path = context.colorscheme_files.get("gtk.css")
+            if (
+                not colorscheme_gtk_css_path
+                or not colorscheme_gtk_css_path.exists()
+            ):
                 return HookResult(
                     success=False,
-                    message="Colorscheme CSS file not found",
+                    message="Colorscheme GTK CSS file not found",
                 )
 
             # Generate icons and style
@@ -71,7 +72,7 @@ class WlogoutIconsHook(Hook):
                 color=color,
                 font_family=context.font_family,
                 font_size=context.font_size,
-                colors_css_path=colorscheme_css_path,
+                colors_css_path=colorscheme_gtk_css_path,
                 background_image=context.wallpaper_path,
                 icons_output_dir=self._icons_output_dir,
                 style_output_path=self._style_output_path,
