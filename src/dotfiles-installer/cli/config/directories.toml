@@ -36,6 +36,7 @@ Documents = "Documents"
 dotfiles = "dotfiles"
 dependencies = ".dependencies"
 backup = ".backup"
+state = "state"
 
 # Dotfiles subdirectories
 dotfiles_starship = "{dotfiles}/starship"
@@ -53,6 +54,11 @@ dotfiles_assets_wallpapers = "{dotfiles_assets}/wallpapers"
 # Wlogout subdirectories
 dotfiles_wlogout_templates = "{dotfiles_wlogout}/templates"
 dotfiles_wlogout_templates_icons = "{dotfiles_wlogout_templates}/icons"
+dotfiles_wlogout_icons = "{dotfiles_wlogout}/icons"
+
+# State subdirectories
+state_manager = "{state}/manager"
+state_wallpaper_orchestrator = "{state}/wallpaper-orchestrator"
 
 # Dependencies subdirectories
 dependencies_nvm = "{dependencies}/nvm"
@@ -70,6 +76,8 @@ dependencies_modules_colorscheme_generator = "{dependencies_modules}/colorscheme
 dependencies_modules_wallpaper_effects_processor = "{dependencies_modules}/wallpaper-effects-processor"
 dependencies_modules_state_manager = "{dependencies_modules}/state-manager"
 dependencies_modules_hyprpaper_manager = "{dependencies_modules}/hyprpaper-manager"
+dependencies_modules_template_renderer = "{dependencies_modules}/template-renderer"
+dependencies_modules_manager = "{dependencies_modules}/manager"
 
 # Tool paths
 dependencies_tools_colorscheme_orchestrator = "{dependencies_tools}/colorscheme-orchestrator"
@@ -100,6 +108,9 @@ dotfiles_assets = "{dotfiles}/assets"
 dotfiles_assets_wallpapers = "{dotfiles_assets}/wallpapers"
 dotfiles_assets_wlogout_icons = "{dotfiles_assets}/wlogout-icons"
 
+dotfiles_modules = "{dotfiles}/modules"
+dotfiles_modules_manager = "{dotfiles_modules}/manager"
+
 # Common subdirectories
 common_modules = "{common}/modules"
 common_tools = "{common}/tools"
@@ -112,7 +123,12 @@ common_modules_container_manager = "{common_modules}/container-manager"
 common_modules_colorscheme_generator = "{common_modules}/colorscheme-generator"
 common_modules_wallpaper_effects_processor = "{common_modules}/wallpaper-effects-processor"
 common_modules_state_manager = "{common_modules}/state-manager"
+common_modules_template_renderer = "{common_modules}/template-renderer"
 common_modules_hyprpaper_manager = "{common_modules}/hyprpaper-manager"
+
+# Alias for manager module (used by install_component function)
+# Manager module is in dotfiles/modules, not common/modules
+common_modules_manager = "{dotfiles_modules}/manager"
 
 # Tool source paths
 common_tools_colorscheme_orchestrator = "{common_tools}/colorscheme-orchestrator"
