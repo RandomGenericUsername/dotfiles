@@ -69,6 +69,14 @@ class WallpaperResult:
         metadata={"description": "List of error messages if any"},
     )
 
+    def __deepcopy__(self, memo):
+        """Return self for deep copy (result should not be copied).
+
+        The result object is shared across parallel pipeline steps and should
+        not be deep copied to preserve modifications made by each step.
+        """
+        return self
+
     def __str__(self) -> str:
         """Human-readable string representation."""
         lines = [
