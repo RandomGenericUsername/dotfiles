@@ -13,6 +13,9 @@ from dotfiles_manager.repositories.system_attributes import (
 from dotfiles_manager.repositories.wallpaper_state import (
     WallpaperStateRepository,
 )
+from dotfiles_manager.services.svg_template_cache_manager import (
+    SVGTemplateCacheManager,
+)
 from dotfiles_manager.services.wallpaper_service import WallpaperService
 from dotfiles_manager.services.wlogout_service import WlogoutService
 
@@ -54,6 +57,14 @@ class Container(containers.DeclarativeContainer):
         system_state=system_state,
         orchestrator_cache=wallpaper_orchestrator.provided.cache_manager,
         orchestrator_config=orchestrator_config,
+    )
+
+    # SVG template cache
+    svg_cache_manager = providers.Singleton(
+        SVGTemplateCacheManager,
+        state=system_state,
+        max_cache_size_mb=config.provided.svg_cache.max_cache_size_mb,
+        enable_lru=config.provided.svg_cache.enable_lru,
     )
 
     # Services

@@ -197,6 +197,37 @@ class HooksConfig(BaseModel):
         return data
 
 
+class SVGCacheConfig(BaseModel):
+    """Configuration for SVG template cache.
+
+    Controls SVG rendering cache behavior and limits.
+    """
+
+    model_config = ConfigDict(
+        frozen=False,
+        validate_assignment=True,
+    )
+
+    enabled: bool = Field(
+        default=True,
+        description="Enable SVG template caching",
+    )
+    max_cache_size_mb: int = Field(
+        default=10,
+        ge=1,
+        le=100,
+        description="Maximum cache size in MB",
+    )
+    enable_lru: bool = Field(
+        default=True,
+        description="Enable LRU eviction when cache is full",
+    )
+    preload_on_startup: bool = Field(
+        default=False,
+        description="Preload cache on startup (not recommended)",
+    )
+
+
 class AppConfig(BaseModel):
     """Application-level configuration.
 
@@ -205,6 +236,7 @@ class AppConfig(BaseModel):
         system: System attributes configuration.
         paths: Paths configuration.
         hooks: Hooks configuration.
+        svg_cache: SVG template cache configuration.
     """
 
     model_config = ConfigDict(
@@ -227,4 +259,8 @@ class AppConfig(BaseModel):
     hooks: HooksConfig = Field(
         default_factory=HooksConfig,
         description="Hooks configuration",
+    )
+    svg_cache: SVGCacheConfig = Field(
+        default_factory=SVGCacheConfig,
+        description="SVG template cache configuration",
     )
