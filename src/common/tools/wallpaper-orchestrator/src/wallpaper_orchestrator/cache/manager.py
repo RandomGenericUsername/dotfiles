@@ -48,6 +48,10 @@ class WallpaperCacheManager:
         self.colorscheme_cache_dir = colorscheme_cache_dir
         self.colorscheme_active_dir = colorscheme_active_dir
 
+    def __deepcopy__(self, memo):
+        """Return self for deep copy (cache manager should not be copied)."""
+        return self
+
     def _get_cache_key(self, wallpaper_path: Path) -> str:
         """Generate cache key from wallpaper file hash.
 

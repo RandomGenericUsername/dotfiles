@@ -1,6 +1,5 @@
 """Utility functions for sending terminal sequences to open terminals."""
 
-import glob
 import logging
 import sys
 from pathlib import Path
@@ -27,7 +26,7 @@ def send_sequences_to_terminals(sequences_file: Path) -> tuple[int, int]:
 
     # Read sequences file content (binary)
     try:
-        with open(sequences_file, "rb") as f:
+        with sequences_file.open("rb") as f:
             sequences = f.read()
     except Exception as e:
         logger.error(f"Failed to read sequences file: {e}")
@@ -36,13 +35,10 @@ def send_sequences_to_terminals(sequences_file: Path) -> tuple[int, int]:
     # Determine terminal device pattern based on OS
     if sys.platform == "darwin":
         # macOS
-        tty_pattern = "/dev/ttys00[0-9]*"
+        terminals = list(Path("/dev").glob("ttys00*"))
     else:
         # Linux and other Unix-like systems
-        tty_pattern = "/dev/pts/[0-9]*"
-
-    # Find all open terminal devices
-    terminals = glob.glob(tty_pattern)
+        terminals = list(Path("/dev/pts").glob("*"))
 
     if not terminals:
         logger.debug("No open terminals found")
@@ -54,7 +50,7 @@ def send_sequences_to_terminals(sequences_file: Path) -> tuple[int, int]:
     # Write sequences to each terminal
     for term in terminals:
         try:
-            with open(term, "wb") as f:
+            with term.open("wb") as f:
                 f.write(sequences)
             successful += 1
             logger.debug(f"Sent sequences to {term}")

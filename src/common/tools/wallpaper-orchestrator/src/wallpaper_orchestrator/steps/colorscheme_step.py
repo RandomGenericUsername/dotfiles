@@ -15,6 +15,16 @@ class GenerateColorSchemeStep(PipelineStep):
     from the original wallpaper (not the processed variants).
     """
 
+    def __init__(self, cache_manager=None, force_rebuild: bool = False):
+        """Initialize step with cache manager and force_rebuild flag.
+
+        Args:
+            cache_manager: Cache manager instance (optional)
+            force_rebuild: Whether to force rebuild even if cached
+        """
+        self.cache_manager = cache_manager
+        self.force_rebuild = force_rebuild
+
     @property
     def step_id(self) -> str:
         return "generate_colorscheme"
@@ -38,9 +48,9 @@ class GenerateColorSchemeStep(PipelineStep):
         if not result:
             raise ValueError("No wallpaper_result found in context")
 
-        # Get cache manager and force_rebuild flag from context
-        cache_manager = context.results.get("cache_manager")
-        force_rebuild = context.results.get("force_rebuild", False)
+        # Use cache manager and force_rebuild from instance attributes
+        cache_manager = self.cache_manager
+        force_rebuild = self.force_rebuild
 
         expected_formats = config.colorscheme.formats
 
@@ -153,11 +163,13 @@ class GenerateColorSchemeStep(PipelineStep):
                     )
                     if successful > 0:
                         context.logger_instance.debug(
-                            f"  Sent color sequences to {successful} terminal(s)"
+                            f"  Sent color sequences to {successful} "
+                            f"terminal(s)"
                         )
                     if failed > 0:
                         context.logger_instance.debug(
-                            f"  Failed to send sequences to {failed} terminal(s)"
+                            f"  Failed to send sequences to {failed} "
+                            f"terminal(s)"
                         )
 
             # Store results

@@ -19,6 +19,16 @@ class GenerateEffectsStep(PipelineStep):
     effect variants from the original wallpaper.
     """
 
+    def __init__(self, cache_manager=None, force_rebuild: bool = False):
+        """Initialize step with cache manager and force_rebuild flag.
+
+        Args:
+            cache_manager: Cache manager instance (optional)
+            force_rebuild: Whether to force rebuild even if cached
+        """
+        self.cache_manager = cache_manager
+        self.force_rebuild = force_rebuild
+
     @property
     def step_id(self) -> str:
         return "generate_effects"
@@ -42,9 +52,9 @@ class GenerateEffectsStep(PipelineStep):
         if not result:
             raise ValueError("No wallpaper_result found in context")
 
-        # Get cache manager and force_rebuild flag from context
-        cache_manager = context.results.get("cache_manager")
-        force_rebuild = context.results.get("force_rebuild", False)
+        # Use cache manager and force_rebuild from instance attributes
+        cache_manager = self.cache_manager
+        force_rebuild = self.force_rebuild
 
         # Get expected effects from processor
         from wallpaper_processor.factory import EffectFactory

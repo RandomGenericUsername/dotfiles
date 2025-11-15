@@ -81,6 +81,14 @@ class RichLogger:
         """Delegate all standard logging methods to wrapped logger."""
         return getattr(self._logger, name)
 
+    def __copy__(self):
+        """Return self for shallow copy (loggers should not be copied)."""
+        return self
+
+    def __deepcopy__(self, memo):
+        """Return self for deep copy (loggers should not be copied)."""
+        return self
+
     @property
     def name(self) -> str:
         """Get logger name."""

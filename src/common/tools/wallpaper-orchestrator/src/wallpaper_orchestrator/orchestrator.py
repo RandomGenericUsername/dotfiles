@@ -164,20 +164,20 @@ class WallpaperOrchestrator:
         )
         context.results["wallpaper_result"] = result
 
-        # Add cache manager and force_rebuild flag to results
-        context.results["cache_manager"] = self.cache_manager
-        context.results["force_rebuild"] = force_rebuild
-
         # Create pipeline configuration
         pipeline_config = PipelineConfig(
             fail_fast=self.config.pipeline.fail_fast,
         )
 
-        # Define pipeline steps (all serial)
+        # Define pipeline steps (parallel generation, then set wallpaper)
+        # Pass cache_manager and force_rebuild to steps to avoid deep
+        # copy issues
         steps = [
-            GenerateEffectsStep(),
-            GenerateColorSchemeStep(),
-            SetWallpaperStep(),
+            [
+                GenerateColorSchemeStep(self.cache_manager, force_rebuild),
+                GenerateEffectsStep(self.cache_manager, force_rebuild),
+            ],  # Parallel group
+            SetWallpaperStep(),  # Serial
         ]
 
         # Create and run pipeline
