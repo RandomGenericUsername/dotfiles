@@ -64,4 +64,3 @@ def send_sequences_to_terminals(sequences_file: Path) -> tuple[int, int]:
             failed += 1
 
     return successful, failed
-

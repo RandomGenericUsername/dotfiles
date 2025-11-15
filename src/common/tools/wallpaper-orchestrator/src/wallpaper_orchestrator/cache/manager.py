@@ -342,3 +342,47 @@ class WallpaperCacheManager:
         """
         key = self._get_cache_key(wallpaper_path)
         return self.state.hgetall(key)
+
+    def get_all_cached_wallpapers(self) -> list[dict]:
+        """Get list of all cached wallpapers with metadata.
+
+        Returns:
+            List of dicts with wallpaper info:
+            [
+                {
+                    "path": Path("/path/to/wallpaper.png"),
+                    "stem": "wallpaper",
+                    "effects_cached": True,
+                    "colorscheme_cached": True,
+                    "effects_cached_at": "2024-01-15T10:30:00",
+                    "colorscheme_cached_at": "2024-01-15T10:30:05",
+                },
+                ...
+            ]
+        """
+        all_keys = self.state.keys("wallpaper:*")
+        wallpapers = []
+
+        for key in all_keys:
+            metadata = self.state.hgetall(key)
+            if not metadata:
+                continue
+
+            wallpaper_path_str = metadata.get("wallpaper_path", "")
+            if not wallpaper_path_str:
+                continue
+
+            wallpaper_info = {
+                "path": Path(wallpaper_path_str),
+                "stem": metadata.get("wallpaper_stem", ""),
+                "effects_cached": metadata.get("effects_cached") == "true",
+                "colorscheme_cached": (
+                    metadata.get("colorscheme_cached") == "true"
+                ),
+                "effects_cached_at": metadata.get("effects_cached_at"),
+                "colorscheme_cached_at": metadata.get("colorscheme_cached_at"),
+            }
+
+            wallpapers.append(wallpaper_info)
+
+        return wallpapers
