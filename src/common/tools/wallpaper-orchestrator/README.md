@@ -117,7 +117,7 @@ verbose = false
 
 [colorscheme]
 backend = "pywal"  # pywal, wallust, or custom
-formats = ["json", "css", "yaml", "sh"]
+formats = ["json", "css", "gtk.css", "yaml", "sh"]
 color_count = 16
 container_runtime = "docker"
 
