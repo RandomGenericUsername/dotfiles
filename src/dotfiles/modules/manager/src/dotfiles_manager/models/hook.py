@@ -15,6 +15,8 @@ class HookContext:
         font_size: System font size in pixels
         monitor: Monitor name the wallpaper is for
         from_cache: Whether wallpaper was loaded from cache
+        colorscheme_generated: Whether colorscheme was generated (not skipped)
+        effects_generated: Whether effects were generated (not skipped)
         config: Hook-specific configuration from settings.toml
     """
 
@@ -24,6 +26,8 @@ class HookContext:
     font_size: int
     monitor: str
     from_cache: bool
+    colorscheme_generated: bool
+    effects_generated: bool
     config: dict
 
 
