@@ -73,6 +73,16 @@ def process(
         "--no-cache",
         help="Disable caching for this run",
     ),
+    colorscheme: bool = typer.Option(
+        True,
+        "--colorscheme/--no-colorscheme",
+        help="Generate colorscheme (default: enabled)",
+    ),
+    effects: bool = typer.Option(
+        True,
+        "--effects/--no-effects",
+        help="Generate effect variants (default: enabled)",
+    ),
 ) -> None:
     """Process wallpaper: generate effects, color scheme, and set wallpaper.
 
@@ -127,6 +137,8 @@ def process(
             colorscheme_output_dir=colorscheme_output,
             monitor=monitor,
             force_rebuild=force_rebuild,
+            generate_colorscheme=colorscheme,
+            generate_effects=effects,
         )
 
         # Display results
@@ -240,6 +252,16 @@ def batch(
         "--no-cache",
         help="Disable caching for this run",
     ),
+    colorscheme: bool = typer.Option(
+        True,
+        "--colorscheme/--no-colorscheme",
+        help="Generate colorscheme (default: enabled)",
+    ),
+    effects: bool = typer.Option(
+        True,
+        "--effects/--no-effects",
+        help="Generate effect variants (default: enabled)",
+    ),
 ) -> None:
     """Process multiple wallpapers in batch.
 
@@ -280,6 +302,8 @@ def batch(
             monitor=monitor,
             force_rebuild=force_rebuild,
             continue_on_error=continue_on_error,
+            generate_colorscheme=colorscheme,
+            generate_effects=effects,
         )
 
         # Display summary
