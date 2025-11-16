@@ -43,6 +43,8 @@ class WallpaperService:
         wallpaper_path: Path,
         monitor: str,
         force_rebuild: bool = False,
+        generate_colorscheme: bool = True,
+        generate_effects: bool = True,
     ) -> dict:
         """Change wallpaper and execute hooks.
 
@@ -50,6 +52,8 @@ class WallpaperService:
             wallpaper_path: Path to wallpaper
             monitor: Monitor name
             force_rebuild: Force rebuild containers
+            generate_colorscheme: Whether to generate colorscheme (default: True)
+            generate_effects: Whether to generate effects (default: True)
 
         Returns:
             Dict with results
@@ -64,6 +68,8 @@ class WallpaperService:
             wallpaper_path=wallpaper_path,
             monitor=monitor,
             force_rebuild=force_rebuild,
+            generate_colorscheme=generate_colorscheme,
+            generate_effects=generate_effects,
         )
 
         # Update system state
@@ -84,6 +90,8 @@ class WallpaperService:
             font_size=system_attrs.font_size,
             monitor=monitor,
             from_cache=from_cache,
+            colorscheme_generated=result.colorscheme_generated,
+            effects_generated=result.effects_generated,
             config={},
         )
 
