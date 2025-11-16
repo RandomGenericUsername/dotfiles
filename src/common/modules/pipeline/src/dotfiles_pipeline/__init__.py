@@ -7,8 +7,12 @@ from .core import (
     PipelineConfig,
     PipelineContext,
     PipelineStep,
+    ProgressTracker,
     TaskStep,
 )
+
+# Decorators
+from .decorators import with_progress_callback
 
 # Executors for advanced usage
 from .executors import (
@@ -27,7 +31,10 @@ __all__ = [
     "PipelineConfig",
     "PipelineContext",
     "PipelineStep",
+    "ProgressTracker",
     "TaskStep",
+    # Decorators
+    "with_progress_callback",
     # Main interface
     "Pipeline",
     # Executors

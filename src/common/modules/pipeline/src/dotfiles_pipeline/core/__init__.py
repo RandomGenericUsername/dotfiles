@@ -6,6 +6,7 @@ from .types import (
     PipelineConfig,
     PipelineContext,
     PipelineStep,
+    ProgressTracker,
     TaskStep,
 )
 
@@ -15,5 +16,6 @@ __all__ = [
     "PipelineConfig",
     "PipelineContext",
     "PipelineStep",
+    "ProgressTracker",
     "TaskStep",
 ]
