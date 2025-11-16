@@ -1,5 +1,6 @@
 """Main wallpaper orchestrator."""
 
+from collections.abc import Callable
 from pathlib import Path
 
 from dotfiles_logging.rich.rich_logger import RichLogger
@@ -38,14 +39,22 @@ class WallpaperOrchestrator:
         self,
         config: AppConfig | None = None,
         logger: RichLogger | None = None,
+        progress_callback: (
+            Callable[[int, int, str, float], None] | None
+        ) = None,
     ):
         """Initialize orchestrator.
 
         Args:
             config: Application configuration (loads from settings.toml)
             logger: Logger instance (creates one if None)
+            progress_callback: Optional callback for progress updates.
+                Signature: (step_index, total_steps, step_name,
+                progress_percent)
         """
         self.config = config or load_settings()
+        self._progress_callback = progress_callback
+        self._pipeline: Pipeline | None = None
 
         # Create logger if not provided
         if logger is None:
@@ -101,6 +110,35 @@ class WallpaperOrchestrator:
                 colorscheme_active_dir=self.config.orchestrator.colorscheme_output_dir,
             )
 
+    def get_status(self) -> dict[str, float | str | bool | None]:
+        """Return current progress status.
+
+        Returns:
+            dict with keys:
+            - progress: float (0-100)
+            - current_step: str | None
+            - is_running: bool
+        """
+        if self._pipeline is None:
+            return {
+                "progress": 0.0,
+                "current_step": None,
+                "is_running": False,
+            }
+        return self._pipeline.get_status()
+
+    def is_running(self) -> bool:
+        """Return True if orchestrator is currently processing."""
+        if self._pipeline is None:
+            return False
+        return self._pipeline.is_running()
+
+    def get_current_step(self) -> str | None:
+        """Return name of current step or None."""
+        if self._pipeline is None:
+            return None
+        return self._pipeline.get_current_step()
+
     def process(
         self,
         wallpaper_path: Path,
@@ -108,6 +146,8 @@ class WallpaperOrchestrator:
         colorscheme_output_dir: Path | None = None,
         monitor: str | None = None,
         force_rebuild: bool = False,
+        generate_colorscheme: bool = True,
+        generate_effects: bool = True,
     ) -> WallpaperResult:
         """Process wallpaper: generate effects, colorscheme, set wallpaper.
 
@@ -118,6 +158,9 @@ class WallpaperOrchestrator:
                 (config default)
             monitor: Monitor to set wallpaper on (config default)
             force_rebuild: Force regeneration even if cached
+            generate_colorscheme: Whether to generate colorscheme
+                (default: True)
+            generate_effects: Whether to generate effects (default: True)
 
         Returns:
             WallpaperResult: Complete result metadata with all paths
@@ -169,22 +212,36 @@ class WallpaperOrchestrator:
             fail_fast=self.config.pipeline.fail_fast,
         )
 
-        # Define pipeline steps (parallel generation, then set wallpaper)
+        # Define pipeline steps (conditionally add generation steps)
         # Pass cache_manager and force_rebuild to steps to avoid deep
         # copy issues
-        steps = [
-            [
-                GenerateColorSchemeStep(self.cache_manager, force_rebuild),
-                GenerateEffectsStep(self.cache_manager, force_rebuild),
-            ],  # Parallel group
-            SetWallpaperStep(),  # Serial
-        ]
+        steps = []
 
-        # Create and run pipeline
-        pipeline = Pipeline(steps, pipeline_config)
+        # Build parallel generation group (if any generation is enabled)
+        parallel_group = []
+        if generate_colorscheme:
+            parallel_group.append(
+                GenerateColorSchemeStep(self.cache_manager, force_rebuild)
+            )
+        if generate_effects:
+            parallel_group.append(
+                GenerateEffectsStep(self.cache_manager, force_rebuild)
+            )
+
+        # Add parallel group if it has any steps
+        if parallel_group:
+            steps.append(parallel_group)
+
+        # Always add wallpaper setting step
+        steps.append(SetWallpaperStep())
+
+        # Create and run pipeline with progress callback
+        self._pipeline = Pipeline(
+            steps, pipeline_config, self._progress_callback
+        )
 
         try:
-            final_context = pipeline.run(context)
+            final_context = self._pipeline.run(context)
 
             # Check for errors
             if final_context.errors:
@@ -205,6 +262,9 @@ class WallpaperOrchestrator:
             result.errors.append(error_msg)
             self.logger.error(error_msg)
             raise
+        finally:
+            # Clear pipeline reference after execution
+            self._pipeline = None
 
         return result
 
@@ -216,6 +276,8 @@ class WallpaperOrchestrator:
         monitor: str | None = None,
         force_rebuild: bool = False,
         continue_on_error: bool = True,
+        generate_colorscheme: bool = True,
+        generate_effects: bool = True,
     ) -> list[WallpaperResult]:
         """Process multiple wallpapers.
 
@@ -226,6 +288,9 @@ class WallpaperOrchestrator:
             monitor: Monitor to set wallpaper on
             force_rebuild: Force regeneration even if cached
             continue_on_error: Continue processing if one fails
+            generate_colorscheme: Whether to generate colorscheme
+                (default: True)
+            generate_effects: Whether to generate effects (default: True)
 
         Returns:
             list[WallpaperResult]: Results for each wallpaper
@@ -240,6 +305,8 @@ class WallpaperOrchestrator:
                     colorscheme_output_dir=colorscheme_output_dir,
                     monitor=monitor,
                     force_rebuild=force_rebuild,
+                    generate_colorscheme=generate_colorscheme,
+                    generate_effects=generate_effects,
                 )
                 results.append(result)
             except Exception as e:

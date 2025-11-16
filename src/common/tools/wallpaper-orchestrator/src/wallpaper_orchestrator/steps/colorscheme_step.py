@@ -73,6 +73,9 @@ class GenerateColorSchemeStep(PipelineStep):
             )
 
             result.colorscheme_files = colorscheme_files
+            result.colorscheme_generated = (
+                True  # Mark as generated (from cache)
+            )
             context.results["colorscheme_files"] = colorscheme_files
 
             context.logger_instance.info(
@@ -174,6 +177,7 @@ class GenerateColorSchemeStep(PipelineStep):
 
             # Store results
             result.colorscheme_files = colorscheme_files
+            result.colorscheme_generated = True  # Mark as generated (fresh)
             context.results["colorscheme_files"] = colorscheme_files
 
             context.logger_instance.info(

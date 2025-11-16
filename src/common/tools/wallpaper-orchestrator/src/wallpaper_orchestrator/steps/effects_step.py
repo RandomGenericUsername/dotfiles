@@ -80,6 +80,7 @@ class GenerateEffectsStep(PipelineStep):
             )
 
             result.effect_variants = cached_variants
+            result.effects_generated = True  # Mark as generated (from cache)
             context.results["effect_variants"] = cached_variants
 
             context.logger_instance.info(
@@ -137,6 +138,7 @@ class GenerateEffectsStep(PipelineStep):
 
             # Store results
             result.effect_variants = effect_variants
+            result.effects_generated = True  # Mark as generated (fresh)
             context.results["effect_variants"] = effect_variants
 
             context.logger_instance.info(
