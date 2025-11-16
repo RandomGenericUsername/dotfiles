@@ -46,6 +46,20 @@ class WallpaperResult:
         metadata={"description": "Mapping of format to output file path"},
     )
 
+    # Generation flags (track what was actually generated vs skipped)
+    effects_generated: bool = field(
+        default=False,
+        metadata={
+            "description": "Whether effects were generated (not skipped)"
+        },
+    )
+    colorscheme_generated: bool = field(
+        default=False,
+        metadata={
+            "description": "Whether colorscheme was generated (not skipped)"
+        },
+    )
+
     # Wallpaper set status
     wallpaper_set: bool = field(
         default=False,
@@ -131,6 +145,8 @@ class WallpaperResult:
             "colorscheme_files": {
                 fmt: str(path) for fmt, path in self.colorscheme_files.items()
             },
+            "effects_generated": self.effects_generated,
+            "colorscheme_generated": self.colorscheme_generated,
             "wallpaper_set": self.wallpaper_set,
             "monitor_set": self.monitor_set,
             "timestamp": self.timestamp.isoformat(),
