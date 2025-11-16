@@ -35,6 +35,20 @@ def change_wallpaper(
         bool,
         typer.Option("--force-rebuild", help="Force rebuild containers"),
     ] = False,
+    colorscheme: Annotated[
+        bool,
+        typer.Option(
+            "--colorscheme/--no-colorscheme",
+            help="Generate colorscheme (default: enabled)",
+        ),
+    ] = True,
+    effects: Annotated[
+        bool,
+        typer.Option(
+            "--effects/--no-effects",
+            help="Generate effect variants (default: enabled)",
+        ),
+    ] = True,
 ) -> None:
     """Change wallpaper and execute hooks."""
     try:
@@ -73,6 +87,8 @@ def change_wallpaper(
             wallpaper_path=wallpaper_path,
             monitor=monitor,
             force_rebuild=force_rebuild,
+            generate_colorscheme=colorscheme,
+            generate_effects=effects,
         )
 
         console.print(f"[green]✓[/green] Wallpaper changed: {wallpaper_path}")
