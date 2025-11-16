@@ -1,6 +1,9 @@
 """Tests for PipelineContext."""
 
-from dotfiles_pipeline import PipelineContext
+import copy
+
+from dotfiles_pipeline import PipelineContext, PipelineStep
+from dotfiles_pipeline.core.types import ProgressTracker
 
 
 class TestPipelineContext:
@@ -232,3 +235,138 @@ class TestPipelineContext:
         # Assert
         assert context.app_config.value == "test"
         assert isinstance(context.app_config, SpecificConfig)
+
+
+class TestPipelineContextDeepCopy:
+    """Test PipelineContext deep copy functionality."""
+
+    def test_deepcopy_basic_context(self, mock_app_config, mock_logger):
+        """Test that context can be deep copied."""
+        # Arrange
+        context = PipelineContext(
+            app_config=mock_app_config,
+            logger_instance=mock_logger,
+        )
+        context.results["key1"] = "value1"
+        context.errors.append(RuntimeError("test"))
+
+        # Act
+        context_copy = copy.deepcopy(context)
+
+        # Assert
+        assert context_copy is not context
+        assert context_copy.results is not context.results
+        assert context_copy.errors is not context.errors
+        assert context_copy.results == context.results
+        assert len(context_copy.errors) == len(context.errors)
+
+    def test_deepcopy_with_progress_tracker(
+        self, mock_app_config, mock_logger
+    ):
+        """Test progress tracker is shared (not copied) during deepcopy."""
+
+        class DummyStep(PipelineStep):
+            @property
+            def step_id(self) -> str:
+                return "dummy"
+
+            @property
+            def description(self) -> str:
+                return "Dummy step"
+
+            def run(self, context):
+                return context
+
+        # Arrange
+        steps = [DummyStep()]
+        tracker = ProgressTracker(steps)
+
+        context = PipelineContext(
+            app_config=mock_app_config,
+            logger_instance=mock_logger,
+        )
+        context._progress_tracker = tracker
+        context._current_step_id = "dummy"
+
+        # Act
+        context_copy = copy.deepcopy(context)
+
+        # Assert - progress tracker should be the SAME instance (shared)
+        assert context_copy._progress_tracker is context._progress_tracker
+        assert context_copy._current_step_id == context._current_step_id
+
+    def test_deepcopy_progress_tracker_updates_shared(
+        self, mock_app_config, mock_logger
+    ):
+        """Test updates to progress tracker are visible in both contexts."""
+
+        class DummyStep(PipelineStep):
+            @property
+            def step_id(self) -> str:
+                return "dummy"
+
+            @property
+            def description(self) -> str:
+                return "Dummy step"
+
+            def run(self, context):
+                return context
+
+        # Arrange
+        steps = [DummyStep()]
+        tracker = ProgressTracker(steps)
+
+        context = PipelineContext(
+            app_config=mock_app_config,
+            logger_instance=mock_logger,
+        )
+        context._progress_tracker = tracker
+        context._current_step_id = "dummy"
+
+        # Act
+        context_copy = copy.deepcopy(context)
+
+        # Update progress via original context
+        context._progress_tracker.update_step_progress("dummy", 50.0)
+
+        # Assert - change should be visible in both
+        assert context._progress_tracker.get_overall_progress() == 50.0
+        assert context_copy._progress_tracker.get_overall_progress() == 50.0
+
+    def test_deepcopy_results_isolation(self, mock_app_config, mock_logger):
+        """Test that results are isolated after deepcopy."""
+        # Arrange
+        context = PipelineContext(
+            app_config=mock_app_config,
+            logger_instance=mock_logger,
+        )
+        context.results["key1"] = "value1"
+
+        # Act
+        context_copy = copy.deepcopy(context)
+        context_copy.results["key2"] = "value2"
+
+        # Assert - changes to copy don't affect original
+        assert "key2" in context_copy.results
+        assert "key2" not in context.results
+        assert context.results == {"key1": "value1"}
+        assert context_copy.results == {"key1": "value1", "key2": "value2"}
+
+    def test_deepcopy_errors_isolation(self, mock_app_config, mock_logger):
+        """Test that errors are isolated after deepcopy."""
+        # Arrange
+        context = PipelineContext(
+            app_config=mock_app_config,
+            logger_instance=mock_logger,
+        )
+        context.errors.append(RuntimeError("error1"))
+
+        # Act
+        context_copy = copy.deepcopy(context)
+        context_copy.errors.append(ValueError("error2"))
+
+        # Assert - changes to copy don't affect original
+        assert len(context.errors) == 1
+        assert len(context_copy.errors) == 2
+        assert isinstance(context.errors[0], RuntimeError)
+        assert isinstance(context_copy.errors[1], ValueError)
