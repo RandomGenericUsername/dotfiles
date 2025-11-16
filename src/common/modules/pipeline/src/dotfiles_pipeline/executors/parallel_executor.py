@@ -8,6 +8,7 @@ from ..core.types import (
     ParallelConfig,
     PipelineContext,
     PipelineStep,
+    ProgressTracker,
 )
 from .task_executor import TaskExecutor
 
@@ -30,6 +31,7 @@ class ParallelTaskExecutor:
         steps: list[PipelineStep],
         context: PipelineContext,
         config: ParallelConfig,
+        progress_tracker: "ProgressTracker | None" = None,
     ) -> PipelineContext:
         """
         Execute a group of steps in parallel with context merging.
@@ -38,6 +40,7 @@ class ParallelTaskExecutor:
             steps: List of pipeline steps to execute in parallel
             context: Pipeline context
             config: Parallel execution configuration
+            progress_tracker: Optional progress tracker for granular progress
 
         Returns:
             PipelineContext: Merged context from all parallel executions
@@ -50,14 +53,20 @@ class ParallelTaskExecutor:
 
         with ThreadPoolExecutor(max_workers=config.max_workers) as executor:
             # Submit all steps with deep copies of context
-            futures = [
-                executor.submit(
-                    self.task_executor.execute,
-                    step,
-                    copy.deepcopy(original_context),
+            futures = []
+            for step in steps:
+                step_context = copy.deepcopy(original_context)
+                # Set current step ID for this parallel branch
+                step_context._current_step_id = step.step_id
+                step_context._progress_tracker = progress_tracker
+
+                futures.append(
+                    executor.submit(
+                        self.task_executor.execute,
+                        step,
+                        step_context,
+                    )
                 )
-                for step in steps
-            ]
 
             # Collect results
             step_contexts = []
