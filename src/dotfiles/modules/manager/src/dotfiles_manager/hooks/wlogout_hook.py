@@ -43,6 +43,13 @@ class WlogoutIconsHook(Hook):
             HookResult: Result of hook execution
         """
         try:
+            # Skip if colorscheme was not generated
+            if not context.colorscheme_generated:
+                return HookResult(
+                    success=True,
+                    message="Skipped (no colorscheme generated)",
+                )
+
             # Get colorscheme color key from config
             color_key = context.config.get("colorscheme_color_key", "color15")
 
