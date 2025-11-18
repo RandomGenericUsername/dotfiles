@@ -220,7 +220,7 @@ class WallpaperOrchestrator:
         return successful, failed
 
     def generate_all_variants(
-        self, input_path: Path, output_dir: Path
+        self, input_path: Path, output_dir: Path, progress_callback=None
     ) -> dict[str, Path]:
         """Generate all effect variants for an input image.
 
@@ -231,6 +231,7 @@ class WallpaperOrchestrator:
         Args:
             input_path: Path to input image
             output_dir: Base output directory
+            progress_callback: Optional callback(percent: float) for progress updates
 
         Returns:
             Dict mapping effect names to output paths
@@ -268,10 +269,16 @@ class WallpaperOrchestrator:
         from wallpaper_processor.factory import EffectFactory
 
         effects = EffectFactory.get_all_effect_names()
+        total_effects = len(effects)
 
         # Generate variant for each effect
         results = {}
-        for effect_name in effects:
+        for i, effect_name in enumerate(effects):
+            # Report progress before processing this effect
+            if progress_callback:
+                progress = (i / total_effects) * 100
+                progress_callback(progress)
+
             # Determine output extension (use PNG for consistency)
             output_path = variant_dir / f"{effect_name}.png"
 
@@ -285,6 +292,11 @@ class WallpaperOrchestrator:
 
             if success:
                 results[effect_name] = output_path
+
+            # Report progress after processing this effect
+            if progress_callback:
+                progress = ((i + 1) / total_effects) * 100
+                progress_callback(progress)
 
         return results
 

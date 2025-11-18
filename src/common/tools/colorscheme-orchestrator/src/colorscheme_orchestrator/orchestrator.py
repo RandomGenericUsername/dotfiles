@@ -111,6 +111,7 @@ class ColorSchemeOrchestrator:
         color_count: int | None = None,
         rebuild: bool = False,
         keep_container: bool = False,
+        progress_callback=None,
         **backend_options,
     ) -> dict[str, Path]:
         """Generate colorscheme using specified backend.
@@ -123,6 +124,7 @@ class ColorSchemeOrchestrator:
             color_count: Number of colors (uses default if None)
             rebuild: Force rebuild container image
             keep_container: Don't remove container after completion
+            progress_callback: Optional callback(percent: float) for progress updates
             **backend_options: Backend-specific options
 
         Returns:
@@ -164,7 +166,11 @@ class ColorSchemeOrchestrator:
         print(f"Colors:       {color_count}")
         print(f"{'=' * 60}\n")
 
-        # Step 1: Ensure backend image exists
+        # Report initial progress
+        if progress_callback:
+            progress_callback(0.0)
+
+        # Step 1: Ensure backend image exists (0-30%)
         metadata = self.registry.get(backend)
         if rebuild or not self.builder.image_exists(
             metadata.image_name, metadata.image_tag
@@ -172,8 +178,14 @@ class ColorSchemeOrchestrator:
             print(f"\n→ Building container image for '{backend}'...")
             self.builder.build_backend_image(backend, rebuild=rebuild)
 
-        # Step 2: Run backend container
+        if progress_callback:
+            progress_callback(30.0)
+
+        # Step 2: Run backend container (30-100%)
         print(f"\n→ Running '{backend}' backend...")
+        if progress_callback:
+            progress_callback(50.0)
+
         output_files = self.runner.run_backend(
             backend=backend,
             image_path=image_path,
@@ -183,6 +195,9 @@ class ColorSchemeOrchestrator:
             backend_options=backend_options,
             keep_container=keep_container,
         )
+
+        if progress_callback:
+            progress_callback(100.0)
 
         print(f"\n{'=' * 60}")
         print("✓ Colorscheme Generation Complete")
