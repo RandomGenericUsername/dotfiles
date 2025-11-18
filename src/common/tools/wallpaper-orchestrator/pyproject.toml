@@ -17,6 +17,7 @@ dependencies = [
     "dotfiles-logging",
     "dotfiles-container-manager",
     "dotfiles-state-manager",
+    "dotfiles-socket",
 ]
 
 [project.scripts]
@@ -52,6 +53,7 @@ dotfiles-pipeline = { path = "../../modules/pipeline", editable = true }
 dotfiles-logging = { path = "../../modules/logging", editable = true }
 dotfiles-container-manager = { path = "../../modules/container-manager", editable = true }
 dotfiles-state-manager = { path = "../../modules/state-manager", editable = true }
+dotfiles-socket = { path = "../../modules/socket", editable = true }
 
 [tool.black]
 line-length = 79
@@ -121,7 +123,7 @@ strict_equality = true
 show_error_codes = true
 
 [[tool.mypy.overrides]]
-module = ["typer.*", "rich.*", "dynaconf.*", "colorscheme_orchestrator.*", "wallpaper_effects_orchestrator.*", "hyprpaper_manager.*", "wallpaper_processor.*", "dotfiles_pipeline.*", "dotfiles_logging.*", "dotfiles_state_manager.*"]
+module = ["typer.*", "rich.*", "dynaconf.*", "colorscheme_orchestrator.*", "wallpaper_effects_orchestrator.*", "hyprpaper_manager.*", "wallpaper_processor.*", "dotfiles_pipeline.*", "dotfiles_logging.*", "dotfiles_state_manager.*", "dotfiles_socket.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
