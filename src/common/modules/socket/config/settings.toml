@@ -1,0 +1,49 @@
+[socket]
+# Generic socket settings (all implementations)
+
+# Directory for Unix domain socket files
+socket_dir = "/tmp/sockets"
+
+# Default timeout for socket operations (seconds)
+default_timeout = 5
+
+# Buffer size for socket I/O (bytes)
+buffer_size = 4096
+
+# Timezone for timestamp_iso formatting (e.g., "UTC", "America/New_York")
+timezone = "UTC"
+
+# Maximum number of messages to queue when no clients are connected
+message_queue_size = 100
+
+# Server threading mode: false = non-blocking (separate thread), true = blocking
+blocking_mode = false
+
+# Allow clients to send messages back to server
+allow_client_send = true
+
+[socket.unix]
+# Unix domain socket specific settings
+
+# Maximum number of concurrent client connections
+max_connections = 10
+
+# File permissions for socket file (octal string, e.g., "0600" = owner only)
+socket_permissions = "0600"
+
+# Automatically remove socket file when server stops
+auto_remove_socket = true
+
+[socket.tcp]
+# TCP socket specific settings
+
+# Host to bind TCP server to (use "127.0.0.1" for localhost only)
+host = "127.0.0.1"
+
+# Port range for auto-assignment
+port_range_start = 9000
+port_range_end = 9100
+
+# Maximum number of concurrent client connections
+max_connections = 10
+
