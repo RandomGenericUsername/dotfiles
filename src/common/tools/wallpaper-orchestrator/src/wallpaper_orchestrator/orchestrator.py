@@ -251,13 +251,25 @@ class WallpaperOrchestrator:
             step_index: int, total_steps: int, step_name: str, progress: float
         ) -> None:
             """Send progress updates via socket."""
+            # Map internal step names to user-friendly names
+            step_name_map = {
+                "parallel_group_0": "Processing colorscheme & effects",
+                "generate_colorscheme": "Generating colorscheme",
+                "generate_effects": "Creating effect variants",
+                "set_wallpaper": "Setting wallpaper",
+            }
+
+            # Use mapped name if available, otherwise use original
+            display_name = step_name_map.get(step_name, step_name)
+
             self.socket_manager.send_progress(
-                step_name=step_name,
+                step_name=display_name,
                 progress_percent=progress,
                 status="processing",
                 extra_data={
                     "step_index": step_index,
                     "total_steps": total_steps,
+                    "wallpaper_path": str(wallpaper_path),
                 },
             )
             # Also call user-provided callback if present
@@ -291,9 +303,10 @@ class WallpaperOrchestrator:
                     self.logger.info("=" * 60)
                     # Send completion message
                     self.socket_manager.send_progress(
-                        step_name="complete",
+                        step_name="Wallpaper changed successfully",
                         progress_percent=100.0,
-                        status="complete",
+                        status="completed",
+                        extra_data={"wallpaper_path": str(wallpaper_path)},
                     )
 
             except Exception as e:
