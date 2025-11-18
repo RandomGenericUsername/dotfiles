@@ -1,0 +1,26 @@
+Integrate the socket module into the wallpaper orchestrator tool to enable real-time progress updates during wallpaper changes.
+
+CRITICAL INSTRUCTIONS:
+
+1. FIRST, read and understand these documents IN ORDER:
+   - src/common/modules/socket/docs/WALLPAPER_ORCHESTRATOR_INTEGRATION.md (COMPLETE integration guide with working code)
+   - src/common/modules/socket/docs/AI_INTEGRATION_PROMPT.md (Detailed requirements and checklist)
+   - src/common/modules/socket/README.md (Socket module API reference)
+
+2. FOLLOW the integration guide EXACTLY - it contains complete, tested code examples.
+
+3. CREATE/MODIFY these files only:
+   - CREATE: src/common/tools/wallpaper-orchestrator/src/dotfiles_wallpaper_orchestrator/socket_manager.py
+   - MODIFY: src/common/tools/wallpaper-orchestrator/src/dotfiles_wallpaper_orchestrator/orchestrator.py
+   - MODIFY: src/common/tools/wallpaper-orchestrator/src/dotfiles_wallpaper_orchestrator/cli.py
+   - MODIFY: src/common/tools/wallpaper-orchestrator/pyproject.toml
+
+4. DO NOT modify the socket module itself - it's complete and tested.
+
+5. VERIFY your implementation:
+   - Run: make format && make lint && make type-check
+   - Test with actual wallpaper change + client connection
+   - Ensure all quality checks pass
+
+The integration guide contains complete working code. Read it carefully and follow it exactly.
+
