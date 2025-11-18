@@ -42,6 +42,7 @@ class WallpaperOrchestrator:
         progress_callback: (
             Callable[[int, int, str, float], None] | None
         ) = None,
+        socket_dir: str | Path | None = None,
     ):
         """Initialize orchestrator.
 
@@ -51,10 +52,20 @@ class WallpaperOrchestrator:
             progress_callback: Optional callback for progress updates.
                 Signature: (step_index, total_steps, step_name,
                 progress_percent)
+            socket_dir: Directory for socket file (optional)
         """
         self.config = config or load_settings()
         self._progress_callback = progress_callback
         self._pipeline: Pipeline | None = None
+
+        # Initialize socket manager for real-time progress updates
+        from wallpaper_orchestrator.socket_manager import (
+            WallpaperProgressSocketManager,
+        )
+
+        self.socket_manager = WallpaperProgressSocketManager(
+            socket_dir=socket_dir
+        )
 
         # Create logger if not provided
         if logger is None:
@@ -235,36 +246,67 @@ class WallpaperOrchestrator:
         # Always add wallpaper setting step
         steps.append(SetWallpaperStep())
 
-        # Create and run pipeline with progress callback
+        # Create progress callback that sends updates via socket
+        def socket_progress_callback(
+            step_index: int, total_steps: int, step_name: str, progress: float
+        ) -> None:
+            """Send progress updates via socket."""
+            self.socket_manager.send_progress(
+                step_name=step_name,
+                progress_percent=progress,
+                status="processing",
+                extra_data={
+                    "step_index": step_index,
+                    "total_steps": total_steps,
+                },
+            )
+            # Also call user-provided callback if present
+            if self._progress_callback:
+                self._progress_callback(
+                    step_index, total_steps, step_name, progress
+                )
+
+        # Create and run pipeline with socket-enabled progress callback
         self._pipeline = Pipeline(
-            steps, pipeline_config, self._progress_callback
+            steps, pipeline_config, socket_progress_callback
         )
 
-        try:
-            final_context = self._pipeline.run(context)
+        # Start socket server and run pipeline
+        with self.socket_manager:
+            try:
+                final_context = self._pipeline.run(context)
 
-            # Check for errors
-            if final_context.errors:
+                # Check for errors
+                if final_context.errors:
+                    result.success = False
+                    error_count = len(final_context.errors)
+                    error_msg = f"Pipeline completed with {error_count} errors"
+                    self.logger.error(error_msg)
+                    # Send error via socket
+                    self.socket_manager.send_error(error_msg)
+                else:
+                    result.success = True
+                    self.logger.info("=" * 60)
+                    self.logger.info("✓ Wallpaper Orchestration Complete")
+                    self.logger.info("=" * 60)
+                    # Send completion message
+                    self.socket_manager.send_progress(
+                        step_name="complete",
+                        progress_percent=100.0,
+                        status="complete",
+                    )
+
+            except Exception as e:
                 result.success = False
-                error_count = len(final_context.errors)
-                self.logger.error(
-                    f"Pipeline completed with {error_count} errors"
-                )
-            else:
-                result.success = True
-                self.logger.info("=" * 60)
-                self.logger.info("✓ Wallpaper Orchestration Complete")
-                self.logger.info("=" * 60)
-
-        except Exception as e:
-            result.success = False
-            error_msg = f"Pipeline failed: {e}"
-            result.errors.append(error_msg)
-            self.logger.error(error_msg)
-            raise
-        finally:
-            # Clear pipeline reference after execution
-            self._pipeline = None
+                error_msg = f"Pipeline failed: {e}"
+                result.errors.append(error_msg)
+                self.logger.error(error_msg)
+                # Send error via socket
+                self.socket_manager.send_error(error_msg)
+                raise
+            finally:
+                # Clear pipeline reference after execution
+                self._pipeline = None
 
         return result
 
