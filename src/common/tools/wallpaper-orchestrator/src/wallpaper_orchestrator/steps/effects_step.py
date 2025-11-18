@@ -106,6 +106,9 @@ class GenerateEffectsStep(PipelineStep):
         # Create orchestrator
         orchestrator = EffectsOrchestrator(effects_config)
 
+        # Report initial progress
+        context.update_step_progress(0.0)
+
         try:
             # Ensure output directory exists
             result.effects_output_dir.mkdir(parents=True, exist_ok=True)
@@ -122,6 +125,7 @@ class GenerateEffectsStep(PipelineStep):
             effect_variants = orchestrator.generate_all_variants(
                 input_path=result.original_wallpaper,
                 output_dir=result.effects_output_dir,
+                progress_callback=context.update_step_progress,
             )
 
             # Mark as cached (if cache manager available)

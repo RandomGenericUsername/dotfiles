@@ -107,6 +107,9 @@ class GenerateColorSchemeStep(PipelineStep):
         # Create orchestrator with default config
         orchestrator = ColorSchemeOrchestrator()
 
+        # Report initial progress
+        context.update_step_progress(0.0)
+
         try:
             # Determine output directory:
             # - If caching enabled: generate directly to per-wallpaper cache
@@ -141,6 +144,7 @@ class GenerateColorSchemeStep(PipelineStep):
                 color_count=config.colorscheme.color_count,
                 rebuild=False,
                 keep_container=False,
+                progress_callback=context.update_step_progress,
             )
 
             # If caching enabled, activate the colorscheme and mark as cached
