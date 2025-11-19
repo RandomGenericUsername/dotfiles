@@ -1547,12 +1547,13 @@ def install_component(
         if run_makefile_install:
             import subprocess
 
-            # Determine which make target to use based on rebuild_containers setting
+            # Determine which make target to use
+            # Only tools support rebuild-containers; modules always use install
             rebuild_containers = (
                 context.app_config.cli_settings.rebuild_containers
             )
 
-            if rebuild_containers:
+            if rebuild_containers and component == "tool":
                 make_target = "rebuild-containers"
                 logger.info(
                     f"Running 'make {make_target}' for {component} '{name}' "
