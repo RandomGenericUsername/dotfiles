@@ -5,6 +5,8 @@ description = "Generic manager module for dotfiles components"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "dotfiles-daemon",
+    "dotfiles-event-protocol",
     "dotfiles-logging",
     "dotfiles-pipeline",
     "dotfiles-state-manager",
@@ -43,6 +45,8 @@ packages = ["src/dotfiles_manager"]
 allow-direct-references = true
 
 [tool.uv.sources]
+dotfiles-daemon = { path = "../../../common/modules/daemon", editable = true }
+dotfiles-event-protocol = { path = "../../../common/modules/event-protocol", editable = true }
 dotfiles-logging = { path = "../../../common/modules/logging", editable = true }
 dotfiles-pipeline = { path = "../../../common/modules/pipeline", editable = true }
 dotfiles-state-manager = { path = "../../../common/modules/state-manager", editable = true }

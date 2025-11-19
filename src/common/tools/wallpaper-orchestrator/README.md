@@ -246,10 +246,6 @@ wallpaper-orchestrator/
 │       │   ├── colorscheme_step.py
 │       │   ├── effects_step.py
 │       │   └── wallpaper_step.py
-│       ├── integrations/          # External integrations
-│       │   ├── __init__.py
-│       │   ├── socket_manager.py  # WebSocket progress reporting
-│       │   └── notifier.py        # Progress notifier
 │       ├── utils/                 # Utility functions
 │       │   ├── __init__.py
 │       │   └── terminal.py        # Terminal sequences
@@ -264,7 +260,6 @@ wallpaper-orchestrator/
 **Directory Structure:**
 - **core/** - Core business logic (orchestrator, cache, types)
 - **pipeline/** - Processing steps (colorscheme, effects, wallpaper)
-- **integrations/** - External integrations (sockets, notifications)
 - **utils/** - Utility functions (terminal operations)
 - **config/** - Configuration management
 

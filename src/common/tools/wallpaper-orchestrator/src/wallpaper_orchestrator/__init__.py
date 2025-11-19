@@ -16,7 +16,6 @@ from wallpaper_orchestrator.core import (
     WallpaperOrchestrator,
 )
 from wallpaper_orchestrator.core.types import WallpaperResult
-from wallpaper_orchestrator.integrations import WallpaperProgressSocketManager
 from wallpaper_orchestrator.pipeline import (
     GenerateColorSchemeStep,
     GenerateEffectsStep,
@@ -32,8 +31,6 @@ __all__ = [
     "WallpaperResult",
     # Cache manager
     "WallpaperCacheManager",
-    # Socket manager
-    "WallpaperProgressSocketManager",
     # Pipeline steps
     "GenerateColorSchemeStep",
     "GenerateEffectsStep",

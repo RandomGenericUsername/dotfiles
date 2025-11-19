@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from dotfiles_daemon import DaemonPublisher
 from wallpaper_orchestrator import WallpaperOrchestrator
 
 from dotfiles_manager.hooks.registry import HookRegistry
@@ -37,6 +38,8 @@ class WallpaperService:
         self._wallpaper_state_repo = wallpaper_state_repo
         self._system_attributes_repo = system_attributes_repo
         self._hook_registry = hook_registry
+        self._publisher = DaemonPublisher()
+        self._operation_id: str | None = None
 
     def change_wallpaper(
         self,
@@ -58,52 +61,109 @@ class WallpaperService:
         Returns:
             Dict with results
         """
-        # Check if cached
-        from_cache = self._wallpaper_state_repo.is_wallpaper_cached(
-            wallpaper_path
-        )
+        # Generate operation ID
+        operation_id = str(uuid4())
 
-        # Process wallpaper (generates effects and colorscheme)
-        result = self._orchestrator.process(
-            wallpaper_path=wallpaper_path,
-            monitor=monitor,
-            force_rebuild=force_rebuild,
-            generate_colorscheme=generate_colorscheme,
-            generate_effects=generate_effects,
-        )
+        # Connect to daemon (non-blocking)
+        try:
+            asyncio.run(self._connect_publisher())
+        except Exception:
+            # Silently ignore connection errors (graceful degradation)
+            pass
 
-        # Update system state
-        self._wallpaper_state_repo.set_current_wallpaper(
-            wallpaper_path=wallpaper_path,
-            monitor=monitor,
-            from_cache=from_cache,
-        )
-
-        # Get system attributes for hooks
-        system_attrs = self._system_attributes_repo.get_attributes()
-
-        # Execute hooks
-        hook_context = HookContext(
-            wallpaper_path=wallpaper_path,
-            colorscheme_files=result.colorscheme_files,
-            font_family=system_attrs.font_family,
-            font_size=system_attrs.font_size,
-            monitor=monitor,
-            from_cache=from_cache,
-            colorscheme_generated=result.colorscheme_generated,
-            effects_generated=result.effects_generated,
-            config={},
-        )
-
-        hook_results = self._hook_registry.execute_all(hook_context)
-
-        return {
-            "wallpaper_path": wallpaper_path,
-            "monitor": monitor,
-            "from_cache": from_cache,
-            "orchestrator_result": result,
-            "hook_results": hook_results,
+        # Publish operation started event
+        start_message = {
+            "message_id": str(uuid4()),
+            "timestamp": "",
+            "event_type": "wallpaper",
+            "payload": {
+                "type": "operation_started",
+                "operation_id": operation_id,
+                "wallpaper_path": str(wallpaper_path),
+                "monitor": monitor,
+            },
         }
+        self._publish_event_sync(start_message)
+
+        try:
+            # Check if cached
+            from_cache = self._wallpaper_state_repo.is_wallpaper_cached(
+                wallpaper_path
+            )
+
+            # Create progress callback
+            progress_callback = self._create_progress_callback(operation_id)
+
+            # Process wallpaper (generates effects and colorscheme)
+            result = self._orchestrator.process(
+                wallpaper_path=wallpaper_path,
+                monitor=monitor,
+                force_rebuild=force_rebuild,
+                generate_colorscheme=generate_colorscheme,
+                generate_effects=generate_effects,
+                progress_callback=progress_callback,
+            )
+
+            # Update system state
+            self._wallpaper_state_repo.set_current_wallpaper(
+                wallpaper_path=wallpaper_path,
+                monitor=monitor,
+                from_cache=from_cache,
+            )
+
+            # Get system attributes for hooks
+            system_attrs = self._system_attributes_repo.get_attributes()
+
+            # Execute hooks
+            hook_context = HookContext(
+                wallpaper_path=wallpaper_path,
+                colorscheme_files=result.colorscheme_files,
+                font_family=system_attrs.font_family,
+                font_size=system_attrs.font_size,
+                monitor=monitor,
+                from_cache=from_cache,
+                colorscheme_generated=result.colorscheme_generated,
+                effects_generated=result.effects_generated,
+                config={},
+            )
+
+            hook_results = self._hook_registry.execute_all(hook_context)
+
+            # Publish operation completed event
+            complete_message = {
+                "message_id": str(uuid4()),
+                "timestamp": "",
+                "event_type": "wallpaper",
+                "payload": {
+                    "type": "operation_completed",
+                    "operation_id": operation_id,
+                    "success": result.success,
+                },
+            }
+            self._publish_event_sync(complete_message)
+
+            return {
+                "wallpaper_path": wallpaper_path,
+                "monitor": monitor,
+                "from_cache": from_cache,
+                "orchestrator_result": result,
+                "hook_results": hook_results,
+            }
+
+        except Exception as e:
+            # Publish operation failed event
+            failed_message = {
+                "message_id": str(uuid4()),
+                "timestamp": "",
+                "event_type": "wallpaper",
+                "payload": {
+                    "type": "operation_failed",
+                    "operation_id": operation_id,
+                    "error": str(e),
+                },
+            }
+            self._publish_event_sync(failed_message)
+            raise
 
     def get_current_wallpaper(self, monitor: str) -> WallpaperState | None:
         """Get current wallpaper for a monitor.
@@ -134,3 +194,57 @@ class WallpaperService:
             List of cached wallpaper info
         """
         return self._wallpaper_state_repo.get_all_cached_wallpapers()
+
+    async def _connect_publisher(self) -> None:
+        """Connect to daemon publisher (non-blocking)."""
+        await self._publisher.connect(timeout=0.1)
+
+    def _publish_event_sync(self, message: dict) -> None:
+        """Publish event synchronously (fire-and-forget).
+
+        Args:
+            message: Message to publish
+        """
+        try:
+            asyncio.run(self._publisher.publish(message))
+        except Exception:
+            # Silently ignore publishing errors (graceful degradation)
+            pass
+
+    def _create_progress_callback(self, operation_id: str) -> callable:
+        """Create progress callback for pipeline.
+
+        Args:
+            operation_id: Unique operation identifier
+
+        Returns:
+            Progress callback function
+        """
+
+        def progress_callback(
+            step_index: int, total_steps: int, step_name: str, progress: float
+        ) -> None:
+            """Pipeline progress callback.
+
+            Args:
+                step_index: Current step index
+                total_steps: Total number of steps
+                step_name: Name of current step
+                progress: Overall progress percentage
+            """
+            # Create progress message
+            message = {
+                "message_id": str(uuid4()),
+                "timestamp": "",  # Will be set by MessageBuilder
+                "event_type": "wallpaper",
+                "payload": {
+                    "type": "operation_progress",
+                    "operation_id": operation_id,
+                    "step_id": step_name,
+                    "step_progress": (step_index + 1) / total_steps * 100,
+                    "overall_progress": progress,
+                },
+            }
+            self._publish_event_sync(message)
+
+        return progress_callback

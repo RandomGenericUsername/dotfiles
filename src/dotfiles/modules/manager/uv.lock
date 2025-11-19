@@ -260,6 +260,39 @@ dev = [
 ]
 
 [[package]]
+name = "dotfiles-daemon"
+version = "0.1.0"
+source = { editable = "../../../common/modules/daemon" }
+dependencies = [
+    { name = "dotfiles-event-protocol" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "dotfiles-event-protocol", editable = "../../../common/modules/event-protocol" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.21.0" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.0.0" },
+]
+provides-extras = ["dev"]
+
+[[package]]
+name = "dotfiles-event-protocol"
+version = "0.1.0"
+source = { editable = "../../../common/modules/event-protocol" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.0.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.0.0" },
+]
+provides-extras = ["dev"]
+
+[[package]]
 name = "dotfiles-logging"
 version = "0.1.0"
 source = { editable = "../../../common/modules/logging" }
@@ -286,6 +319,8 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "dependency-injector" },
+    { name = "dotfiles-daemon" },
+    { name = "dotfiles-event-protocol" },
     { name = "dotfiles-logging" },
     { name = "dotfiles-pipeline" },
     { name = "dotfiles-state-manager" },
@@ -313,6 +348,8 @@ dev = [
 requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=24.0.0" },
     { name = "dependency-injector", specifier = ">=4.41.0" },
+    { name = "dotfiles-daemon", editable = "../../../common/modules/daemon" },
+    { name = "dotfiles-event-protocol", editable = "../../../common/modules/event-protocol" },
     { name = "dotfiles-logging", editable = "../../../common/modules/logging" },
     { name = "dotfiles-pipeline", editable = "../../../common/modules/pipeline" },
     { name = "dotfiles-state-manager", editable = "../../../common/modules/state-manager" },

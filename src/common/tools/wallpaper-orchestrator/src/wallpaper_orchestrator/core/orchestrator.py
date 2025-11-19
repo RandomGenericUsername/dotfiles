@@ -43,7 +43,6 @@ class WallpaperOrchestrator:
         progress_callback: (
             Callable[[int, int, str, float], None] | None
         ) = None,
-        socket_dir: str | Path | None = None,
     ):
         """Initialize orchestrator.
 
@@ -53,31 +52,14 @@ class WallpaperOrchestrator:
             progress_callback: Optional callback for progress updates.
                 Signature: (step_index, total_steps, step_name,
                 progress_percent)
-            socket_dir: Directory for socket file (optional)
         """
         self.config = config or load_settings()
         self._progress_callback = progress_callback
         self._pipeline: Pipeline | None = None
 
         # Initialize components
-        self.socket_manager = self._create_socket_manager(socket_dir)
         self.logger = logger or self._create_logger()
         self.cache_manager = self._create_cache_manager()
-
-    def _create_socket_manager(self, socket_dir: str | Path | None) -> Any:
-        """Create socket manager for real-time progress updates.
-
-        Args:
-            socket_dir: Directory for socket file (optional)
-
-        Returns:
-            WallpaperProgressSocketManager instance
-        """
-        from wallpaper_orchestrator.integrations import (
-            WallpaperProgressSocketManager,
-        )
-
-        return WallpaperProgressSocketManager(socket_dir=socket_dir)
 
     def _create_logger(self) -> RichLogger:
         """Create logger with configuration from settings.
@@ -240,6 +222,9 @@ class WallpaperOrchestrator:
         force_rebuild: bool = False,
         generate_colorscheme: bool = True,
         generate_effects: bool = True,
+        progress_callback: (
+            Callable[[int, int, str, float], None] | None
+        ) = None,
     ) -> WallpaperResult:
         """Process wallpaper: generate effects, colorscheme, set wallpaper.
 
@@ -253,6 +238,9 @@ class WallpaperOrchestrator:
             generate_colorscheme: Whether to generate colorscheme
                 (default: True)
             generate_effects: Whether to generate effects (default: True)
+            progress_callback: Optional callback for progress updates.
+                Signature: (step_index, total_steps, step_name,
+                progress_percent)
 
         Returns:
             WallpaperResult: Complete result metadata with all paths
@@ -261,36 +249,45 @@ class WallpaperOrchestrator:
             FileNotFoundError: If wallpaper file doesn't exist
             Exception: If any pipeline step fails
         """
-        # Validate input
-        self._validate_wallpaper(wallpaper_path)
+        # Store progress callback for this operation
+        original_callback = self._progress_callback
+        if progress_callback is not None:
+            self._progress_callback = progress_callback
 
-        # Resolve configuration
-        effects_output_dir, colorscheme_output_dir = (
-            self._resolve_output_directories(
-                effects_output_dir, colorscheme_output_dir
+        try:
+            # Validate input
+            self._validate_wallpaper(wallpaper_path)
+
+            # Resolve configuration
+            effects_output_dir, colorscheme_output_dir = (
+                self._resolve_output_directories(
+                    effects_output_dir, colorscheme_output_dir
+                )
             )
-        )
-        self._apply_monitor_override(monitor)
+            self._apply_monitor_override(monitor)
 
-        # Log start
-        self._log_orchestration_start(
-            wallpaper_path, effects_output_dir, colorscheme_output_dir
-        )
+            # Log start
+            self._log_orchestration_start(
+                wallpaper_path, effects_output_dir, colorscheme_output_dir
+            )
 
-        # Create result and context
-        result = self._create_result_object(
-            wallpaper_path, effects_output_dir, colorscheme_output_dir
-        )
-        context = self._create_pipeline_context(result, wallpaper_path)
+            # Create result and context
+            result = self._create_result_object(
+                wallpaper_path, effects_output_dir, colorscheme_output_dir
+            )
+            context = self._create_pipeline_context(result, wallpaper_path)
 
-        # Build and execute pipeline
-        steps = self._build_pipeline_steps(
-            generate_colorscheme, generate_effects, force_rebuild
-        )
-        pipeline = self._create_pipeline(steps, wallpaper_path)
+            # Build and execute pipeline
+            steps = self._build_pipeline_steps(
+                generate_colorscheme, generate_effects, force_rebuild
+            )
+            pipeline = self._create_pipeline(steps, wallpaper_path)
 
-        # Execute with socket management
-        return self._execute_pipeline(pipeline, context, result)
+            # Execute pipeline
+            return self._execute_pipeline(pipeline, context, result)
+        finally:
+            # Restore original callback
+            self._progress_callback = original_callback
 
     def _create_result_object(
         self,
@@ -420,7 +417,7 @@ class WallpaperOrchestrator:
     def _create_progress_callback(
         self, wallpaper_path: Path
     ) -> Callable[[int, int, str, float], None]:
-        """Create progress callback that sends updates via socket.
+        """Create progress callback that calls user-provided callback.
 
         Args:
             wallpaper_path: Path to wallpaper being processed
@@ -429,37 +426,17 @@ class WallpaperOrchestrator:
             Progress callback function
         """
 
-        def socket_progress_callback(
+        def progress_callback_wrapper(
             step_index: int, total_steps: int, step_name: str, progress: float
         ) -> None:
-            """Send progress updates via socket."""
-            display_name = self._map_step_name_to_display_name(step_name)
-
-            # Get step-level progress details from pipeline's progress tracker
-            step_details = None
-            if hasattr(self, "_pipeline") and self._pipeline:
-                tracker = getattr(self._pipeline, "_progress_tracker", None)
-                if tracker:
-                    step_details = tracker.get_step_details()
-
-            self.socket_manager.send_progress(
-                step_name=display_name,
-                progress_percent=progress,
-                status="processing",
-                extra_data={
-                    "step_index": step_index,
-                    "total_steps": total_steps,
-                    "wallpaper_path": str(wallpaper_path),
-                    "step_details": step_details,
-                },
-            )
-            # Also call user-provided callback if present
+            """Call user-provided progress callback if present."""
+            # Call user-provided callback if present
             if self._progress_callback:
                 self._progress_callback(
                     step_index, total_steps, step_name, progress
                 )
 
-        return socket_progress_callback
+        return progress_callback_wrapper
 
     def _create_pipeline(self, steps: list, wallpaper_path: Path) -> Pipeline:
         """Create pipeline with steps and progress callback.
@@ -484,7 +461,7 @@ class WallpaperOrchestrator:
         context: PipelineContext,
         result: WallpaperResult,
     ) -> WallpaperResult:
-        """Execute pipeline with socket management and error handling.
+        """Execute pipeline with error handling.
 
         Args:
             pipeline: Pipeline to execute
@@ -499,25 +476,23 @@ class WallpaperOrchestrator:
         """
         self._pipeline = pipeline
 
-        # Start socket server and run pipeline
-        with self.socket_manager:
-            try:
-                final_context = self._pipeline.run(context)
+        try:
+            final_context = self._pipeline.run(context)
 
-                # Check for errors
-                if final_context.errors:
-                    self._handle_pipeline_errors(result, final_context)
-                else:
-                    self._handle_pipeline_success(
-                        result, result.original_wallpaper
-                    )
+            # Check for errors
+            if final_context.errors:
+                self._handle_pipeline_errors(result, final_context)
+            else:
+                self._handle_pipeline_success(
+                    result, result.original_wallpaper
+                )
 
-            except Exception as e:
-                self._handle_pipeline_exception(result, e)
-                raise
-            finally:
-                # Clear pipeline reference after execution
-                self._pipeline = None
+        except Exception as e:
+            self._handle_pipeline_exception(result, e)
+            raise
+        finally:
+            # Clear pipeline reference after execution
+            self._pipeline = None
 
         return result
 
@@ -534,7 +509,6 @@ class WallpaperOrchestrator:
         error_count = len(context.errors)
         error_msg = f"Pipeline completed with {error_count} errors"
         self.logger.error(error_msg)
-        self.socket_manager.send_error(error_msg)
 
     def _handle_pipeline_success(
         self, result: WallpaperResult, wallpaper_path: Path
@@ -550,14 +524,6 @@ class WallpaperOrchestrator:
         self.logger.info("✓ Wallpaper Orchestration Complete")
         self.logger.info("=" * 60)
 
-        # Send completion message
-        self.socket_manager.send_progress(
-            step_name="Wallpaper changed successfully",
-            progress_percent=100.0,
-            status="completed",
-            extra_data={"wallpaper_path": str(wallpaper_path)},
-        )
-
     def _handle_pipeline_exception(
         self, result: WallpaperResult, exception: Exception
     ) -> None:
@@ -571,7 +537,6 @@ class WallpaperOrchestrator:
         error_msg = f"Pipeline failed: {exception}"
         result.errors.append(error_msg)
         self.logger.error(error_msg)
-        self.socket_manager.send_error(error_msg)
 
     def process_batch(
         self,

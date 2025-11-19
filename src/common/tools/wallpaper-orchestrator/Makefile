@@ -3,7 +3,7 @@ MAKEFLAGS += --no-print-directory
 # Standard Makefile for wallpaper-orchestrator
 # Provides consistent development workflows
 
-.PHONY: help sync-check ensure-sync dev-shell format lint type-check test test-cov clean clean-venv install install-service enable-service disable-service build build-containers rebuild-containers pre-commit-install pre-commit-run all-checks
+.PHONY: help sync-check ensure-sync dev-shell format lint type-check test test-cov clean clean-venv install build build-containers rebuild-containers pre-commit-install pre-commit-run all-checks
 
 help: ## Show this help message
 	@echo "Available commands:"
@@ -86,27 +86,6 @@ install: ## Install project in editable mode and build containers
 	@cd ../colorscheme-orchestrator && .venv/bin/python -m colorscheme_orchestrator.cli build --all
 	@echo "✅ All containers built successfully"
 	@echo "✅ Installation complete"
-
-install-service: ## Install systemd user service for wallpaper notifier
-	@echo "Installing wallpaper-notifier systemd service..."
-	@mkdir -p ~/.config/systemd/user
-	@cp wallpaper-notifier.service ~/.config/systemd/user/
-	@systemctl --user daemon-reload
-	@echo "✅ Service installed"
-	@echo "Run 'make enable-service' to enable and start the service"
-
-enable-service: ## Enable and start the wallpaper notifier service
-	@echo "Enabling and starting wallpaper-notifier service..."
-	@systemctl --user enable wallpaper-notifier.service
-	@systemctl --user start wallpaper-notifier.service
-	@systemctl --user status wallpaper-notifier.service --no-pager
-	@echo "✅ Service enabled and started"
-
-disable-service: ## Disable and stop the wallpaper notifier service
-	@echo "Disabling and stopping wallpaper-notifier service..."
-	@systemctl --user stop wallpaper-notifier.service
-	@systemctl --user disable wallpaper-notifier.service
-	@echo "✅ Service disabled and stopped"
 
 build: ensure-sync ## Build the package
 	@echo "Building package..."

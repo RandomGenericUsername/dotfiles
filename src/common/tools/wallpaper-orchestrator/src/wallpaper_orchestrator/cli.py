@@ -83,11 +83,6 @@ def process(
         "--effects/--no-effects",
         help="Generate effect variants (default: enabled)",
     ),
-    socket_dir: Path | None = typer.Option(
-        None,
-        "--socket-dir",
-        help="Directory for socket file (optional)",
-    ),
 ) -> None:
     """Process wallpaper: generate effects, color scheme, and set wallpaper.
 
@@ -129,9 +124,7 @@ def process(
             config.cache.enabled = False
 
         # Create orchestrator
-        orchestrator = WallpaperOrchestrator(
-            config=config, socket_dir=socket_dir
-        )
+        orchestrator = WallpaperOrchestrator(config=config)
 
         # Process wallpaper
         console.print(
@@ -269,11 +262,6 @@ def batch(
         "--effects/--no-effects",
         help="Generate effect variants (default: enabled)",
     ),
-    socket_dir: Path | None = typer.Option(
-        None,
-        "--socket-dir",
-        help="Directory for socket file (optional)",
-    ),
 ) -> None:
     """Process multiple wallpapers in batch.
 
@@ -300,9 +288,7 @@ def batch(
             config.cache.enabled = False
 
         # Create orchestrator
-        orchestrator = WallpaperOrchestrator(
-            config=config, socket_dir=socket_dir
-        )
+        orchestrator = WallpaperOrchestrator(config=config)
 
         # Process batch
         console.print(
