@@ -1,0 +1,16 @@
+[Unit]
+Description=Dotfiles Event Daemon
+Documentation=https://github.com/yourusername/dotfiles
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart={{DAEMON_VENV_PYTHON}} -m dotfiles_daemon
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
+

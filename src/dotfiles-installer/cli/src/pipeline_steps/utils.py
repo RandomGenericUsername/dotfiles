@@ -1768,3 +1768,116 @@ def configure_dotfiles_manager(
         context.results["dotfiles_manager_configured"] = False
 
     return context
+
+
+def start_daemon_service(context: PipelineContext) -> PipelineContext:
+    """Install and start dotfiles-daemon systemd service.
+
+    This function:
+    1. Copies systemd service template to ~/.config/systemd/user/
+    2. Replaces template variables with actual paths
+    3. Reloads systemd user daemon
+    4. Enables the service to start on login
+    5. Starts the service immediately
+
+    Args:
+        context: Pipeline context
+
+    Returns:
+        Updated pipeline context with service installation results
+    """
+    import subprocess
+
+    logger: RichLogger = context.logger_instance
+    logger.debug("Installing dotfiles-daemon systemd service")
+
+    try:
+        # Get paths
+        install_root = context.app_config.project.paths.install["_root"]
+        daemon_module_path = (
+            context.app_config.project.paths.install["dependencies_modules"]
+            / "daemon"
+        )
+        daemon_venv_python = daemon_module_path / ".venv" / "bin" / "python"
+
+        # Systemd user service directory
+        systemd_user_dir = Path.home() / ".config" / "systemd" / "user"
+        systemd_user_dir.mkdir(parents=True, exist_ok=True)
+
+        # Service template and destination
+        template_path = (
+            context.app_config.project.paths.source["_root"]
+            / "src"
+            / "dotfiles"
+            / "runtime"
+            / "systemd"
+            / "dotfiles-daemon.service.template"
+        )
+        service_path = systemd_user_dir / "dotfiles-daemon.service"
+
+        # Read template
+        logger.debug(f"Reading service template from {template_path}")
+        template_content = template_path.read_text()
+
+        # Replace template variables
+        service_content = template_content.replace(
+            "{{DAEMON_VENV_PYTHON}}", str(daemon_venv_python)
+        )
+
+        # Write service file
+        logger.debug(f"Writing service file to {service_path}")
+        service_path.write_text(service_content)
+
+        # Reload systemd user daemon
+        logger.debug("Reloading systemd user daemon")
+        subprocess.run(
+            ["systemctl", "--user", "daemon-reload"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+        # Enable service
+        logger.debug("Enabling dotfiles-daemon service")
+        subprocess.run(
+            ["systemctl", "--user", "enable", "dotfiles-daemon.service"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+        # Start service
+        logger.debug("Starting dotfiles-daemon service")
+        result = subprocess.run(
+            ["systemctl", "--user", "start", "dotfiles-daemon.service"],
+            capture_output=True,
+            text=True,
+        )
+
+        if result.returncode == 0:
+            logger.info("✓ Dotfiles daemon service installed and started")
+            context.results["daemon_service_started"] = True
+        else:
+            logger.warning(
+                f"Daemon service installed but failed to start: {result.stderr}"
+            )
+            logger.warning(
+                "You can start it manually with: systemctl --user start dotfiles-daemon"
+            )
+            context.results["daemon_service_started"] = False
+
+    except FileNotFoundError as e:
+        logger.warning(
+            f"systemctl not found - skipping daemon service installation: {e}"
+        )
+        logger.warning("You can start the daemon manually if needed")
+        context.results["daemon_service_started"] = False
+
+    except Exception as e:
+        logger.warning(f"Failed to install daemon service: {e}")
+        logger.warning("Daemon is optional - installation will continue")
+        logger.warning("You can start the daemon manually if needed")
+        context.errors.append(e)
+        context.results["daemon_service_started"] = False
+
+    return context

@@ -540,6 +540,33 @@ class InstallWlogoutConfigStep(PipelineStep):
         return install_wlogout_config(context)
 
 
+class StartDaemonServiceStep(PipelineStep):
+    """Pipeline step to install and start dotfiles-daemon systemd service."""
+
+    @property
+    def step_id(self) -> str:
+        return "start_daemon_service"
+
+    @property
+    def description(self) -> str:
+        return "Install and start dotfiles-daemon service"
+
+    @property
+    def timeout(self) -> float | None:
+        """Step timeout in seconds."""
+        return 60.0
+
+    @property
+    def critical(self) -> bool:
+        return False  # Non-critical - daemon is optional
+
+    def run(self, context: PipelineContext) -> PipelineContext:
+        """Install and start dotfiles-daemon systemd service."""
+        from src.pipeline_steps.utils import start_daemon_service
+
+        return start_daemon_service(context)
+
+
 class ConfigureDotfilesManagerStep(PipelineStep):
     """Pipeline step to configure dotfiles manager."""
 

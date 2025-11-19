@@ -45,6 +45,7 @@ from src.pipeline_steps.pipeline import (
     InstallWlogoutConfigStep,
     InstallZshConfigStep,
     PrintInstallationMessageStep,
+    StartDaemonServiceStep,
     UpdateSystemStep,
 )
 
@@ -230,6 +231,8 @@ def install(
         InstallModuleStep(module_name="logging"),
         InstallModuleStep(module_name="pipeline"),
         InstallModuleStep(module_name="socket"),
+        InstallModuleStep(module_name="event-protocol"),
+        InstallModuleStep(module_name="daemon"),
         InstallModuleStep(module_name="package-manager"),
         InstallModuleStep(module_name="container-manager"),
         InstallModuleStep(module_name="colorscheme-generator"),
@@ -266,6 +269,7 @@ def install(
         ),
         InstallModuleStep(module_name="manager"),
         ConfigureDotfilesManagerStep(),
+        StartDaemonServiceStep(),
     ]
     pipeline: Pipeline = Pipeline.create(steps)
     pipeline.run(context)
