@@ -1567,6 +1567,16 @@ def install_component(
             logger.debug(f"Working directory: {install_path}")
 
             try:
+                # Prepare environment without VIRTUAL_ENV to prevent UV from using
+                # the installer's venv instead of the module's own .venv
+                import os
+
+                env = os.environ.copy()
+                # Remove VIRTUAL_ENV to ensure UV creates/uses the module's own venv
+                env.pop("VIRTUAL_ENV", None)
+                # Also remove other venv-related variables that might interfere
+                env.pop("PYTHONHOME", None)
+
                 # Run make target in the component directory
                 make_result = subprocess.run(
                     ["make", make_target],
@@ -1574,6 +1584,7 @@ def install_component(
                     capture_output=True,
                     text=True,
                     check=True,
+                    env=env,
                 )
 
                 # Log output
