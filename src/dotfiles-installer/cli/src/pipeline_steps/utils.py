@@ -1344,6 +1344,8 @@ def _update_pyproject_paths(
                 elif dep_name in [
                     "hyprpaper-manager",
                     "wallpaper-effects-processor",
+                    "event-protocol",
+                    "daemon",
                 ]:
                     # Module dependency (not prefixed with dotfiles-)
                     if is_module:
@@ -1793,7 +1795,6 @@ def start_daemon_service(context: PipelineContext) -> PipelineContext:
 
     try:
         # Get paths
-        install_root = context.app_config.project.paths.install["_root"]
         daemon_module_path = (
             context.app_config.project.paths.install["dependencies_modules"]
             / "daemon"
