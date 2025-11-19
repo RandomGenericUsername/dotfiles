@@ -231,8 +231,10 @@ def install(
         InstallModuleStep(module_name="logging"),
         InstallModuleStep(module_name="pipeline"),
         InstallModuleStep(module_name="socket"),
-        InstallModuleStep(module_name="event-protocol"),
-        InstallModuleStep(module_name="daemon"),
+        InstallModuleStep(
+            module_name="event-protocol", run_makefile_install=True
+        ),
+        InstallModuleStep(module_name="daemon", run_makefile_install=True),
         InstallModuleStep(module_name="package-manager"),
         InstallModuleStep(module_name="container-manager"),
         InstallModuleStep(module_name="colorscheme-generator"),

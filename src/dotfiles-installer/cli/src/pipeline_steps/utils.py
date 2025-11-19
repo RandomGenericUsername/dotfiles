@@ -1808,7 +1808,6 @@ def start_daemon_service(context: PipelineContext) -> PipelineContext:
         # Service template and destination
         template_path = (
             context.app_config.project.paths.source["_root"]
-            / "src"
             / "dotfiles"
             / "runtime"
             / "systemd"
