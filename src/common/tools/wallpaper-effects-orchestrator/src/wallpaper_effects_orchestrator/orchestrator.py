@@ -271,14 +271,13 @@ class WallpaperOrchestrator:
         effects = EffectFactory.get_all_effect_names()
         total_effects = len(effects)
 
+        # Report initial progress
+        if progress_callback:
+            progress_callback(0.0)
+
         # Generate variant for each effect
         results = {}
         for i, effect_name in enumerate(effects):
-            # Report progress before processing this effect
-            if progress_callback:
-                progress = (i / total_effects) * 100
-                progress_callback(progress)
-
             # Determine output extension (use PNG for consistency)
             output_path = variant_dir / f"{effect_name}.png"
 
@@ -293,7 +292,7 @@ class WallpaperOrchestrator:
             if success:
                 results[effect_name] = output_path
 
-            # Report progress after processing this effect
+            # Report progress after completing this effect
             if progress_callback:
                 progress = ((i + 1) / total_effects) * 100
                 progress_callback(progress)

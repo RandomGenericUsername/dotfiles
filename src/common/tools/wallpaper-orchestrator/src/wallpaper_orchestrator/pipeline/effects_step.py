@@ -106,9 +106,6 @@ class GenerateEffectsStep(PipelineStep):
         # Create orchestrator
         orchestrator = EffectsOrchestrator(effects_config)
 
-        # Report initial progress
-        context.update_step_progress(0.0)
-
         try:
             # Ensure output directory exists
             result.effects_output_dir.mkdir(parents=True, exist_ok=True)
@@ -122,10 +119,27 @@ class GenerateEffectsStep(PipelineStep):
                 f"Output directory: {result.effects_output_dir}"
             )
 
+            # Create progress callback that triggers real-time updates
+            def effect_progress_callback(progress: float) -> None:
+                """Update step progress and trigger real-time updates."""
+                # Update the progress tracker
+                context.update_step_progress(progress)
+
+                # Trigger real-time progress callback for socket updates
+                realtime_callback = context.results.get(
+                    "_realtime_progress_callback"
+                )
+                if realtime_callback and context._progress_tracker:
+                    overall_progress = (
+                        context._progress_tracker.get_overall_progress()
+                    )
+                    # Call with current step info
+                    realtime_callback(0, 1, self.step_id, overall_progress)
+
             effect_variants = orchestrator.generate_all_variants(
                 input_path=result.original_wallpaper,
                 output_dir=result.effects_output_dir,
-                progress_callback=context.update_step_progress,
+                progress_callback=effect_progress_callback,
             )
 
             # Mark as cached (if cache manager available)

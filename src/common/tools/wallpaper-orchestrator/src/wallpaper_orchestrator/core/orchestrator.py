@@ -281,7 +281,7 @@ class WallpaperOrchestrator:
         result = self._create_result_object(
             wallpaper_path, effects_output_dir, colorscheme_output_dir
         )
-        context = self._create_pipeline_context(result)
+        context = self._create_pipeline_context(result, wallpaper_path)
 
         # Build and execute pipeline
         steps = self._build_pipeline_steps(
@@ -315,12 +315,13 @@ class WallpaperOrchestrator:
         )
 
     def _create_pipeline_context(
-        self, result: WallpaperResult
+        self, result: WallpaperResult, wallpaper_path: Path
     ) -> PipelineContext:
         """Create pipeline context with configuration and result.
 
         Args:
             result: WallpaperResult instance to track in context
+            wallpaper_path: Path to wallpaper being processed
 
         Returns:
             PipelineContext instance
@@ -330,6 +331,12 @@ class WallpaperOrchestrator:
             logger_instance=self.logger,
         )
         context.results["wallpaper_result"] = result
+
+        # Store real-time progress callback in context for steps to use
+        context.results["_realtime_progress_callback"] = (
+            self._create_progress_callback(wallpaper_path)
+        )
+
         return context
 
     def _build_pipeline_steps(
@@ -428,6 +435,13 @@ class WallpaperOrchestrator:
             """Send progress updates via socket."""
             display_name = self._map_step_name_to_display_name(step_name)
 
+            # Get step-level progress details from pipeline's progress tracker
+            step_details = None
+            if hasattr(self, "_pipeline") and self._pipeline:
+                tracker = getattr(self._pipeline, "_progress_tracker", None)
+                if tracker:
+                    step_details = tracker.get_step_details()
+
             self.socket_manager.send_progress(
                 step_name=display_name,
                 progress_percent=progress,
@@ -436,6 +450,7 @@ class WallpaperOrchestrator:
                     "step_index": step_index,
                     "total_steps": total_steps,
                     "wallpaper_path": str(wallpaper_path),
+                    "step_details": step_details,
                 },
             )
             # Also call user-provided callback if present
