@@ -11,8 +11,17 @@ from wallpaper_orchestrator.config import (
     WallpaperEffectsSettings,
     load_settings,
 )
-from wallpaper_orchestrator.orchestrator import WallpaperOrchestrator
-from wallpaper_orchestrator.types import WallpaperResult
+from wallpaper_orchestrator.core import (
+    WallpaperCacheManager,
+    WallpaperOrchestrator,
+)
+from wallpaper_orchestrator.core.types import WallpaperResult
+from wallpaper_orchestrator.integrations import WallpaperProgressSocketManager
+from wallpaper_orchestrator.pipeline import (
+    GenerateColorSchemeStep,
+    GenerateEffectsStep,
+    SetWallpaperStep,
+)
 
 __all__ = [
     # Version
@@ -21,6 +30,14 @@ __all__ = [
     "WallpaperOrchestrator",
     # Result type
     "WallpaperResult",
+    # Cache manager
+    "WallpaperCacheManager",
+    # Socket manager
+    "WallpaperProgressSocketManager",
+    # Pipeline steps
+    "GenerateColorSchemeStep",
+    "GenerateEffectsStep",
+    "SetWallpaperStep",
     # Configuration
     "AppConfig",
     "OrchestratorSettings",

@@ -229,6 +229,7 @@ def install(
         ExtractWallpapersStep(),
         InstallModuleStep(module_name="logging"),
         InstallModuleStep(module_name="pipeline"),
+        InstallModuleStep(module_name="socket"),
         InstallModuleStep(module_name="package-manager"),
         InstallModuleStep(module_name="container-manager"),
         InstallModuleStep(module_name="colorscheme-generator"),

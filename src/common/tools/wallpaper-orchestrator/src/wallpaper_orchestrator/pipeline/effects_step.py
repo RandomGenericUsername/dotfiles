@@ -9,7 +9,7 @@ from wallpaper_effects_orchestrator import (
 )
 
 from wallpaper_orchestrator.config.settings import AppConfig
-from wallpaper_orchestrator.types import WallpaperResult
+from wallpaper_orchestrator.core.types import WallpaperResult
 
 
 class GenerateEffectsStep(PipelineStep):

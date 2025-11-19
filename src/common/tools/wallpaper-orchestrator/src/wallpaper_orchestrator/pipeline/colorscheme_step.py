@@ -4,8 +4,8 @@ from colorscheme_orchestrator import ColorSchemeOrchestrator
 from dotfiles_pipeline import PipelineContext, PipelineStep
 
 from wallpaper_orchestrator.config.settings import AppConfig
-from wallpaper_orchestrator.types import WallpaperResult
-from wallpaper_orchestrator.utils.sequences import send_sequences_to_terminals
+from wallpaper_orchestrator.core.types import WallpaperResult
+from wallpaper_orchestrator.utils.terminal import send_sequences_to_terminals
 
 
 class GenerateColorSchemeStep(PipelineStep):

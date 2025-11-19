@@ -225,29 +225,48 @@ make clean
 
 ## Architecture
 
+The wallpaper orchestrator follows a clean, layered architecture:
+
 ```
 wallpaper-orchestrator/
 ├── config/
-│   └── settings.toml          # Configuration
+│   └── settings.toml              # Configuration
 ├── src/
 │   └── wallpaper_orchestrator/
-│       ├── __init__.py        # Package exports
-│       ├── __main__.py        # python -m entry point
-│       ├── cli.py             # Typer CLI
-│       ├── orchestrator.py    # Main orchestrator
-│       ├── types.py           # Result types
-│       ├── config/            # Configuration models
+│       ├── __init__.py            # Package exports
+│       ├── __main__.py            # python -m entry point
+│       ├── cli.py                 # Typer CLI
+│       ├── core/                  # Core business logic
 │       │   ├── __init__.py
-│       │   └── settings.py
-│       └── steps/             # Pipeline steps
+│       │   ├── orchestrator.py    # Main orchestrator class
+│       │   ├── types.py           # Data types & models
+│       │   └── cache.py           # Cache manager
+│       ├── pipeline/              # Pipeline steps
+│       │   ├── __init__.py
+│       │   ├── colorscheme_step.py
+│       │   ├── effects_step.py
+│       │   └── wallpaper_step.py
+│       ├── integrations/          # External integrations
+│       │   ├── __init__.py
+│       │   ├── socket_manager.py  # WebSocket progress reporting
+│       │   └── notifier.py        # Progress notifier
+│       ├── utils/                 # Utility functions
+│       │   ├── __init__.py
+│       │   └── terminal.py        # Terminal sequences
+│       └── config/                # Configuration
 │           ├── __init__.py
-│           ├── effects_step.py
-│           ├── colorscheme_step.py
-│           └── wallpaper_step.py
+│           └── settings.py
 ├── pyproject.toml
 ├── Makefile
 └── README.md
 ```
+
+**Directory Structure:**
+- **core/** - Core business logic (orchestrator, cache, types)
+- **pipeline/** - Processing steps (colorscheme, effects, wallpaper)
+- **integrations/** - External integrations (sockets, notifications)
+- **utils/** - Utility functions (terminal operations)
+- **config/** - Configuration management
 
 ## License
 

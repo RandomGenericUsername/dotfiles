@@ -1,17 +1,20 @@
-#!/usr/bin/env -S uv run --project ../../modules/socket python
+#!/usr/bin/env python3
 """
 Wallpaper Progress Notifier
 
 Listens to wallpaper_progress socket and displays real-time notifications
 with progress bar, wallpaper path, and current step.
 
-Supports both dunst (dunstify) and GNOME Shell (gdbus) notification systems.
+Supports dunstify, mako, and GNOME Shell notification systems.
 
 Usage:
-    ./wallpaper_progress_notifier.py [--socket-dir /tmp/sockets]
+    # Run as a module:
+    uv run python -m wallpaper_orchestrator.integrations.notifier \\
+        [--socket-dir /tmp/sockets]
 
-    Or with explicit uv:
-    uv run --project ../../modules/socket python wallpaper_progress_notifier.py
+    # Or run directly:
+    uv run python src/wallpaper_orchestrator/integrations/notifier.py \\
+        [--socket-dir /tmp/sockets]
 """
 
 import subprocess
@@ -28,7 +31,19 @@ _notification_id: int | None = None
 # Detect notification backend
 def detect_notification_backend() -> str:
     """Detect which notification system is available."""
-    # Check if mako is running (preferred for Wayland/Hyprland)
+    # Check if dunstify is available (preferred - works with any daemon)
+    try:
+        result = subprocess.run(
+            ["which", "dunstify"],
+            capture_output=True,
+            timeout=2,
+        )
+        if result.returncode == 0:
+            return "dunstify"
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        pass
+
+    # Check if mako is running (Wayland/Hyprland)
     try:
         result = subprocess.run(
             ["pgrep", "-x", "mako"],
@@ -37,18 +52,6 @@ def detect_notification_backend() -> str:
         )
         if result.returncode == 0:
             return "mako"
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        pass
-
-    # Check if dunst is running
-    try:
-        result = subprocess.run(
-            ["pgrep", "-x", "dunst"],
-            capture_output=True,
-            timeout=2,
-        )
-        if result.returncode == 0:
-            return "dunst"
     except (FileNotFoundError, subprocess.TimeoutExpired):
         pass
 
@@ -79,7 +82,8 @@ def detect_notification_backend() -> str:
     return "notify-send"
 
 
-NOTIFICATION_BACKEND = detect_notification_backend()
+# Will be set in main()
+NOTIFICATION_BACKEND: str = ""
 
 
 def send_notification(
@@ -92,7 +96,8 @@ def send_notification(
     """
     Send a notification with optional progress bar.
 
-    Automatically uses the detected notification backend (mako/dunst/gnome/notify-send).
+    Automatically uses the detected notification backend
+    (mako/dunst/gnome/notify-send).
 
     Args:
         title: Notification title
@@ -107,10 +112,10 @@ def send_notification(
     if progress is not None:
         progress = max(0, min(100, int(progress)))
 
-    if NOTIFICATION_BACKEND == "mako":
+    if NOTIFICATION_BACKEND == "dunstify":
+        _send_dunstify_notification(title, message, progress, icon, urgency)
+    elif NOTIFICATION_BACKEND == "mako":
         _send_mako_notification(title, message, progress, icon, urgency)
-    elif NOTIFICATION_BACKEND == "dunst":
-        _send_dunst_notification(title, message, progress, icon, urgency)
     elif NOTIFICATION_BACKEND == "gnome":
         _send_gnome_notification(title, message, progress, icon, urgency)
     else:
@@ -149,10 +154,10 @@ def _send_mako_notification(
         sys.exit(1)
 
 
-def _send_dunst_notification(
+def _send_dunstify_notification(
     title: str, message: str, progress: int | None, icon: str, urgency: str
 ) -> None:
-    """Send notification using dunst (dunstify)."""
+    """Send notification using dunstify (works with any daemon)."""
     global _notification_id
 
     cmd = [
@@ -185,7 +190,7 @@ def _send_dunst_notification(
         if _notification_id is None and result.stdout.strip():
             _notification_id = int(result.stdout.strip())
     except FileNotFoundError:
-        print("Error: dunstify not found.", file=sys.stderr)
+        print("Error: dunstify not found.", file=sys.stderr, flush=True)
         sys.exit(1)
 
 
@@ -235,6 +240,8 @@ def format_wallpaper_path(wallpaper_path: str) -> str:
 
 def main() -> None:
     """Main function to listen to socket and display notifications."""
+    global NOTIFICATION_BACKEND
+
     import argparse
 
     parser = argparse.ArgumentParser(description="Wallpaper progress notifier")
@@ -246,8 +253,9 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    # Print detected notification backend
-    print(f"Using notification backend: {NOTIFICATION_BACKEND}")
+    # Detect notification backend
+    NOTIFICATION_BACKEND = detect_notification_backend()
+    print(f"Using notification backend: {NOTIFICATION_BACKEND}", flush=True)
 
     # Create socket client
     try:
@@ -257,7 +265,9 @@ def main() -> None:
             socket_dir=args.socket_dir,
         )
     except Exception as e:
-        print(f"Error creating socket client: {e}", file=sys.stderr)
+        print(
+            f"Error creating socket client: {e}", file=sys.stderr, flush=True
+        )
         sys.exit(1)
 
     # Connect to socket with retry logic
@@ -266,22 +276,30 @@ def main() -> None:
     max_retries = 30  # 30 seconds timeout
     retry_delay = 1  # 1 second between retries
 
-    print("Waiting for wallpaper orchestrator to start...")
+    print("Waiting for wallpaper orchestrator to start...", flush=True)
     for attempt in range(max_retries):
         try:
             client.connect()
             print(
-                "Connected to wallpaper_progress socket. Listening for updates..."
+                "Connected to wallpaper_progress socket. "
+                "Listening for updates...",
+                flush=True,
             )
             break
         except Exception as e:
             if attempt < max_retries - 1:
                 time.sleep(retry_delay)
             else:
-                print(f"Error connecting to socket: {e}", file=sys.stderr)
                 print(
-                    "Timeout: wallpaper orchestrator did not start within 30 seconds.",
+                    f"Error connecting to socket: {e}",
                     file=sys.stderr,
+                    flush=True,
+                )
+                print(
+                    "Timeout: wallpaper orchestrator did not start "
+                    "within 30 seconds.",
+                    file=sys.stderr,
+                    flush=True,
                 )
                 sys.exit(1)
 
@@ -295,7 +313,8 @@ def main() -> None:
             progress = data.get("progress", 0)
             status = data.get("status", "processing")
 
-            # Get wallpaper path from extra_data if available (DEPRECATED - now in data directly)
+            # Get wallpaper path from extra_data if available
+            # (DEPRECATED - now in data directly)
             extra_data = data.get("extra_data", {})
             wallpaper_path = extra_data.get(
                 "wallpaper_path", data.get("wallpaper_path", "")

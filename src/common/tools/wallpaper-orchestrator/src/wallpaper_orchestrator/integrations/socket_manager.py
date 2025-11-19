@@ -149,9 +149,42 @@ class WallpaperProgressSocketManager:
         except Exception as e:
             logger.error(f"Failed to send error message: {e}")
 
+    def send_ready(self) -> None:
+        """Send ready signal to notify clients that server is ready.
+
+        This should be called after starting the server to allow clients
+        to connect before processing begins.
+        """
+        if not self._is_running or not self._server:
+            return
+
+        try:
+            data = {
+                "status": "ready",
+                "step": "Initializing",
+                "progress": 0.0,
+            }
+
+            message = create_message(
+                self._event_name,
+                MessageType.CONTROL,
+                data,
+            )
+            self._server.send(message)
+            logger.debug("Ready signal sent to clients")
+
+        except Exception as e:
+            logger.error(f"Failed to send ready signal: {e}")
+
     def __enter__(self) -> "WallpaperProgressSocketManager":
         """Context manager entry."""
         self.start()
+        # Send ready signal and give clients time to connect
+        self.send_ready()
+        # Small delay to allow clients to connect (500ms)
+        import time
+
+        time.sleep(0.5)
         return self
 
     def __exit__(self, *args: Any, **kwargs: Any) -> None:  # noqa: ARG002

@@ -6,7 +6,7 @@ from hyprpaper_manager.config.config import HyprpaperConfig
 from hyprpaper_manager.core.types import MonitorSelector, WallpaperMode
 
 from wallpaper_orchestrator.config.settings import AppConfig
-from wallpaper_orchestrator.types import WallpaperResult
+from wallpaper_orchestrator.core.types import WallpaperResult
 
 
 class SetWallpaperStep(PipelineStep):
