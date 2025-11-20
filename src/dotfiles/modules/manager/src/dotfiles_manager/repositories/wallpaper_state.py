@@ -2,11 +2,12 @@
 
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from dotfiles_state_manager import StateManager
 from wallpaper_orchestrator import AppConfig as OrchestratorConfig
-from wallpaper_orchestrator.cache.manager import WallpaperCacheManager
 
+# from wallpaper_orchestrator.cache.manager import WallpaperCacheManager
 from dotfiles_manager.models.wallpaper_state import WallpaperState
 
 
@@ -16,14 +17,14 @@ class WallpaperStateRepository:
     def __init__(
         self,
         system_state: StateManager,
-        orchestrator_cache: WallpaperCacheManager,
+        orchestrator_cache: Any | None,  # WallpaperCacheManager,
         orchestrator_config: OrchestratorConfig,
     ):
         """Initialize repository.
 
         Args:
             system_state: System state manager
-            orchestrator_cache: Wallpaper orchestrator cache manager
+            orchestrator_cache: Wallpaper orchestrator cache manager (deprecated, not used)
             orchestrator_config: Wallpaper orchestrator configuration
         """
         self._system_state = system_state
@@ -97,15 +98,8 @@ class WallpaperStateRepository:
         Returns:
             True if wallpaper is fully cached
         """
-        # Get expected effects/formats from orchestrator config
-        expected_effects = self._get_expected_effects()
-        expected_formats = self._get_expected_formats()
-
-        return self._orchestrator_cache.is_fully_cached(
-            wallpaper_path,
-            expected_effects,
-            expected_formats,
-        )
+        # Cache manager is deprecated - always return False
+        return False
 
     def get_cache_info(self, wallpaper_path: Path) -> dict:
         """Get cache information for a wallpaper.
@@ -116,7 +110,8 @@ class WallpaperStateRepository:
         Returns:
             Dict with cache information
         """
-        return self._orchestrator_cache.get_cache_info(wallpaper_path)
+        # Cache manager is deprecated - return empty dict
+        return {}
 
     def get_all_cached_wallpapers(self) -> list[dict]:
         """Get list of all cached wallpapers.
@@ -124,7 +119,8 @@ class WallpaperStateRepository:
         Returns:
             List of dicts with wallpaper info
         """
-        return self._orchestrator_cache.get_all_cached_wallpapers()
+        # Cache manager is deprecated - return empty list
+        return []
 
     def invalidate_cache(self, wallpaper_path: Path) -> None:
         """Invalidate cache for a wallpaper.
@@ -132,7 +128,8 @@ class WallpaperStateRepository:
         Args:
             wallpaper_path: Path to wallpaper
         """
-        self._orchestrator_cache.invalidate_cache(wallpaper_path)
+        # Cache manager is deprecated - do nothing
+        pass
 
     def _get_expected_effects(self) -> list[str]:
         """Get expected effects from orchestrator config.

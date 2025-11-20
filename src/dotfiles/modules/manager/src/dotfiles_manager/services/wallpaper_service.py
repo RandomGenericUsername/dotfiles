@@ -1,6 +1,8 @@
 """Wallpaper service for managing wallpaper changes."""
 
+import asyncio
 from pathlib import Path
+from uuid import uuid4
 
 from dotfiles_daemon import DaemonPublisher
 from wallpaper_orchestrator import WallpaperOrchestrator
