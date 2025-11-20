@@ -1,0 +1,18 @@
+;; Eww Status Bar Widget Configuration
+;; This is a placeholder configuration file for the status bar widget.
+;; Customize this file to create your status bar layout.
+
+(defwindow status-bar
+  :monitor 0
+  :geometry (geometry :x "0%"
+                      :y "0%"
+                      :width "100%"
+                      :height "30px"
+                      :anchor "top center")
+  :stacking "fg"
+  :exclusive true
+  :focusable false
+  (box :class "status-bar"
+       :orientation "h"
+       :space-evenly false
+    "Status Bar - Configure in eww.yuck"))
