@@ -540,6 +540,122 @@ class InstallWlogoutConfigStep(PipelineStep):
         return install_wlogout_config(context)
 
 
+class InstallRustupStep(PipelineStep):
+    """Pipeline step to install Rustup."""
+
+    @property
+    def step_id(self) -> str:
+        return "install_rustup"
+
+    @property
+    def description(self) -> str:
+        return "Install Rustup (Rust toolchain installer)"
+
+    @property
+    def timeout(self) -> float | None:
+        """Step timeout in seconds."""
+        return 300.0
+
+    @property
+    def critical(self) -> bool:
+        return True
+
+    def run(self, context: PipelineContext) -> PipelineContext:
+        """Install Rustup."""
+        from src.pipeline_steps.utils import install_rustup_manager
+
+        return install_rustup_manager(
+            context,
+            force=False,
+            timeout=int(self.timeout or 300),
+            critical=self.critical,
+        )
+
+
+class InstallRustStep(PipelineStep):
+    """Pipeline step to install Rust using Rustup."""
+
+    @property
+    def step_id(self) -> str:
+        return "install_rust"
+
+    @property
+    def description(self) -> str:
+        return "Install Rust toolchain"
+
+    @property
+    def timeout(self) -> float | None:
+        """Step timeout in seconds."""
+        return 600.0
+
+    @property
+    def critical(self) -> bool:
+        return True
+
+    def run(self, context: PipelineContext) -> PipelineContext:
+        """Install Rust."""
+        from src.pipeline_steps.utils import install_rust_runtime
+
+        return install_rust_runtime(
+            context,
+            timeout=int(self.timeout or 600),
+            critical=self.critical,
+        )
+
+
+class InstallEwwStep(PipelineStep):
+    """Pipeline step to build and install Eww from source."""
+
+    @property
+    def step_id(self) -> str:
+        return "install_eww"
+
+    @property
+    def description(self) -> str:
+        return "Build and install Eww from source"
+
+    @property
+    def timeout(self) -> float | None:
+        """Step timeout in seconds."""
+        return 600.0
+
+    @property
+    def critical(self) -> bool:
+        return True
+
+    def run(self, context: PipelineContext) -> PipelineContext:
+        """Build and install Eww."""
+        from src.pipeline_steps.utils import install_eww_from_source
+
+        return install_eww_from_source(
+            context,
+            timeout=int(self.timeout or 600),
+            critical=self.critical,
+        )
+
+
+class InstallEwwConfigStep(PipelineStep):
+    """Pipeline step to install Eww configuration."""
+
+    @property
+    def step_id(self) -> str:
+        return "install_eww_config"
+
+    @property
+    def description(self) -> str:
+        return "Install Eww configuration"
+
+    @property
+    def critical(self) -> bool:
+        return True
+
+    def run(self, context: PipelineContext) -> PipelineContext:
+        """Install Eww configuration."""
+        from src.pipeline_steps.utils import install_eww_config
+
+        return install_eww_config(context)
+
+
 class StartDaemonServiceStep(PipelineStep):
     """Pipeline step to install and start dotfiles-daemon systemd service."""
 

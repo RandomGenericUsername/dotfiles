@@ -1893,3 +1893,321 @@ def start_daemon_service(context: PipelineContext) -> PipelineContext:
         context.results["daemon_service_started"] = False
 
     return context
+
+
+def install_rustup_manager(
+    context: PipelineContext,
+    force: bool = False,
+    timeout: int = 300,
+    critical: bool = True,
+) -> PipelineContext:
+    """Install Rustup (Rust toolchain installer).
+
+    Args:
+        context: The pipeline context
+        force: Force reinstallation even if already installed
+        timeout: Installation timeout in seconds (default: 300)
+        critical: Whether failure should stop the pipeline (default: True)
+
+    Returns:
+        Updated pipeline context with installation results
+
+    Raises:
+        RustupInstallError: If installation fails and critical is True
+    """
+    from src.tasks.install_rustup import (
+        RustupInstallError,
+        check_rustup_installed,
+        get_rustup_version,
+        install_rustup,
+    )
+
+    logger: RichLogger = context.logger_instance
+    rustup_dir = context.app_config.project.paths.install[
+        "dependencies_rustup"
+    ]
+    cargo_dir = context.app_config.project.paths.install["dependencies_cargo"]
+
+    try:
+        # Check if already installed
+        if not force and check_rustup_installed(rustup_dir, cargo_dir):
+            version = get_rustup_version(rustup_dir, cargo_dir)
+            logger.info(
+                f"✓ Rustup already installed (version: {version or 'unknown'})"
+            )
+            context.results["rustup_installed"] = True
+            context.results["rustup_version"] = version
+            return context
+
+        # Install Rustup
+        logger.info("Installing Rustup...")
+        install_rustup(
+            rustup_dir=rustup_dir,
+            force=force,
+            timeout=timeout,
+        )
+
+        # Verify installation
+        version = get_rustup_version(rustup_dir, cargo_dir)
+        if version:
+            logger.info(
+                f"✓ Rustup installed successfully (version: {version})"
+            )
+            context.results["rustup_installed"] = True
+            context.results["rustup_version"] = version
+        else:
+            raise RustupInstallError("Rustup installation verification failed")
+
+    except RustupInstallError as e:
+        logger.error(f"Failed to install Rustup: {e.message}")
+        context.results["rustup_installed"] = False
+        context.errors.append(e)
+        if critical:
+            raise
+
+    return context
+
+
+def install_rust_runtime(
+    context: PipelineContext,
+    timeout: int = 600,
+    critical: bool = True,
+) -> PipelineContext:
+    """Install Rust toolchain using Rustup.
+
+    Args:
+        context: The pipeline context
+        timeout: Installation timeout in seconds (default: 600)
+        critical: Whether failure should stop the pipeline (default: True)
+
+    Returns:
+        Updated pipeline context with installation results
+
+    Raises:
+        RustInstallError: If installation fails and critical is True
+    """
+    from src.tasks.install_rust import (
+        RustInstallError,
+        check_rust_installed,
+        get_rust_version,
+        install_rust_with_rustup,
+    )
+
+    logger: RichLogger = context.logger_instance
+    rustup_dir = context.app_config.project.paths.install[
+        "dependencies_rustup"
+    ]
+    cargo_dir = context.app_config.project.paths.install["dependencies_cargo"]
+
+    # Get Rust version from settings
+    rust_config = (
+        context.app_config.project.settings.system.packages.features.get(
+            "rust"
+        )
+    )
+    if not rust_config:
+        logger.warning("Rust not configured in features - skipping")
+        context.results["rust_installed"] = False
+        return context
+
+    # Convert Feature model to dict to access version field
+    rust_version = (
+        rust_config.version if hasattr(rust_config, "version") else "stable"
+    )
+
+    try:
+        # Check if already installed
+        if check_rust_installed(rustup_dir, cargo_dir, rust_version):
+            version = get_rust_version(rustup_dir, cargo_dir)
+            logger.info(
+                f"✓ Rust already installed (version: {version or 'unknown'})"
+            )
+            context.results["rust_installed"] = True
+            context.results["rust_version"] = version
+            return context
+
+        # Install Rust
+        logger.info(f"Installing Rust {rust_version}...")
+        install_rust_with_rustup(
+            rustup_dir=rustup_dir,
+            cargo_dir=cargo_dir,
+            version=rust_version,
+            set_default=True,
+            timeout=timeout,
+        )
+
+        # Verify installation
+        version = get_rust_version(rustup_dir, cargo_dir)
+        if version:
+            logger.info(f"✓ Rust installed successfully (version: {version})")
+            context.results["rust_installed"] = True
+            context.results["rust_version"] = version
+        else:
+            raise RustInstallError("Rust installation verification failed")
+
+    except RustInstallError as e:
+        logger.error(f"Failed to install Rust: {e.message}")
+        context.results["rust_installed"] = False
+        context.errors.append(e)
+        if critical:
+            raise
+
+    return context
+
+
+def install_eww_from_source(
+    context: PipelineContext,
+    timeout: int = 600,
+    critical: bool = True,
+) -> PipelineContext:
+    """Build and install Eww from source using Cargo.
+
+    Args:
+        context: The pipeline context
+        timeout: Build timeout in seconds (default: 600)
+        critical: Whether failure should stop the pipeline (default: True)
+
+    Returns:
+        Updated pipeline context with installation results
+
+    Raises:
+        EwwInstallError: If build or installation fails and critical is True
+    """
+    from src.tasks.install_eww import (
+        EwwInstallError,
+        build_eww_from_source,
+        check_eww_installed,
+        get_eww_version,
+    )
+
+    logger: RichLogger = context.logger_instance
+    rustup_dir = context.app_config.project.paths.install[
+        "dependencies_rustup"
+    ]
+    cargo_dir = context.app_config.project.paths.install["dependencies_cargo"]
+    source_dir = context.app_config.project.paths.install[
+        "dependencies_eww_source"
+    ]
+    install_dir = context.app_config.project.paths.install["dependencies_eww"]
+
+    # Get Eww config from settings
+    features_dict = (
+        context.app_config.project.settings.system.packages.features
+    )
+    eww_config = features_dict.get("eww")
+    if not eww_config:
+        logger.warning("Eww not configured in features - skipping")
+        context.results["eww_installed"] = False
+        return context
+
+    # Convert Feature model to dict to access extra fields
+    eww_dict = eww_config.model_dump()
+    git_url = eww_dict.get("git_url", "https://github.com/elkowar/eww")
+    branch = eww_dict.get("branch", "master")
+    features = eww_dict.get("features", ["wayland", "x11"])
+
+    try:
+        eww_bin_dir = install_dir / "bin"
+
+        # Check if already installed
+        if check_eww_installed(eww_bin_dir):
+            version = get_eww_version(eww_bin_dir)
+            logger.info(
+                f"✓ Eww already installed (version: {version or 'unknown'})"
+            )
+            context.results["eww_installed"] = True
+            context.results["eww_version"] = version
+            return context
+
+        # Build and install Eww
+        logger.info(f"Building Eww from source ({branch} branch)...")
+        logger.info(f"Features: {', '.join(features)}")
+        build_eww_from_source(
+            rustup_dir=rustup_dir,
+            cargo_dir=cargo_dir,
+            source_dir=source_dir,
+            install_dir=install_dir,
+            git_url=git_url,
+            branch=branch,
+            features=features,
+            force=False,
+            timeout=timeout,
+        )
+
+        # Verify installation
+        version = get_eww_version(eww_bin_dir)
+        if version:
+            logger.info(
+                f"✓ Eww built and installed successfully (version: {version})"
+            )
+            context.results["eww_installed"] = True
+            context.results["eww_version"] = version
+        else:
+            raise EwwInstallError("Eww installation verification failed")
+
+    except EwwInstallError as e:
+        logger.error(f"Failed to build/install Eww: {e.message}")
+        context.results["eww_installed"] = False
+        context.errors.append(e)
+        if critical:
+            raise
+
+    return context
+
+
+def install_eww_config(context: PipelineContext) -> PipelineContext:
+    """Install Eww configuration files.
+
+    Copies the entire eww directory structure (including all widgets)
+    from source to installation directory.
+
+    Args:
+        context: The pipeline context
+
+    Returns:
+        Updated pipeline context with installation results
+    """
+    logger: RichLogger = context.logger_instance
+
+    try:
+        # Get eww config from settings
+        eww_config = (
+            context.app_config.project.settings.system.packages.config.get(
+                "eww"
+            )
+        )
+        if not eww_config:
+            logger.warning("Eww config not found in settings - skipping")
+            context.results["eww_config_installed"] = False
+            return context
+
+        # Access path attribute from PackageConfig model
+        source_path = eww_config.path if hasattr(eww_config, "path") else None
+
+        if not source_path:
+            logger.warning("Eww config path not specified - skipping")
+            context.results["eww_config_installed"] = False
+            return context
+
+        # Get source and destination paths
+        source_dir = Path(source_path)
+        dest_dir = context.app_config.project.paths.install["dotfiles_eww"]
+
+        if not source_dir.exists():
+            logger.warning(f"Eww config source not found: {source_dir}")
+            context.results["eww_config_installed"] = False
+            return context
+
+        # Copy the entire eww directory structure
+        logger.info("Installing Eww configuration...")
+        copy_directory(source_dir, dest_dir)
+
+        logger.info(f"✓ Eww configuration installed to {dest_dir}")
+        context.results["eww_config_installed"] = True
+
+    except Exception as e:
+        logger.error(f"Failed to install Eww configuration: {e}")
+        context.results["eww_config_installed"] = False
+        context.errors.append(e)
+
+    return context
