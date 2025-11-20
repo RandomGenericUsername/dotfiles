@@ -14,18 +14,10 @@ def mock_wlogout_service():
     """Create mock wlogout service."""
     service = Mock()
     service.generate_all.return_value = {
-        "icons": ["icon1.svg", "icon2.svg"],
+        "icons": {"lock": "lock.svg", "logout": "logout.svg"},
         "style": "style.css",
     }
     return service
-
-
-@pytest.fixture
-def icons_output_dir(tmp_path):
-    """Create temporary icons output directory."""
-    icons_dir = tmp_path / "icons"
-    icons_dir.mkdir()
-    return icons_dir
 
 
 @pytest.fixture
@@ -35,11 +27,10 @@ def style_output_path(tmp_path):
 
 
 @pytest.fixture
-def wlogout_hook(mock_wlogout_service, icons_output_dir, style_output_path):
+def wlogout_hook(mock_wlogout_service, style_output_path):
     """Create WlogoutIconsHook instance."""
     return WlogoutIconsHook(
         wlogout_service=mock_wlogout_service,
-        icons_output_dir=icons_output_dir,
         style_output_path=style_output_path,
     )
 
@@ -206,10 +197,10 @@ def test_hook_fails_when_gtk_css_missing(
     assert "Colorscheme GTK CSS file not found" in result.message
 
 
-def test_hook_uses_custom_color_key(
+def test_hook_passes_full_colorscheme_to_service(
     wlogout_hook, wallpaper_path, colorscheme_files, mock_wlogout_service
 ):
-    """Test hook uses custom color key from config."""
+    """Test hook passes full colorscheme dict to service."""
     # Arrange
     context = HookContext(
         wallpaper_path=wallpaper_path,
@@ -220,7 +211,7 @@ def test_hook_uses_custom_color_key(
         from_cache=False,
         colorscheme_generated=True,
         effects_generated=True,
-        config={"colorscheme_color_key": "color0"},  # Custom key
+        config={},
     )
 
     # Act
@@ -228,9 +219,14 @@ def test_hook_uses_custom_color_key(
 
     # Assert
     assert result.success is True
-    # Verify service was called with color0 value
+    # Verify service was called with full colorscheme dict
     call_args = mock_wlogout_service.generate_all.call_args
-    assert call_args.kwargs["color"] == "#000000"  # color0 value
+    colorscheme = call_args.kwargs["colorscheme"]
+    assert isinstance(colorscheme, dict)
+    assert "color0" in colorscheme
+    assert "color15" in colorscheme
+    assert colorscheme["color0"] == "#000000"
+    assert colorscheme["color15"] == "#ffffff"
 
 
 def test_hook_handles_service_exception(
