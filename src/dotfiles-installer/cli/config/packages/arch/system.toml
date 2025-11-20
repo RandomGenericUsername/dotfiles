@@ -25,7 +25,17 @@ packages = [
 
     # Hyprland dependencies
     "hyprland",
-    "hyprpaper"
+    "hyprpaper",
+
+    # Eww build dependencies
+    "gtk3",
+    "gtk-layer-shell",
+    "pango",
+    "gdk-pixbuf2",
+    "cairo",
+    "glib2",
+    "gcc-libs",
+    "libdbusmenu-gtk3"
 ]
 
 # Arch-specific zsh plugin paths

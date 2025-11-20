@@ -28,7 +28,16 @@ packages = [
     # Hyprland dependencies
     "hyprland",
     "hyprland-devel",
-    "hyprpaper"
+    "hyprpaper",
+
+    # Eww build dependencies
+    "gtk3-devel",
+    "gtk-layer-shell-devel",
+    "pango-devel",
+    "gdk-pixbuf2-devel",
+    "cairo-devel",
+    "glib2-devel",
+    "libdbusmenu-gtk3-devel"
 ]
 
 # RedHat/Fedora-specific zsh plugin paths
