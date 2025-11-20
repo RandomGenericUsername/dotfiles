@@ -14,18 +14,15 @@ class WlogoutIconsHook(Hook):
     def __init__(
         self,
         wlogout_service: WlogoutService,
-        icons_output_dir: Path,
         style_output_path: Path,
     ):
         """Initialize wlogout icons hook.
 
         Args:
             wlogout_service: Wlogout service instance
-            icons_output_dir: Directory to write generated icons
             style_output_path: Path to write style.css
         """
         self._wlogout_service = wlogout_service
-        self._icons_output_dir = icons_output_dir
         self._style_output_path = style_output_path
 
     @property
@@ -50,10 +47,7 @@ class WlogoutIconsHook(Hook):
                     message="Skipped (no colorscheme generated)",
                 )
 
-            # Get colorscheme color key from config
-            color_key = context.config.get("colorscheme_color_key", "color15")
-
-            # Extract color from colorscheme JSON
+            # Extract full colorscheme from JSON
             colorscheme_json_path = context.colorscheme_files.get("json")
             if not colorscheme_json_path or not colorscheme_json_path.exists():
                 return HookResult(
@@ -61,7 +55,7 @@ class WlogoutIconsHook(Hook):
                     message="Colorscheme JSON file not found",
                 )
 
-            color = self._extract_color(colorscheme_json_path, color_key)
+            colorscheme = self._load_colorscheme(colorscheme_json_path)
 
             # Get GTK CSS colorscheme path for style template
             colorscheme_gtk_css_path = context.colorscheme_files.get("gtk.css")
@@ -76,12 +70,11 @@ class WlogoutIconsHook(Hook):
 
             # Generate icons and style
             generated = self._wlogout_service.generate_all(
-                color=color,
+                colorscheme=colorscheme,
                 font_family=context.font_family,
                 font_size=context.font_size,
                 colors_css_path=colorscheme_gtk_css_path,
                 background_image=context.wallpaper_path,
-                icons_output_dir=self._icons_output_dir,
                 style_output_path=self._style_output_path,
             )
 
@@ -97,18 +90,35 @@ class WlogoutIconsHook(Hook):
                 message=f"Failed to generate wlogout icons: {e}",
             )
 
-    def _extract_color(
-        self, colorscheme_json_path: Path, color_key: str
-    ) -> str:
-        """Extract color from colorscheme JSON.
+    def _load_colorscheme(self, colorscheme_json_path: Path) -> dict[str, str]:
+        """Load full colorscheme from JSON file.
 
         Args:
             colorscheme_json_path: Path to colorscheme JSON file
-            color_key: Color key to extract (e.g., "color15")
 
         Returns:
-            Hex color string (e.g., "#ffffff")
+            Dict with all colors (color0-color15 + special colors)
         """
         data = json.loads(colorscheme_json_path.read_text())
         colors = data.get("colors", {})
-        return colors.get(color_key, "#ffffff")
+
+        # Build colorscheme dict with all colors
+        colorscheme = {}
+
+        # Add standard colors (color0-color15)
+        for i in range(16):
+            key = f"color{i}"
+            if key in colors:
+                colorscheme[key] = colors[key]
+
+        # Add special colors
+        special_colors = [
+            "background",
+            "foreground",
+            "cursor",
+        ]
+        for key in special_colors:
+            if key in colors:
+                colorscheme[key] = colors[key]
+
+        return colorscheme

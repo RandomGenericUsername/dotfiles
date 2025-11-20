@@ -2,102 +2,70 @@
 
 from pathlib import Path
 
-from dotfiles_manager.services.svg_template_cache_manager import (
-    SVGTemplateCacheManager,
-)
+from icon_generator import IconRegistry, IconService
+from icon_generator.models.requests import IconGenerationRequest
 
 
 class WlogoutService:
-    """Service for generating wlogout icons and styles."""
+    """Service for generating wlogout icons and styles.
+
+    This service uses the generic icon-generator module for icon generation
+    and handles wlogout-specific style.css generation.
+    """
 
     def __init__(
         self,
-        icons_templates_dir: Path,
+        icon_registry: IconRegistry,
+        icon_service: IconService,
         style_template_path: Path,
-        svg_cache_manager: SVGTemplateCacheManager | None = None,
+        icons_output_dir: Path,
+        color_key: str = "color15",
     ):
         """Initialize wlogout service.
 
         Args:
-            icons_templates_dir: Directory containing SVG icon templates
+            icon_registry: Icon registry for discovering wlogout icons
+            icon_service: Icon service for generating icons with caching
             style_template_path: Path to style.css.tpl template
-            svg_cache_manager: Optional SVG cache manager for caching rendered templates
+            icons_output_dir: Directory to write generated icons
+            color_key: Which color from colorscheme to use (default: color15)
         """
-        self._icons_templates_dir = icons_templates_dir
+        self._icon_registry = icon_registry
+        self._icon_service = icon_service
         self._style_template_path = style_template_path
-        self._svg_cache = svg_cache_manager
+        self._icons_output_dir = icons_output_dir
+        self._color_key = color_key
 
-    def generate_icons(self, color: str, output_dir: Path) -> dict[str, Path]:
+    def generate_icons(
+        self, colorscheme: dict[str, str], output_dir: Path
+    ) -> dict[str, Path]:
         """Generate wlogout icons from SVG templates.
 
-        Uses SVG cache if available to avoid re-rendering templates with the same color.
+        Uses IconService with integrated caching.
 
         Args:
-            color: Hex color to use (e.g., "#ffffff")
+            colorscheme: Full colorscheme dict (all 16 colors + special colors)
             output_dir: Directory to write generated icons
 
         Returns:
             Dict mapping icon name to output path
         """
-        from dotfiles_template_renderer import Jinja2Renderer
+        # Extract the primary color for icon rendering
+        color = colorscheme.get(self._color_key, "#ffffff")
 
-        output_dir.mkdir(parents=True, exist_ok=True)
+        # Create icon generation request
+        request = IconGenerationRequest(
+            category="wlogout-icons",
+            variant=None,  # Flat structure, no variants
+            color=color,
+            colorscheme_data=colorscheme,
+            output_dir=output_dir,
+        )
 
-        icon_names = [
-            "lock",
-            "logout",
-            "logout",
-            "suspend",
-            "hibernate",
-            "shutdown",
-            "reboot",
-        ]
+        # Generate icons
+        result = self._icon_service.generate_icons(request)
 
-        generated_icons = {}
-
-        # Compute colorscheme hash for cache key (use color as simple colorscheme)
-        colorscheme = {"icon_color": color}
-        colorscheme_hash = None
-        if self._svg_cache:
-            colorscheme_hash = self._svg_cache.compute_colorscheme_hash(
-                colorscheme
-            )
-
-        # Create renderer for icon templates
-        renderer = Jinja2Renderer(self._icons_templates_dir)
-
-        for icon_name in icon_names:
-            template_name = f"{icon_name}.svg"
-            output_path = output_dir / template_name
-
-            template_path = self._icons_templates_dir / template_name
-            if not template_path.exists():
-                continue
-
-            # Try to get from cache first
-            rendered = None
-            if self._svg_cache and colorscheme_hash:
-                rendered = self._svg_cache.get_cached_svg(
-                    colorscheme_hash, template_name
-                )
-
-            # If not in cache, render template
-            if rendered is None:
-                context = {"CURRENT_COLOR": color}
-                rendered = renderer.render(template_name, context)
-
-                # Cache the rendered SVG
-                if self._svg_cache and colorscheme_hash:
-                    self._svg_cache.cache_svg(
-                        colorscheme_hash, template_name, rendered
-                    )
-
-            # Write to file
-            output_path.write_text(rendered)
-
-            generated_icons[icon_name] = output_path
-
-        return generated_icons
+        return result.generated_icons
 
     def generate_style(
         self,
@@ -143,30 +111,28 @@ class WlogoutService:
 
     def generate_all(
         self,
-        color: str,
+        colorscheme: dict[str, str],
         font_family: str,
         font_size: int,
         colors_css_path: Path,
         background_image: Path,
-        icons_output_dir: Path,
         style_output_path: Path,
     ) -> dict[str, Path]:
         """Generate both icons and style.
 
         Args:
-            color: Hex color for icons
+            colorscheme: Full colorscheme dict (all 16 colors + special colors)
             font_family: System font family
             font_size: System font size in pixels
             colors_css_path: Path to colorscheme CSS file
             background_image: Path to wallpaper
-            icons_output_dir: Directory to write icons
             style_output_path: Path to write style.css
 
         Returns:
             Dict with generated file paths
         """
-        # Generate icons
-        icons = self.generate_icons(color, icons_output_dir)
+        # Generate icons using IconService
+        icons = self.generate_icons(colorscheme, self._icons_output_dir)
 
         # Generate style
         self.generate_style(
@@ -174,7 +140,7 @@ class WlogoutService:
             font_size=font_size,
             colors_css_path=colors_css_path,
             background_image=background_image,
-            icons_dir=icons_output_dir,
+            icons_dir=self._icons_output_dir,
             output_path=style_output_path,
         )
 
