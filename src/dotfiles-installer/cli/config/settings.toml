@@ -25,13 +25,24 @@ path = "src/dotfiles/config-files/tmux/.tmux.conf.j2"
 type = "file"
 path = "src/dotfiles/config-files/starship/starship.toml"
 
+[project.settings.system.packages.config.eww]
+type = "directory"
+path = "src/dotfiles/config-files/eww"
+
 # Default features with version specifications (can be overridden per distro)
 [project.settings.system.packages.features]
 pyenv = { version = "2.4.17" }
 python = { version = "3.12.0", pip_packages = ["ipython"] }
 nvm = { version = "0.40.3" }
 nodejs = { version = "20.9.0" }
+rustup = { version = "latest" }
 rust = { version = "1.75.0" }
+
+[project.settings.system.packages.features.eww]
+version = "master"  # Git branch/tag to use
+git_url = "https://github.com/elkowar/eww"
+branch = "master"
+features = ["wayland", "x11"]
 
 [safety.directory_deletion]
 protected_directories = [
