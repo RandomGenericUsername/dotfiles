@@ -248,6 +248,7 @@ def install(
         InstallModuleStep(module_name="colorscheme-generator"),
         InstallModuleStep(module_name="state-manager"),
         InstallModuleStep(module_name="template-renderer"),
+        InstallModuleStep(module_name="icon-generator"),
         InstallModuleStep(module_name="wallpaper-effects-processor"),
         InstallModuleStep(
             module_name="hyprpaper-manager",

@@ -2,7 +2,7 @@
 MODULES_DIR := src/common/modules
 
 # List of all modules
-MODULES := colorscheme-generator container-manager daemon event-protocol filesystem-path-builder hyprpaper-manager logging package-manager pipeline socket state-manager template-renderer wallpaper-effects-processor
+MODULES := colorscheme-generator container-manager daemon event-protocol filesystem-path-builder hyprpaper-manager icon-generator logging package-manager pipeline socket state-manager template-renderer wallpaper-effects-processor
 
 # CLI directory
 CLI_DIR := src/dotfiles-installer/cli

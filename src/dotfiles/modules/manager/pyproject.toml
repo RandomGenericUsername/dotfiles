@@ -12,6 +12,7 @@ dependencies = [
     "dotfiles-state-manager",
     "dotfiles-template-renderer",
     "hyprpaper-manager",
+    "icon-generator",
     "wallpaper-orchestrator",
     "dynaconf>=3.2.0",
     "pydantic>=2.0.0",
@@ -52,6 +53,7 @@ dotfiles-pipeline = { path = "../../../common/modules/pipeline", editable = true
 dotfiles-state-manager = { path = "../../../common/modules/state-manager", editable = true }
 dotfiles-template-renderer = { path = "../../../common/modules/template-renderer", editable = true }
 hyprpaper-manager = { path = "../../../common/modules/hyprpaper-manager", editable = true }
+icon-generator = { path = "../../../common/modules/icon-generator", editable = true }
 wallpaper-orchestrator = { path = "../../../common/tools/wallpaper-orchestrator", editable = true }
 
 [tool.black]

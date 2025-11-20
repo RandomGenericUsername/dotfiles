@@ -1346,6 +1346,7 @@ def _update_pyproject_paths(
                     "wallpaper-effects-processor",
                     "event-protocol",
                     "daemon",
+                    "icon-generator",
                 ]:
                     # Module dependency (not prefixed with dotfiles-)
                     if is_module:

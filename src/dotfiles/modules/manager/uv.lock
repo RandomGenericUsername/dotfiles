@@ -327,6 +327,7 @@ dependencies = [
     { name = "dotfiles-template-renderer" },
     { name = "dynaconf" },
     { name = "hyprpaper-manager" },
+    { name = "icon-generator" },
     { name = "pydantic" },
     { name = "rich" },
     { name = "typer" },
@@ -356,6 +357,7 @@ requires-dist = [
     { name = "dotfiles-template-renderer", editable = "../../../common/modules/template-renderer" },
     { name = "dynaconf", specifier = ">=3.2.0" },
     { name = "hyprpaper-manager", editable = "../../../common/modules/hyprpaper-manager" },
+    { name = "icon-generator", editable = "../../../common/modules/icon-generator" },
     { name = "isort", marker = "extra == 'dev'", specifier = ">=5.13.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.8.0" },
@@ -482,6 +484,27 @@ requires-dist = [
     { name = "typer", specifier = ">=0.19.2" },
 ]
 provides-extras = ["dev"]
+
+[[package]]
+name = "icon-generator"
+version = "0.1.0"
+source = { editable = "../../../common/modules/icon-generator" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = ">=2.11.9" }]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "black", specifier = ">=24.0.0" },
+    { name = "isort", specifier = ">=5.13.0" },
+    { name = "mypy", specifier = ">=1.11.0" },
+    { name = "pytest", specifier = ">=8.4.2" },
+    { name = "pytest-cov", specifier = ">=4.1.0" },
+    { name = "ruff", specifier = ">=0.6.0" },
+]
 
 [[package]]
 name = "identify"

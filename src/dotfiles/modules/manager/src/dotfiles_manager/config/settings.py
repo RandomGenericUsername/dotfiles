@@ -53,6 +53,10 @@ def load_config() -> AppConfig:
     manager_config = ManagerConfig(
         state_db_path=Path(settings.get("manager.state_db_path")).expanduser(),
         debug=settings.get("manager.debug", False),
+        icon_variant=settings.get("manager.icon_variant", "solid"),
+        icon_variant_overrides=settings.get(
+            "manager.icon_variant_overrides", {}
+        ),
     )
 
     # Load system config
@@ -63,29 +67,44 @@ def load_config() -> AppConfig:
     )
 
     # Load paths config
+    # First get install_root to use for template substitution
+    install_root = Path(settings.get("paths.install_root")).expanduser()
+
+    # Helper function to resolve path templates
+    def resolve_path(path_str: str) -> Path:
+        """Resolve path template with {install_root} substitution."""
+        resolved = path_str.replace("{install_root}", str(install_root))
+        return Path(resolved).expanduser()
+
     paths_config = PathsConfig(
-        install_root=Path(settings.get("paths.install_root")).expanduser(),
-        wallpaper_orchestrator_path=Path(
+        install_root=install_root,
+        wallpaper_orchestrator_path=resolve_path(
             settings.get("paths.wallpaper_orchestrator_path")
-        ).expanduser(),
-        colorscheme_orchestrator_path=Path(
+        ),
+        colorscheme_orchestrator_path=resolve_path(
             settings.get("paths.colorscheme_orchestrator_path")
-        ).expanduser(),
-        wlogout_icons_templates_dir=Path(
+        ),
+        status_bar_icons_base_dir=resolve_path(
+            settings.get("paths.status_bar_icons_base_dir")
+        ),
+        status_bar_icons_output_dir=resolve_path(
+            settings.get("paths.status_bar_icons_output_dir")
+        ),
+        wlogout_icons_templates_dir=resolve_path(
             settings.get("paths.wlogout_icons_templates_dir")
-        ).expanduser(),
-        wlogout_style_template_path=Path(
+        ),
+        wlogout_style_template_path=resolve_path(
             settings.get("paths.wlogout_style_template_path")
-        ).expanduser(),
-        wlogout_icons_output_dir=Path(
+        ),
+        wlogout_icons_output_dir=resolve_path(
             settings.get("paths.wlogout_icons_output_dir")
-        ).expanduser(),
-        wlogout_style_output_path=Path(
+        ),
+        wlogout_style_output_path=resolve_path(
             settings.get("paths.wlogout_style_output_path")
-        ).expanduser(),
-        wlogout_config_dir=Path(
+        ),
+        wlogout_config_dir=resolve_path(
             settings.get("paths.wlogout_config_dir")
-        ).expanduser(),
+        ),
     )
 
     # Load hooks config - get all hooks settings as dict

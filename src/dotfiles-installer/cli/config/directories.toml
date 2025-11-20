@@ -82,6 +82,7 @@ dependencies_modules_container_manager = "{dependencies_modules}/container-manag
 dependencies_modules_colorscheme_generator = "{dependencies_modules}/colorscheme-generator"
 dependencies_modules_wallpaper_effects_processor = "{dependencies_modules}/wallpaper-effects-processor"
 dependencies_modules_state_manager = "{dependencies_modules}/state-manager"
+dependencies_modules_icon_generator = "{dependencies_modules}/icon-generator"
 dependencies_modules_hyprpaper_manager = "{dependencies_modules}/hyprpaper-manager"
 dependencies_modules_template_renderer = "{dependencies_modules}/template-renderer"
 dependencies_modules_manager = "{dependencies_modules}/manager"
@@ -134,6 +135,7 @@ common_modules_colorscheme_generator = "{common_modules}/colorscheme-generator"
 common_modules_wallpaper_effects_processor = "{common_modules}/wallpaper-effects-processor"
 common_modules_state_manager = "{common_modules}/state-manager"
 common_modules_template_renderer = "{common_modules}/template-renderer"
+common_modules_icon_generator = "{common_modules}/icon-generator"
 common_modules_hyprpaper_manager = "{common_modules}/hyprpaper-manager"
 
 # Alias for manager module (used by install_component function)

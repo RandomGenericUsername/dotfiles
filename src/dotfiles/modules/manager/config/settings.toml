@@ -16,6 +16,13 @@ state_db_path = "~/.local/share/dotfiles/state/manager/system.db"
 # Enable debug mode
 debug = false
 
+# Default icon variant for all categories
+icon_variant = "solid"
+
+# Per-category icon variant overrides
+[manager.icon_variant_overrides]
+# Example: battery-icons = "rounded"
+
 # ============================================================================
 # System Attributes (User-configurable)
 # ============================================================================
@@ -37,6 +44,10 @@ install_root = "~/.local/share/dotfiles"
 # Tool paths
 wallpaper_orchestrator_path = "{install_root}/.dependencies/tools/wallpaper-orchestrator"
 colorscheme_orchestrator_path = "{install_root}/.dependencies/tools/colorscheme-orchestrator"
+
+# Icon paths
+status_bar_icons_base_dir = "{install_root}/dotfiles/assets/status-bar-icons"
+status_bar_icons_output_dir = "{install_root}/dotfiles/eww/status-bar/icons"
 
 # Wlogout paths
 wlogout_icons_templates_dir = "{install_root}/dotfiles/wlogout/templates/icons"
@@ -64,7 +75,7 @@ ignore_cache_on_rebuild = false
 # ============================================================================
 [hooks]
 # Enabled hooks
-enabled = ["wlogout_icons"]
+enabled = ["status_bar_icons", "wlogout_icons"]
 
 # Fail fast: stop execution if a critical hook fails
 fail_fast = false
@@ -72,11 +83,15 @@ fail_fast = false
 # Execution groups define order and parallelism
 # Each group can be serial or parallel
 [[hooks.execution_groups]]
-# First: Generate wlogout icons (must complete first)
-hooks = ["wlogout_icons"]
-mode = "serial"
+# First: Generate all icons in parallel
+hooks = ["status_bar_icons", "wlogout_icons"]
+mode = "parallel"
 
 # Individual hook configurations
+[hooks.status_bar_icons]
+critical = false  # Don't stop if this fails
+colorscheme_color_key = "color15"  # Which color from colorscheme to use
+
 [hooks.wlogout_icons]
 critical = false  # Don't stop if this fails
 colorscheme_color_key = "color15"  # Which color from colorscheme to use

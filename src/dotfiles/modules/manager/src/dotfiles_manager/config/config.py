@@ -11,6 +11,8 @@ class ManagerConfig(BaseModel):
     Attributes:
         state_db_path: Path to the state database.
         debug: Enable debug mode.
+        icon_variant: Default icon variant for all categories.
+        icon_variant_overrides: Per-category icon variant overrides.
     """
 
     model_config = ConfigDict(
@@ -31,6 +33,14 @@ class ManagerConfig(BaseModel):
     debug: bool = Field(
         default=False,
         description="Enable debug mode",
+    )
+    icon_variant: str = Field(
+        default="solid",
+        description="Default icon variant for all categories",
+    )
+    icon_variant_overrides: dict[str, str] = Field(
+        default_factory=dict,
+        description="Per-category icon variant overrides",
     )
 
 
@@ -69,6 +79,8 @@ class PathsConfig(BaseModel):
         install_root: Installation root directory.
         wallpaper_orchestrator_path: Path to wallpaper orchestrator.
         colorscheme_orchestrator_path: Path to colorscheme orchestrator.
+        status_bar_icons_base_dir: Base directory for status bar icon templates.
+        status_bar_icons_output_dir: Directory for generated status bar icons.
         wlogout_icons_templates_dir: Directory for wlogout icon templates.
         wlogout_style_template_path: Path to wlogout style template.
         wlogout_icons_output_dir: Directory for generated wlogout icons.
@@ -104,6 +116,27 @@ class PathsConfig(BaseModel):
         / "tools"
         / "colorscheme-orchestrator",
         description="Path to colorscheme orchestrator",
+    )
+    status_bar_icons_base_dir: Path = Field(
+        default=Path.home()
+        / ".local"
+        / "share"
+        / "dotfiles"
+        / "dotfiles"
+        / "assets"
+        / "status-bar-icons",
+        description="Base directory for status bar icon templates",
+    )
+    status_bar_icons_output_dir: Path = Field(
+        default=Path.home()
+        / ".local"
+        / "share"
+        / "dotfiles"
+        / "dotfiles"
+        / "eww"
+        / "status-bar"
+        / "icons",
+        description="Directory for generated status bar icons",
     )
     wlogout_icons_templates_dir: Path = Field(
         default=Path.home()
