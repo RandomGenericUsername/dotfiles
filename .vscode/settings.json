@@ -6,10 +6,19 @@
 
   // Black Formatter Configuration
   "[python]": {
-    "editor.defaultFormatter": "ms-python.python",
+    "diffEditor.ignoreTrimWhitespace": false,
+    "editor.defaultColorDecorators": "never",
+    "gitlens.codeLens.symbolScopes": [
+      "!Module"
+    ],
+    "editor.formatOnType": true,
+    "editor.wordBasedSuggestions": "off",
+    "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit"
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit",
+      "source.organizeImports": "never"
     }
   },
   "python.formatting.provider": "black",
