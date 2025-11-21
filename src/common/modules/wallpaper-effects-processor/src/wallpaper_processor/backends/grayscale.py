@@ -6,11 +6,14 @@ import tempfile
 from pathlib import Path
 
 from PIL import Image, ImageOps
+
 from wallpaper_processor.core.base import WallpaperEffect
 from wallpaper_processor.core.exceptions import ProcessingError
+from wallpaper_processor.core.registry import register_effect
 from wallpaper_processor.core.types import EffectParams, GrayscaleParams
 
 
+@register_effect("grayscale")
 class ImageMagickGrayscale(WallpaperEffect):
     """Grayscale effect using ImageMagick."""
 
@@ -49,11 +52,14 @@ class ImageMagickGrayscale(WallpaperEffect):
             raise TypeError(f"Expected GrayscaleParams, got {type(params)}")
 
         # Create temporary files
-        with tempfile.NamedTemporaryFile(
-            suffix=".png", delete=False
-        ) as input_tmp, tempfile.NamedTemporaryFile(
-            suffix=".png", delete=False
-        ) as output_tmp:
+        with (
+            tempfile.NamedTemporaryFile(
+                suffix=".png", delete=False
+            ) as input_tmp,
+            tempfile.NamedTemporaryFile(
+                suffix=".png", delete=False
+            ) as output_tmp,
+        ):
             input_path = Path(input_tmp.name)
             output_path = Path(output_tmp.name)
 
@@ -114,6 +120,7 @@ class ImageMagickGrayscale(WallpaperEffect):
             output_path.unlink(missing_ok=True)
 
 
+@register_effect("grayscale")
 class PILGrayscale(WallpaperEffect):
     """Grayscale effect using PIL (fallback)."""
 

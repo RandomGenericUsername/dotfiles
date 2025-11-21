@@ -6,11 +6,14 @@ import tempfile
 from pathlib import Path
 
 from PIL import Image, ImageEnhance
+
 from wallpaper_processor.core.base import WallpaperEffect
 from wallpaper_processor.core.exceptions import ProcessingError
+from wallpaper_processor.core.registry import register_effect
 from wallpaper_processor.core.types import EffectParams, SaturationParams
 
 
+@register_effect("saturation")
 class ImageMagickSaturation(WallpaperEffect):
     """Saturation effect using ImageMagick."""
 
@@ -98,6 +101,7 @@ class ImageMagickSaturation(WallpaperEffect):
             output_path.unlink(missing_ok=True)
 
 
+@register_effect("saturation")
 class PILSaturation(WallpaperEffect):
     """Saturation effect using PIL (fallback)."""
 

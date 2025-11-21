@@ -6,11 +6,14 @@ import tempfile
 from pathlib import Path
 
 from PIL import Image
+
 from wallpaper_processor.core.base import WallpaperEffect
 from wallpaper_processor.core.exceptions import ProcessingError
+from wallpaper_processor.core.registry import register_effect
 from wallpaper_processor.core.types import ColorOverlayParams, EffectParams
 
 
+@register_effect("color_overlay")
 class ImageMagickColorOverlay(WallpaperEffect):
     """Color overlay effect using ImageMagick."""
 
@@ -49,11 +52,14 @@ class ImageMagickColorOverlay(WallpaperEffect):
             raise TypeError(f"Expected ColorOverlayParams, got {type(params)}")
 
         # Create temporary files
-        with tempfile.NamedTemporaryFile(
-            suffix=".png", delete=False
-        ) as input_tmp, tempfile.NamedTemporaryFile(
-            suffix=".png", delete=False
-        ) as output_tmp:
+        with (
+            tempfile.NamedTemporaryFile(
+                suffix=".png", delete=False
+            ) as input_tmp,
+            tempfile.NamedTemporaryFile(
+                suffix=".png", delete=False
+            ) as output_tmp,
+        ):
             input_path = Path(input_tmp.name)
             output_path = Path(output_tmp.name)
 
@@ -107,6 +113,7 @@ class ImageMagickColorOverlay(WallpaperEffect):
             output_path.unlink(missing_ok=True)
 
 
+@register_effect("color_overlay")
 class PILColorOverlay(WallpaperEffect):
     """Color overlay effect using PIL (fallback)."""
 

@@ -6,11 +6,14 @@ import tempfile
 from pathlib import Path
 
 from PIL import Image, ImageDraw
+
 from wallpaper_processor.core.base import WallpaperEffect
 from wallpaper_processor.core.exceptions import ProcessingError
+from wallpaper_processor.core.registry import register_effect
 from wallpaper_processor.core.types import EffectParams, VignetteParams
 
 
+@register_effect("vignette")
 class ImageMagickVignette(WallpaperEffect):
     """Vignette effect using ImageMagick."""
 
@@ -99,6 +102,7 @@ class ImageMagickVignette(WallpaperEffect):
             output_path.unlink(missing_ok=True)
 
 
+@register_effect("vignette")
 class PILVignette(WallpaperEffect):
     """Vignette effect using PIL (fallback)."""
 

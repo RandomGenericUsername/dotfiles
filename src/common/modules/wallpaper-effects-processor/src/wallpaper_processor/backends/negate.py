@@ -6,11 +6,14 @@ import tempfile
 from pathlib import Path
 
 from PIL import Image, ImageOps
+
 from wallpaper_processor.core.base import WallpaperEffect
 from wallpaper_processor.core.exceptions import ProcessingError
+from wallpaper_processor.core.registry import register_effect
 from wallpaper_processor.core.types import EffectParams, NegateParams
 
 
+@register_effect("negate")
 class ImageMagickNegate(WallpaperEffect):
     """Negate effect using ImageMagick."""
 
@@ -49,11 +52,14 @@ class ImageMagickNegate(WallpaperEffect):
             raise TypeError(f"Expected NegateParams, got {type(params)}")
 
         # Create temporary files
-        with tempfile.NamedTemporaryFile(
-            suffix=".png", delete=False
-        ) as input_tmp, tempfile.NamedTemporaryFile(
-            suffix=".png", delete=False
-        ) as output_tmp:
+        with (
+            tempfile.NamedTemporaryFile(
+                suffix=".png", delete=False
+            ) as input_tmp,
+            tempfile.NamedTemporaryFile(
+                suffix=".png", delete=False
+            ) as output_tmp,
+        ):
             input_path = Path(input_tmp.name)
             output_path = Path(output_tmp.name)
 
@@ -96,6 +102,7 @@ class ImageMagickNegate(WallpaperEffect):
             output_path.unlink(missing_ok=True)
 
 
+@register_effect("negate")
 class PILNegate(WallpaperEffect):
     """Negate effect using PIL (fallback)."""
 

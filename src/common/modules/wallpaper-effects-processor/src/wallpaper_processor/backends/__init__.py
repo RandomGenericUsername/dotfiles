@@ -1,5 +1,20 @@
-"""Effect backend implementations."""
+"""Effect backend implementations with auto-registration.
 
+This module automatically discovers and imports all effect modules,
+triggering their @register_effect decorators to populate the registry.
+"""
+
+import importlib
+import pkgutil
+from pathlib import Path
+
+# Auto-discover and import all effect modules to trigger registration
+package_dir = Path(__file__).parent
+for _, module_name, _ in pkgutil.iter_modules([str(package_dir)]):
+    if not module_name.startswith("_"):
+        importlib.import_module(f"wallpaper_processor.backends.{module_name}")
+
+# Keep explicit imports for backwards compatibility
 from wallpaper_processor.backends.blur import ImageMagickBlur, PILBlur
 from wallpaper_processor.backends.brightness import (
     ImageMagickBrightness,
