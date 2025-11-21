@@ -20,6 +20,7 @@ from wallpaper_processor.core import (
     EffectMetadata,
     EffectNotAvailableError,
     EffectParams,
+    EffectRegistry,
     InvalidParametersError,
     PresetNotFoundError,
     ProcessingError,
@@ -30,6 +31,7 @@ from wallpaper_processor.core import (
     VignetteParams,
     WallpaperEffect,
     WallpaperProcessorError,
+    register_effect,
 )
 
 # Managers
@@ -60,6 +62,7 @@ __all__ = [
     "EffectMetadata",
     "EffectNotAvailableError",
     "EffectParams",
+    "EffectRegistry",
     "InvalidParametersError",
     "PresetNotFoundError",
     "ProcessingError",
@@ -70,6 +73,7 @@ __all__ = [
     "VignetteParams",
     "WallpaperEffect",
     "WallpaperProcessorError",
+    "register_effect",
     # Managers
     "OutputManager",
     "PresetManager",
