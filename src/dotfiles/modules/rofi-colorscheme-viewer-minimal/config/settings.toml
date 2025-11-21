@@ -1,0 +1,9 @@
+[paths]
+colorscheme_file = "~/.cache/colorscheme/colors.json"
+swatch_dir = "/tmp/rofi-colorscheme-swatches-minimal"
+
+[display]
+swatch_size = 40
+show_background = true
+show_foreground = true
+show_cursor = true

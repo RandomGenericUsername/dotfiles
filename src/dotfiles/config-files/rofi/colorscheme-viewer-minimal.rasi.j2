@@ -1,0 +1,84 @@
+/* ---- Minimal Colorscheme Viewer - Horizontal Strip ---- */
+
+configuration {
+    click-to-exit: true;
+    show-icons: true;
+    display-colors: "";
+}
+
+* {
+    background-color: transparent;
+    text-color: {{ colors.foreground }};
+    font: "JetBrainsMono Nerd Font 10";
+}
+
+/* ---- Window ---- */
+window {
+    transparency: "real";
+    background-color: {{ colors.background }}E6;
+    border: 2px;
+    border-color: {{ colors.color4 }};
+    border-radius: 8px;
+    location: center;
+    anchor: center;
+    x-offset: 0;
+    y-offset: 0;
+}
+
+/* ---- Mainbox ---- */
+mainbox {
+    enabled: true;
+    spacing: 0px;
+    background-color: transparent;
+    orientation: horizontal;
+    children: ["listview"];
+}
+
+/* ---- Listview ---- */
+listview {
+    enabled: true;
+    columns: 19;  /* background + foreground + cursor + 16 colors */
+    lines: 1;
+    cycle: false;
+    dynamic: false;
+    scrollbar: false;
+    layout: horizontal;
+    reverse: false;
+    fixed-height: true;
+    fixed-columns: true;
+    spacing: 2px;
+    background-color: transparent;
+    cursor: "default";
+}
+
+/* ---- Elements ---- */
+element {
+    enabled: true;
+    padding: 4px;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+element selected {
+    background-color: {{ colors.color4 }}40;
+    border: 2px;
+    border-color: {{ colors.color4 }};
+    border-radius: 4px;
+}
+
+/* ---- Element Icon ---- */
+element-icon {
+    background-color: transparent;
+    size: 40px;
+    cursor: inherit;
+}
+
+/* ---- Element Text (hidden) ---- */
+element-text {
+    background-color: transparent;
+    cursor: inherit;
+    highlight: none;
+    vertical-align: 0.5;
+    horizontal-align: 0.5;
+    enabled: false;  /* Hide text, show only icons */
+}

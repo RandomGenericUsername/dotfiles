@@ -1,0 +1,18 @@
+[project]
+name = "rofi-colorscheme-viewer-minimal"
+version = "0.1.0"
+description = "Minimal rofi-based colorscheme viewer with horizontal strip display"
+requires-python = ">=3.12"
+dependencies = [
+    "colorscheme-generator",
+]
+
+[project.scripts]
+rofi-colorscheme-viewer-minimal = "rofi_colorscheme_viewer_minimal.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.sources]
+colorscheme-generator = { path = "../../../common/modules/colorscheme-generator", editable = true }
