@@ -1,4 +1,4 @@
-/* ---- Minimal Colorscheme Viewer - Horizontal Strip ---- */
+/* ---- Minimal Colorscheme Viewer - 2x8 Grid ---- */
 
 configuration {
     click-to-exit: true;
@@ -15,14 +15,14 @@ configuration {
 /* ---- Window ---- */
 window {
     transparency: "real";
-    background-color: {{ colors.background }}E6;
-    border: 2px;
-    border-color: {{ colors.color4 }};
-    border-radius: 8px;
+    background-color: #00000030;
+    border: 0px;
+    border-radius: 0px;
     location: center;
     anchor: center;
     x-offset: 0;
     y-offset: 0;
+    width: 340px;
 }
 
 /* ---- Mainbox ---- */
@@ -30,15 +30,16 @@ mainbox {
     enabled: true;
     spacing: 0px;
     background-color: transparent;
-    orientation: horizontal;
+    padding: 10px;
+    border-radius: 0px;
     children: ["listview"];
 }
 
 /* ---- Listview ---- */
 listview {
     enabled: true;
-    columns: 19;  /* background + foreground + cursor + 16 colors */
-    lines: 1;
+    columns: 8;  /* 8 colors per row */
+    lines: 2;    /* 2 rows = 16 colors total */
     cycle: false;
     dynamic: false;
     scrollbar: false;
@@ -46,7 +47,8 @@ listview {
     reverse: false;
     fixed-height: true;
     fixed-columns: true;
-    spacing: 2px;
+    spacing: 0px;
+    padding: 0px;
     background-color: transparent;
     cursor: "default";
 }
@@ -54,16 +56,17 @@ listview {
 /* ---- Elements ---- */
 element {
     enabled: true;
-    padding: 4px;
+    padding: 0px;
+    margin: 0px;
+    spacing: 0px;
     background-color: transparent;
+    border: 0px;
+    border-radius: 0px;
     cursor: pointer;
 }
 
 element selected {
-    background-color: {{ colors.color4 }}40;
-    border: 2px;
-    border-color: {{ colors.color4 }};
-    border-radius: 4px;
+    background-color: #ffffff20;
 }
 
 /* ---- Element Icon ---- */
@@ -71,6 +74,10 @@ element-icon {
     background-color: transparent;
     size: 40px;
     cursor: inherit;
+    padding: 0px;
+    margin: 0px;
+    spacing: 0px;
+    border: 0px;
 }
 
 /* ---- Element Text (hidden) ---- */
