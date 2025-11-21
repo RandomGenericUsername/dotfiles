@@ -103,7 +103,13 @@ class SVGTemplateCacheManager:
             self._increment_counter(self._misses_key)
             return None
         except Exception as e:
-            logger.warning("Failed to get cached SVG: %s", e)
+            import traceback
+
+            logger.warning(
+                "Failed to get cached SVG: %s\n%s",
+                e,
+                traceback.format_exc(),
+            )
             self._increment_counter(self._misses_key)
             return None
 
