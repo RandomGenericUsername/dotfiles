@@ -1,7 +1,6 @@
 """Configuration management for rofi-colorscheme-viewer."""
 
 from pathlib import Path
-from typing import Optional
 
 from dynaconf import Dynaconf
 from pydantic import BaseModel, Field
@@ -21,7 +20,9 @@ class PathsConfig(BaseModel):
 class RofiConfig(BaseModel):
     """Rofi display configuration."""
 
-    show_icons: bool = Field(True, description="Whether to show color swatches")
+    show_icons: bool = Field(
+        True, description="Whether to show color swatches"
+    )
     swatch_size: int = Field(100, description="Swatch size in pixels")
 
 
@@ -50,7 +51,7 @@ class AppConfig(BaseModel):
     logging: LoggingConfig
 
 
-def load_config(config_file: Optional[Path] = None) -> AppConfig:
+def load_config(config_file: Path | None = None) -> AppConfig:
     """Load configuration from settings.toml.
 
     Args:
@@ -81,7 +82,9 @@ def load_config(config_file: Optional[Path] = None) -> AppConfig:
     # Convert to Pydantic models
     return AppConfig(
         paths=PathsConfig(
-            colorscheme_file=Path(settings.paths.colorscheme_file).expanduser(),
+            colorscheme_file=Path(
+                settings.paths.colorscheme_file
+            ).expanduser(),
             temp_dir=Path(settings.paths.temp_dir).expanduser(),
         ),
         rofi=RofiConfig(

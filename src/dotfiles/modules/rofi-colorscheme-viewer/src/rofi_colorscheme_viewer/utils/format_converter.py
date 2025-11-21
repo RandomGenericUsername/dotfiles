@@ -1,7 +1,6 @@
 """Format converter for color values."""
 
 import json
-from typing import Tuple
 
 
 class FormatConverter:
@@ -23,7 +22,7 @@ class FormatConverter:
     """
 
     @staticmethod
-    def to_hex(hex_value: str, rgb_value: Tuple[int, int, int]) -> str:
+    def to_hex(hex_value: str, rgb_value: tuple[int, int, int]) -> str:
         """Convert to hex format.
 
         Args:
@@ -40,7 +39,7 @@ class FormatConverter:
         return hex_value
 
     @staticmethod
-    def to_rgb(hex_value: str, rgb_value: Tuple[int, int, int]) -> str:
+    def to_rgb(hex_value: str, rgb_value: tuple[int, int, int]) -> str:
         """Convert to RGB format.
 
         Args:
@@ -57,7 +56,7 @@ class FormatConverter:
         return f"rgb({rgb_value[0]}, {rgb_value[1]}, {rgb_value[2]})"
 
     @staticmethod
-    def to_json(hex_value: str, rgb_value: Tuple[int, int, int]) -> str:
+    def to_json(hex_value: str, rgb_value: tuple[int, int, int]) -> str:
         """Convert to JSON format.
 
         Args:
@@ -77,7 +76,7 @@ class FormatConverter:
 
     @staticmethod
     def format_color(
-        hex_value: str, rgb_value: Tuple[int, int, int], format_type: str
+        hex_value: str, rgb_value: tuple[int, int, int], format_type: str
     ) -> str:
         """Format color value based on format type.
 

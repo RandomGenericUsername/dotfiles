@@ -1,7 +1,6 @@
 """Rofi output formatter for script mode."""
 
 from pathlib import Path
-from typing import Optional
 
 
 class RofiFormatter:
@@ -39,7 +38,7 @@ class RofiFormatter:
         return f"\x00message\x1f{text}\n"
 
     @staticmethod
-    def item(label: str, icon_path: Optional[Path] = None) -> str:
+    def item(label: str, icon_path: Path | None = None) -> str:
         """Format an item for rofi's list.
 
         Args:
