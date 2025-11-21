@@ -12,6 +12,7 @@ Apply effects to wallpapers using ImageMagick and PIL backends with a clean, ext
 - 🎯 **Type-Safe**: Pydantic models for all parameters
 - 📝 **Logging**: Integrated with dotfiles-logging module
 - 🎭 **Variant Generation**: Generate all effect variants automatically
+- 🚀 **Dynamic Registry**: Auto-discovery of effects - add new effects with just a decorator!
 
 ## Installation
 
@@ -155,6 +156,8 @@ effects = [
 
 ## Architecture
 
+The module uses a **Registry Pattern with Auto-Discovery** for maximum extensibility:
+
 ```
 wallpaper-effects-processor/
 ├── config/
@@ -164,25 +167,155 @@ wallpaper-effects-processor/
 │   ├── core/                  # Core abstractions
 │   │   ├── base.py           # WallpaperEffect ABC
 │   │   ├── types.py          # Pydantic models
+│   │   ├── registry/         # 🆕 Registry system
+│   │   │   ├── effect_registry.py  # Central registry
+│   │   │   └── decorators.py       # @register_effect()
 │   │   └── managers/         # Preset & output managers
 │   ├── backends/             # Effect implementations
+│   │   ├── __init__.py      # 🆕 Auto-discovery via pkgutil
 │   │   ├── blur.py          # ImageMagick + PIL blur
 │   │   ├── brightness.py    # ImageMagick + PIL brightness
 │   │   └── ...
 │   ├── pipeline.py          # EffectPipeline
-│   ├── factory.py           # EffectFactory
+│   ├── factory.py           # EffectFactory (registry-based)
 │   └── cli.py               # CLI interface
 └── tests/                   # Comprehensive tests
 ```
 
+### Key Components
+
+- **EffectRegistry**: Central registry for all effects and parameters
+- **@register_effect()**: Decorator for automatic effect registration
+- **Auto-Discovery**: Effects are automatically discovered at import time
+- **EffectFactory**: Creates effects by querying the registry (no hardcoded lists!)
+
 ## Adding New Effects
 
-1. Create a new file in `backends/` (e.g., `my_effect.py`)
-2. Implement both ImageMagick and PIL versions
-3. Add default parameters to `config/settings.toml`
-4. Register in `factory.py`
+**The registry-based architecture makes adding new effects incredibly simple!**
 
-See [docs/guides/creating_effects.md](docs/guides/creating_effects.md) for details.
+### Quick Example
+
+Create a new file `backends/sepia.py`:
+
+```python
+from wallpaper_processor.core.base import WallpaperEffect
+from wallpaper_processor.core.types import EffectParams
+from wallpaper_processor.core.registry import register_effect
+from pydantic import Field
+
+# 1. Define parameters (optional if no parameters needed)
+class SepiaParams(EffectParams):
+    """Parameters for sepia effect."""
+    intensity: int = Field(default=80, ge=0, le=100, description="Sepia intensity")
+
+# 2. Implement ImageMagick version
+@register_effect("sepia")  # ← That's it! Auto-registered!
+class ImageMagickSepia(WallpaperEffect):
+    """Sepia effect using ImageMagick."""
+
+    backend_name = "imagemagick"
+
+    def apply(self, input_path: str, output_path: str, params: SepiaParams) -> None:
+        intensity = params.intensity
+        self._run_imagemagick(
+            input_path,
+            output_path,
+            ["-sepia-tone", f"{intensity}%"]
+        )
+
+# 3. Implement PIL version (fallback)
+@register_effect("sepia")  # ← Same decorator, different backend!
+class PILSepia(WallpaperEffect):
+    """Sepia effect using PIL."""
+
+    backend_name = "pil"
+
+    def apply(self, input_path: str, output_path: str, params: SepiaParams) -> None:
+        from PIL import Image, ImageOps
+
+        img = Image.open(input_path)
+        # Convert to grayscale first
+        gray = ImageOps.grayscale(img)
+        # Apply sepia toning
+        sepia = ImageOps.colorize(gray, "#704214", "#C0A080")
+        sepia.save(output_path)
+```
+
+**That's it!** Your new effect is now:
+- ✅ Automatically discovered and registered
+- ✅ Available via `EffectFactory.create("sepia", config)`
+- ✅ Listed in `EffectFactory.get_all_effect_names()`
+- ✅ Usable in CLI: `wallpaper-effects-process process -i input.jpg -o output.jpg -e sepia --intensity 90`
+- ✅ Included in variant generation
+
+### Step-by-Step Guide
+
+1. **Create effect file**: `src/wallpaper_processor/backends/my_effect.py`
+2. **Define parameters** (optional):
+   ```python
+   from wallpaper_processor.core.types import EffectParams
+   from pydantic import Field
+
+   class MyEffectParams(EffectParams):
+       my_param: int = Field(default=50, ge=0, le=100)
+   ```
+
+3. **Implement ImageMagick version**:
+   ```python
+   from wallpaper_processor.core.base import WallpaperEffect
+   from wallpaper_processor.core.registry import register_effect
+
+   @register_effect("my_effect")
+   class ImageMagickMyEffect(WallpaperEffect):
+       backend_name = "imagemagick"
+
+       def apply(self, input_path: str, output_path: str, params: MyEffectParams) -> None:
+           self._run_imagemagick(input_path, output_path, ["-my-operation", str(params.my_param)])
+   ```
+
+4. **Implement PIL version**:
+   ```python
+   @register_effect("my_effect")
+   class PILMyEffect(WallpaperEffect):
+       backend_name = "pil"
+
+       def apply(self, input_path: str, output_path: str, params: MyEffectParams) -> None:
+           from PIL import Image
+           img = Image.open(input_path)
+           # ... apply effect ...
+           img.save(output_path)
+   ```
+
+5. **Register parameters** (in `core/types.py`):
+   ```python
+   from wallpaper_processor.core.registry import EffectRegistry
+
+   EffectRegistry.register_params("my_effect", MyEffectParams)
+   ```
+
+6. **Add defaults** (optional, in `config/settings.toml`):
+   ```toml
+   [defaults.my_effect]
+   my_param = 50
+   ```
+
+**No factory modifications needed!** The registry handles everything automatically.
+
+### What Changed?
+
+**Before (Hardcoded):**
+- Adding an effect required editing 6+ files
+- Manual registration in factory if/elif chains
+- Hardcoded effect lists
+- Easy to forget steps
+
+**After (Registry-Based):**
+- Adding an effect requires **1 file** with a decorator
+- Automatic registration at import time
+- Dynamic effect discovery
+- Impossible to forget - just add `@register_effect()`!
+
+See the existing effects in `src/wallpaper_processor/backends/` for complete examples.
 
 ## Documentation
 
