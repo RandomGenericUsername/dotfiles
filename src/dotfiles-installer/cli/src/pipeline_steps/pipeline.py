@@ -709,3 +709,25 @@ class ConfigureDotfilesManagerStep(PipelineStep):
 
         install_root = context.app_config.project.paths.install["_root"]
         return configure_dotfiles_manager(context, install_root)
+
+
+class InstallRofiConfigStep(PipelineStep):
+    """Pipeline step to install Rofi configuration."""
+
+    @property
+    def step_id(self) -> str:
+        return "install_rofi_config"
+
+    @property
+    def description(self) -> str:
+        return "Install Rofi configuration"
+
+    @property
+    def critical(self) -> bool:
+        return False
+
+    def run(self, context: PipelineContext) -> PipelineContext:
+        """Install Rofi configuration"""
+        from src.pipeline_steps.utils import render_rofi_config
+
+        return render_rofi_config(context)

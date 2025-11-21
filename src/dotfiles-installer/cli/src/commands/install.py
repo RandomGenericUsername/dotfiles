@@ -42,6 +42,7 @@ from src.pipeline_steps.pipeline import (
     InstallPipPackagesStep,
     InstallPyenvStep,
     InstallPythonStep,
+    InstallRofiConfigStep,
     InstallRustStep,
     InstallRustupStep,
     InstallStarshipStep,
@@ -212,6 +213,21 @@ def install(
             "colorscheme.backend": "pywal",
             "hyprpaper.monitor": "all",
         },
+        "rofi-wallpaper-selector": {
+            "paths.wallpapers_dir": str(
+                context.app_config.project.paths.install["dotfiles_wallpapers"]
+            ),
+            "paths.effects_cache_dir": str(
+                context.app_config.project.paths.install["dotfiles_cache"]
+                / "wallpaper-effects"
+            ),
+            "paths.dotfiles_manager_path": str(
+                context.app_config.project.paths.install[
+                    "dependencies_modules"
+                ]
+                / "manager"
+            ),
+        },
     }
 
     steps: list[TaskStep] = [
@@ -279,6 +295,14 @@ def install(
             timeout=60.0 * 5,
         ),
         InstallModuleStep(module_name="manager", run_makefile_install=True),
+        InstallModuleStep(
+            module_name="rofi-wallpaper-selector",
+            settings_overrides=module_settings_overrides[
+                "rofi-wallpaper-selector"
+            ],
+            run_makefile_install=True,
+        ),
+        InstallRofiConfigStep(),
         ConfigureDotfilesManagerStep(),
         StartDaemonServiceStep(),
     ]
