@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import threading
 import time
 from fnmatch import fnmatch
 from pathlib import Path
@@ -28,6 +29,7 @@ class SQLiteBackend(StateBackend):
         """
         self.db_path = Path(db_path).expanduser()
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self._lock = threading.RLock()  # Reentrant lock for thread safety
 
         self.conn = sqlite3.connect(
             str(self.db_path),
@@ -119,30 +121,32 @@ class SQLiteBackend(StateBackend):
 
     def set(self, key: str, value: Any) -> None:
         """Store a value for the given key."""
-        serialized = self._serialize(value)
-        self.conn.execute(
-            "INSERT OR REPLACE INTO kv_store (key, value, expires_at) VALUES (?, ?, NULL)",
-            (key, serialized),
-        )
+        with self._lock:
+            serialized = self._serialize(value)
+            self.conn.execute(
+                "INSERT OR REPLACE INTO kv_store (key, value, expires_at) VALUES (?, ?, NULL)",
+                (key, serialized),
+            )
 
     def get(self, key: str, default: Any = None) -> Any:
         """Retrieve a value for the given key."""
-        cursor = self.conn.execute(
-            "SELECT value, expires_at FROM kv_store WHERE key = ?",
-            (key,),
-        )
-        row = cursor.fetchone()
+        with self._lock:
+            cursor = self.conn.execute(
+                "SELECT value, expires_at FROM kv_store WHERE key = ?",
+                (key,),
+            )
+            row = cursor.fetchone()
 
-        if row is None:
-            return default
+            if row is None:
+                return default
 
-        value, expires_at = row
+            value, expires_at = row
 
-        if self._is_expired(expires_at):
-            self.delete(key)
-            return default
+            if self._is_expired(expires_at):
+                self.delete(key)
+                return default
 
-        return self._deserialize(value)
+            return self._deserialize(value)
 
     def delete(self, key: str) -> bool:
         """Delete a key."""
