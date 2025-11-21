@@ -61,19 +61,9 @@ class MinimalViewer:
     def get_colors(self, colorscheme: dict) -> list[tuple[str, str]]:
         """Get list of (name, hex) tuples for all colors to display."""
         colors = []
-        special = colorscheme.get("special", {})
         color_dict = colorscheme.get("colors", {})
 
-        if self.show_background:
-            colors.append(("background", special.get("background", "#000000")))
-
-        if self.show_foreground:
-            colors.append(("foreground", special.get("foreground", "#ffffff")))
-
-        if self.show_cursor:
-            colors.append(("cursor", special.get("cursor", "#ffffff")))
-
-        # Add all 16 colors
+        # Only show the 16 main colors (no background/foreground/cursor)
         for i in range(16):
             hex_color = color_dict.get(f"color{i}", "#000000")
             colors.append((f"color{i}", hex_color))
@@ -89,7 +79,8 @@ class MinimalViewer:
         for name, hex_color in colors:
             swatch_path = self.generate_swatch(hex_color)
             # Use hex color as the item text (hidden in icon-only mode)
-            print(f"{hex_color}\x00icon\x1f{swatch_path}", flush=True)
+            print(f"{hex_color}\x00icon\x1f{swatch_path}")
+            sys.stdout.flush()
 
     def handle_selection(self, selected: str) -> None:
         """Handle color selection - copy hex to clipboard."""

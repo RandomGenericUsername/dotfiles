@@ -10,7 +10,9 @@ def load_config() -> dict:
     """Load configuration from settings.toml."""
     import tomllib
 
-    config_file = Path(__file__).parent.parent.parent / "config" / "settings.toml"
+    config_file = (
+        Path(__file__).parent.parent.parent / "config" / "settings.toml"
+    )
 
     with open(config_file, "rb") as f:
         return tomllib.load(f)
