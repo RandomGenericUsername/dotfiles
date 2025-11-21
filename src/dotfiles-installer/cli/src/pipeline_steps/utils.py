@@ -1706,7 +1706,7 @@ def configure_dotfiles_manager(
                     / ".dependencies/tools/colorscheme-orchestrator"
                 ),
                 "paths.wlogout_icons_templates_dir": str(
-                    install_root / "dotfiles/wlogout/templates/icons"
+                    install_root / "dotfiles/wlogout/templates"
                 ),
                 "paths.wlogout_style_template_path": str(
                     install_root / "dotfiles/wlogout/templates/style.css.tpl"

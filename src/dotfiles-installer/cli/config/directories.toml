@@ -55,7 +55,7 @@ dotfiles_assets_wallpapers = "{dotfiles_assets}/wallpapers"
 
 # Wlogout subdirectories
 dotfiles_wlogout_templates = "{dotfiles_wlogout}/templates"
-dotfiles_wlogout_templates_icons = "{dotfiles_wlogout_templates}/icons"
+dotfiles_wlogout_templates_icons = "{dotfiles_wlogout_templates}/wlogout-icons"
 dotfiles_wlogout_icons = "{dotfiles_wlogout}/icons"
 
 # State subdirectories
