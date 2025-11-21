@@ -69,7 +69,7 @@ def main() -> int:
             pipeline_effects = []
             for effect_name in effects:
                 effect = EffectFactory.create(effect_name.strip(), config)
-                params = EffectFactory._create_params(
+                params = EffectFactory.create_params(
                     effect_name.strip(),
                     effect_params.get(effect_name.strip(), {}),
                 )
