@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from pydantic import BaseModel, Field
+
 from wallpaper_processor.config.defaults import (
     DEFAULT_BLUR_RADIUS,
     DEFAULT_BLUR_SIGMA,
@@ -100,6 +101,19 @@ class NegateParams(EffectParams):
     """Parameters for negate (color inversion) effect."""
 
     pass
+
+
+# Register all parameter classes with the registry
+# This happens at module import time
+from wallpaper_processor.core.registry import EffectRegistry
+
+EffectRegistry.register_params("blur", BlurParams)
+EffectRegistry.register_params("brightness", BrightnessParams)
+EffectRegistry.register_params("saturation", SaturationParams)
+EffectRegistry.register_params("vignette", VignetteParams)
+EffectRegistry.register_params("color_overlay", ColorOverlayParams)
+EffectRegistry.register_params("grayscale", GrayscaleParams)
+EffectRegistry.register_params("negate", NegateParams)
 
 
 class ProcessorConfig(BaseModel):

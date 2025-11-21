@@ -9,6 +9,7 @@ from wallpaper_processor.core.exceptions import (
     UnsupportedFormatError,
     WallpaperProcessorError,
 )
+from wallpaper_processor.core.registry import EffectRegistry, register_effect
 from wallpaper_processor.core.types import (
     BlurParams,
     BrightnessParams,
@@ -31,6 +32,9 @@ __all__ = [
     "ProcessingError",
     "UnsupportedFormatError",
     "WallpaperProcessorError",
+    # Registry
+    "EffectRegistry",
+    "register_effect",
     # Types
     "BlurParams",
     "BrightnessParams",
