@@ -10,9 +10,11 @@ packages = [
     "htop",
     "zsh",
     "tmux",
-    "build-essential",  # Debian-specific: development tools
     "curl",
     "wget",
+    "rofi",         # App launcher
+    # Devel tools
+    "build-essential",  # Debian-specific: development tools
     # Zsh plugins
     "zsh-syntax-highlighting",
     "zsh-autosuggestions",

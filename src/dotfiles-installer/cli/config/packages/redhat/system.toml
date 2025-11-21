@@ -10,11 +10,13 @@ packages = [
     "htop",
     "zsh",
     "tmux",
+    "curl",
+    "wget",
+    "rofi",
+    # Devel tools
     "gcc",              # RedHat-specific: C compiler
     "gcc-c++",          # RedHat-specific: C++ compiler
     "make",
-    "curl",
-    "wget",
     # Zsh plugins
     "zsh-syntax-highlighting",
     "zsh-autosuggestions",

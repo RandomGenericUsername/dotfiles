@@ -10,6 +10,10 @@ packages = [
     "htop",
     "zsh",
     "tmux",
+    "curl",
+    "wget",
+    "rofi",
+    # Devel tools
     "base-devel",  # Arch-specific: development tools
     "yay",         # AUR helper (if using AUR)
     # Zsh plugins
