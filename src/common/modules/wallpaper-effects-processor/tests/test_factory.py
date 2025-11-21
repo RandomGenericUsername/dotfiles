@@ -114,11 +114,13 @@ class TestEffectFactory:
         assert effect.backend_name == "pil"
 
     def test_get_all_effect_names(self):
-        """Test getting all effect names."""
+        """Test getting all effect names from dynamic registry."""
         names = EffectFactory.get_all_effect_names()
 
         assert isinstance(names, list)
-        assert len(names) == 7
+        # Should have at least the 7 core effects (dynamic registry may have more)
+        assert len(names) >= 7
+        # Verify all core effects are present
         assert "blur" in names
         assert "brightness" in names
         assert "saturation" in names
