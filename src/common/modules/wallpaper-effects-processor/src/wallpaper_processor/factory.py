@@ -4,38 +4,15 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from wallpaper_processor.backends import (
-    ImageMagickBlur,
-    ImageMagickBrightness,
-    ImageMagickColorOverlay,
-    ImageMagickGrayscale,
-    ImageMagickNegate,
-    ImageMagickSaturation,
-    ImageMagickVignette,
-    PILBlur,
-    PILBrightness,
-    PILColorOverlay,
-    PILGrayscale,
-    PILNegate,
-    PILSaturation,
-    PILVignette,
-)
+# Import backends module to trigger effect registration
+from wallpaper_processor import backends  # noqa: F401
 from wallpaper_processor.config import AppConfig
 from wallpaper_processor.core.base import WallpaperEffect
 from wallpaper_processor.core.exceptions import (
     EffectNotAvailableError,
     PresetNotFoundError,
 )
-from wallpaper_processor.core.types import (
-    BlurParams,
-    BrightnessParams,
-    ColorOverlayParams,
-    GrayscaleParams,
-    NegateParams,
-    ProcessorConfig,
-    SaturationParams,
-    VignetteParams,
-)
+from wallpaper_processor.core.types import EffectParams, ProcessorConfig
 from wallpaper_processor.pipeline import EffectPipeline
 
 
@@ -84,7 +61,7 @@ class EffectFactory:
 
     @staticmethod
     def _create_imagemagick(effect_name: str) -> WallpaperEffect | None:
-        """Create ImageMagick effect instance.
+        """Create ImageMagick effect instance using registry.
 
         Args:
             effect_name: Effect identifier
@@ -92,25 +69,18 @@ class EffectFactory:
         Returns:
             ImageMagick effect instance or None if unknown
         """
-        if effect_name == "blur":
-            return ImageMagickBlur()
-        elif effect_name == "brightness":
-            return ImageMagickBrightness()
-        elif effect_name == "saturation":
-            return ImageMagickSaturation()
-        elif effect_name == "vignette":
-            return ImageMagickVignette()
-        elif effect_name == "color_overlay":
-            return ImageMagickColorOverlay()
-        elif effect_name == "grayscale":
-            return ImageMagickGrayscale()
-        elif effect_name == "negate":
-            return ImageMagickNegate()
+        from wallpaper_processor.core.registry import EffectRegistry
+
+        effect_class = EffectRegistry.get_effect_class(
+            effect_name, "imagemagick"
+        )
+        if effect_class:
+            return effect_class()
         return None
 
     @staticmethod
     def _create_pil(effect_name: str) -> WallpaperEffect | None:
-        """Create PIL effect instance.
+        """Create PIL effect instance using registry.
 
         Args:
             effect_name: Effect identifier
@@ -118,20 +88,11 @@ class EffectFactory:
         Returns:
             PIL effect instance or None if unknown
         """
-        if effect_name == "blur":
-            return PILBlur()
-        elif effect_name == "brightness":
-            return PILBrightness()
-        elif effect_name == "saturation":
-            return PILSaturation()
-        elif effect_name == "vignette":
-            return PILVignette()
-        elif effect_name == "color_overlay":
-            return PILColorOverlay()
-        elif effect_name == "grayscale":
-            return PILGrayscale()
-        elif effect_name == "negate":
-            return PILNegate()
+        from wallpaper_processor.core.registry import EffectRegistry
+
+        effect_class = EffectRegistry.get_effect_class(effect_name, "pil")
+        if effect_class:
+            return effect_class()
         return None
 
     @staticmethod
@@ -173,8 +134,29 @@ class EffectFactory:
         return EffectPipeline(effects, config)
 
     @staticmethod
-    def _create_params(effect_name: str, params_dict: dict) -> object:
-        """Create params instance from dict.
+    def create_params(effect_name: str, params_dict: dict) -> EffectParams:
+        """Create params instance from dict (PUBLIC API).
+
+        Args:
+            effect_name: Effect identifier
+            params_dict: Parameters dictionary
+
+        Returns:
+            EffectParams instance
+
+        Raises:
+            ValueError: If effect_name is unknown
+        """
+        from wallpaper_processor.core.registry import EffectRegistry
+
+        params_class = EffectRegistry.get_params_class(effect_name)
+        if not params_class:
+            raise ValueError(f"Unknown effect: {effect_name}")
+        return params_class(**params_dict)
+
+    @staticmethod
+    def _create_params(effect_name: str, params_dict: dict) -> EffectParams:
+        """Create params instance from dict (DEPRECATED - use create_params).
 
         Args:
             effect_name: Effect identifier
@@ -183,39 +165,19 @@ class EffectFactory:
         Returns:
             EffectParams instance
         """
-        if effect_name == "blur":
-            return BlurParams(**params_dict)
-        elif effect_name == "brightness":
-            return BrightnessParams(**params_dict)
-        elif effect_name == "saturation":
-            return SaturationParams(**params_dict)
-        elif effect_name == "vignette":
-            return VignetteParams(**params_dict)
-        elif effect_name == "color_overlay":
-            return ColorOverlayParams(**params_dict)
-        elif effect_name == "grayscale":
-            return GrayscaleParams(**params_dict)
-        elif effect_name == "negate":
-            return NegateParams(**params_dict)
-        else:
-            raise ValueError(f"Unknown effect: {effect_name}")
+        # Backwards compatibility wrapper
+        return EffectFactory.create_params(effect_name, params_dict)
 
     @staticmethod
     def get_all_effect_names() -> list[str]:
-        """Get list of all registered effect names.
+        """Get list of all registered effect names from registry.
 
         Returns:
-            List of effect names
+            Sorted list of effect names
         """
-        return [
-            "blur",
-            "brightness",
-            "saturation",
-            "vignette",
-            "color_overlay",
-            "grayscale",
-            "negate",
-        ]
+        from wallpaper_processor.core.registry import EffectRegistry
+
+        return EffectRegistry.get_all_effect_names()
 
     @staticmethod
     def list_available_effects(_settings: AppConfig) -> dict[str, list[str]]:
