@@ -731,3 +731,31 @@ class InstallRofiConfigStep(PipelineStep):
         from src.pipeline_steps.utils import render_rofi_config
 
         return render_rofi_config(context)
+
+
+class SetDefaultWallpaperStep(PipelineStep):
+    """Pipeline step to set default wallpaper."""
+
+    @property
+    def step_id(self) -> str:
+        return "set_default_wallpaper"
+
+    @property
+    def description(self) -> str:
+        return "Set default wallpaper"
+
+    @property
+    def timeout(self) -> float | None:
+        """Step timeout in seconds (5 minutes for generation)."""
+        return 360.0
+
+    @property
+    def critical(self) -> bool:
+        return True
+
+    def run(self, context: PipelineContext) -> PipelineContext:
+        """Set default wallpaper using dotfiles-manager."""
+        from src.pipeline_steps.utils import set_default_wallpaper
+
+        install_root = context.app_config.project.paths.install["_root"]
+        return set_default_wallpaper(context, install_root)

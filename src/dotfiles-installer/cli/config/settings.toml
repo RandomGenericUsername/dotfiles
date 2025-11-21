@@ -12,6 +12,19 @@ dry_run = false
 # (arch, debian, redhat). Package configs and features defined here are defaults
 # that can be overridden by distro-specific configs.
 
+# ============================================================================
+# Installation Settings
+# ============================================================================
+[installation.wallpaper]
+# Default wallpaper to set during installation
+# This should be the filename (without extension) of a wallpaper in the
+# wallpapers directory (e.g., "default" will match "default.jpg", "default.png", etc.)
+default_wallpaper = "default"
+
+# Target monitor(s) for default wallpaper
+# Options: "all" (all monitors), "focused" (currently focused monitor), or specific monitor name
+target_monitors = "all"
+
 # Default package configurations (can be overridden per distro)
 [project.settings.system.packages.config.zsh]
 type = "template"

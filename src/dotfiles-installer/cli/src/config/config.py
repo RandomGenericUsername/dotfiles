@@ -589,6 +589,19 @@ class CliSettings(BaseModel):
         return validate_boolean_string(v)
 
 
+class WallpaperInstallationSettings(BaseModel):
+    """Wallpaper installation settings."""
+
+    default_wallpaper: str = Field(
+        default="default",
+        description="Default wallpaper filename (without extension) to set during installation",
+    )
+    target_monitors: str = Field(
+        default="all",
+        description="Target monitor(s) for default wallpaper: 'all', 'focused', or specific monitor name",
+    )
+
+
 class ProjectSettings(BaseModel):
     """Project-level settings (not user-configurable)."""
 
@@ -611,6 +624,19 @@ class ProjectSettings(BaseModel):
     system: System = Field(
         default_factory=System,
         description="System configuration (packages, etc.)",
+    )
+    installation: "InstallationSettings" = Field(
+        default_factory=lambda: InstallationSettings(),
+        description="Installation-specific settings",
+    )
+
+
+class InstallationSettings(BaseModel):
+    """Installation-specific settings."""
+
+    wallpaper: WallpaperInstallationSettings = Field(
+        default_factory=WallpaperInstallationSettings,
+        description="Wallpaper installation settings",
     )
 
 

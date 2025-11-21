@@ -50,6 +50,7 @@ from src.pipeline_steps.pipeline import (
     InstallWlogoutConfigStep,
     InstallZshConfigStep,
     PrintInstallationMessageStep,
+    SetDefaultWallpaperStep,
     StartDaemonServiceStep,
     UpdateSystemStep,
 )
@@ -305,6 +306,7 @@ def install(
         InstallRofiConfigStep(),
         ConfigureDotfilesManagerStep(),
         StartDaemonServiceStep(),
+        SetDefaultWallpaperStep(),
     ]
     pipeline: Pipeline = Pipeline.create(steps)
     pipeline.run(context)

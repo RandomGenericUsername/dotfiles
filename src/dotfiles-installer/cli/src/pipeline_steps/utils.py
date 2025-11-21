@@ -2320,3 +2320,144 @@ def render_rofi_config(context: PipelineContext) -> PipelineContext:
         raise
 
     return context
+
+
+def set_default_wallpaper(
+    context: PipelineContext,
+    install_root: Path,
+) -> PipelineContext:
+    """Set default wallpaper using dotfiles-manager.
+
+    This function:
+    1. Reads default wallpaper configuration from settings
+    2. Finds the wallpaper file in the wallpapers directory
+    3. Calls dotfiles-manager CLI to set the wallpaper
+    4. Generates effects and colorscheme during the process
+
+    Args:
+        context: Pipeline context
+        install_root: Installation root directory
+
+    Returns:
+        Updated pipeline context
+
+    Raises:
+        Exception: If wallpaper setting fails (critical step)
+    """
+    import subprocess
+
+    logger: RichLogger = context.logger_instance
+
+    logger.debug("Setting default wallpaper...")
+
+    try:
+        # Get wallpaper configuration from settings
+        wallpaper_config = (
+            context.app_config.project.settings.installation.wallpaper
+        )
+        default_wallpaper_name = wallpaper_config.default_wallpaper
+        target_monitors = wallpaper_config.target_monitors
+
+        logger.debug(
+            f"Default wallpaper: {default_wallpaper_name}, "
+            f"Target monitors: {target_monitors}"
+        )
+
+        # Find wallpaper file in wallpapers directory
+        wallpapers_dir = install_root / "dotfiles" / "wallpapers"
+
+        if not wallpapers_dir.exists():
+            raise FileNotFoundError(
+                f"Wallpapers directory not found: {wallpapers_dir}"
+            )
+
+        # Search for wallpaper file with any common image extension
+        wallpaper_extensions = [".jpg", ".jpeg", ".png", ".webp", ".bmp"]
+        wallpaper_path = None
+
+        for ext in wallpaper_extensions:
+            candidate = wallpapers_dir / f"{default_wallpaper_name}{ext}"
+            if candidate.exists():
+                wallpaper_path = candidate
+                break
+
+        if not wallpaper_path:
+            raise FileNotFoundError(
+                f"Default wallpaper '{default_wallpaper_name}' not found in "
+                f"{wallpapers_dir}. Searched extensions: {wallpaper_extensions}"
+            )
+
+        logger.debug(f"Found wallpaper: {wallpaper_path}")
+
+        # Get dotfiles-manager CLI path
+        manager_cli = (
+            install_root
+            / ".dependencies"
+            / "modules"
+            / "manager"
+            / ".venv"
+            / "bin"
+            / "dotfiles-manager"
+        )
+
+        if not manager_cli.exists():
+            raise FileNotFoundError(
+                f"dotfiles-manager CLI not found: {manager_cli}"
+            )
+
+        # Build command
+        cmd = [
+            str(manager_cli),
+            "change-wallpaper",
+            str(wallpaper_path),
+            "--monitor",
+            target_monitors,
+            "--colorscheme",  # Generate colorscheme
+            "--effects",  # Generate effects
+        ]
+
+        logger.info(
+            f"Setting default wallpaper: {wallpaper_path.name} "
+            f"(monitor: {target_monitors})"
+        )
+        logger.debug(f"Running command: {' '.join(cmd)}")
+
+        # Run dotfiles-manager
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=300,  # 5 minute timeout for generation
+        )
+
+        if result.returncode == 0:
+            logger.info("✓ Default wallpaper set successfully")
+            logger.debug(f"Output: {result.stdout}")
+            context.results["default_wallpaper_set"] = True
+            context.results["default_wallpaper_path"] = str(wallpaper_path)
+        else:
+            error_msg = (
+                f"Failed to set default wallpaper. "
+                f"Return code: {result.returncode}\n"
+                f"Stderr: {result.stderr}\n"
+                f"Stdout: {result.stdout}"
+            )
+            logger.error(f"✗ {error_msg}")
+            raise RuntimeError(error_msg)
+
+    except subprocess.TimeoutExpired as e:
+        error_msg = (
+            f"Timeout setting default wallpaper (exceeded 5 minutes): {e}"
+        )
+        logger.error(f"✗ {error_msg}")
+        context.errors.append(e)
+        context.results["default_wallpaper_set"] = False
+        raise RuntimeError(error_msg) from e
+
+    except Exception as e:
+        logger.error(f"✗ Failed to set default wallpaper: {e}")
+        context.errors.append(e)
+        context.results["default_wallpaper_set"] = False
+        raise
+
+    return context
