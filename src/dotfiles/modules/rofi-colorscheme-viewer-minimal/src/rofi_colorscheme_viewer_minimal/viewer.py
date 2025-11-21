@@ -18,6 +18,8 @@ class MinimalViewer:
         show_background: bool = True,
         show_foreground: bool = True,
         show_cursor: bool = True,
+        clipboard_method: str = "wl-copy",
+        auto_copy: bool = True,
     ):
         self.colorscheme_file = Path(colorscheme_file).expanduser()
         self.swatch_dir = Path(swatch_dir)
@@ -25,6 +27,8 @@ class MinimalViewer:
         self.show_background = show_background
         self.show_foreground = show_foreground
         self.show_cursor = show_cursor
+        self.clipboard_method = clipboard_method
+        self.auto_copy = auto_copy
 
         # Ensure swatch directory exists
         self.swatch_dir.mkdir(parents=True, exist_ok=True)
@@ -84,15 +88,23 @@ class MinimalViewer:
 
     def handle_selection(self, selected: str) -> None:
         """Handle color selection - copy hex to clipboard."""
-        if not selected:
+        if not selected or not self.auto_copy:
             return
 
-        # Copy to clipboard using wl-copy
-        subprocess.run(
-            ["wl-copy", selected],
-            check=True,
-            capture_output=True,
-        )
+        # Copy to clipboard using configured method
+        try:
+            # Split the clipboard command to handle arguments
+            # e.g., "xclip -selection clipboard" -> ["xclip", "-selection", "clipboard"]
+            clipboard_cmd = self.clipboard_method.split()
+            subprocess.run(
+                clipboard_cmd,
+                input=selected.encode(),
+                check=True,
+                capture_output=True,
+            )
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            # Silently fail if clipboard tool is not available
+            pass
 
     def run(self) -> None:
         """Run the viewer in rofi script mode."""

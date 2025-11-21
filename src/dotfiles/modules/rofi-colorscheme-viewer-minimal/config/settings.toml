@@ -7,3 +7,10 @@ swatch_size = 40
 show_background = true
 show_foreground = true
 show_cursor = true
+
+[clipboard]
+# Clipboard tool configuration
+# Can be any clipboard command that reads from stdin
+# Examples: "wl-copy" (Wayland), "xclip -selection clipboard" (X11), "pbcopy" (macOS)
+method = "wl-copy"
+auto_copy = true

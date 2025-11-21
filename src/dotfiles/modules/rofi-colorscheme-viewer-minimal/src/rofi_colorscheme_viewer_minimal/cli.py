@@ -30,6 +30,8 @@ def main() -> None:
             show_background=config["display"]["show_background"],
             show_foreground=config["display"]["show_foreground"],
             show_cursor=config["display"]["show_cursor"],
+            clipboard_method=config["clipboard"]["method"],
+            auto_copy=config["clipboard"]["auto_copy"],
         )
 
         viewer.run()
