@@ -42,19 +42,19 @@ monitors = []  # Empty = auto-detect, or specify: ["DP-1", "HDMI-1"]
 install_root = "~/.local/share/dotfiles"
 
 # Tool paths
-wallpaper_orchestrator_path = "{install_root}/.dependencies/tools/wallpaper-orchestrator"
-colorscheme_orchestrator_path = "{install_root}/.dependencies/tools/colorscheme-orchestrator"
+wallpaper_orchestrator_path = "{install_root}/tools/wallpaper-orchestrator"
+colorscheme_orchestrator_path = "{install_root}/tools/colorscheme-orchestrator"
 
 # Icon paths
-status_bar_icons_base_dir = "{install_root}/dotfiles/assets/status-bar-icons"
-status_bar_icons_output_dir = "{install_root}/dotfiles/eww/status-bar/icons"
+status_bar_icons_base_dir = "{install_root}/assets/status-bar-icons"
+status_bar_icons_output_dir = "~/.config/eww/status-bar/icons"
 
 # Wlogout paths
-wlogout_icons_templates_dir = "{install_root}/dotfiles/wlogout/templates/icons"
+wlogout_icons_templates_dir = "{install_root}/dotfiles/wlogout/templates"
 wlogout_style_template_path = "{install_root}/dotfiles/wlogout/templates/style.css.tpl"
-wlogout_icons_output_dir = "{install_root}/dotfiles/wlogout/icons"
-wlogout_style_output_path = "{install_root}/dotfiles/wlogout/style.css"
-wlogout_config_dir = "{install_root}/dotfiles/config/wlogout"
+wlogout_icons_output_dir = "~/.config/wlogout/icons"
+wlogout_style_output_path = "~/.config/wlogout/style.css"
+wlogout_config_dir = "~/.config/wlogout"
 
 # ============================================================================
 # Wallpaper Orchestrator Configuration Overrides
