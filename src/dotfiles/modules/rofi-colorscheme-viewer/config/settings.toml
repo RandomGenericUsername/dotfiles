@@ -23,6 +23,13 @@ swatch_size = 100  # pixels
 available = ["hex", "rgb", "json"]
 default = "hex"
 
+[clipboard]
+# Clipboard tool configuration
+# Can be any clipboard command that reads from stdin
+# Examples: "wl-copy" (Wayland), "xclip -selection clipboard" (X11), "pbcopy" (macOS)
+method = "wl-copy"
+auto_copy = true
+
 [logging]
 # Logging configuration
 level = "INFO"

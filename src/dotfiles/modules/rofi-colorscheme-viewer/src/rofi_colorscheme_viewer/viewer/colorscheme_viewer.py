@@ -270,13 +270,17 @@ class ColorschemeViewer:
         else:
             return
 
-        # Copy to clipboard using wl-copy
-        try:
-            subprocess.run(
-                ["wl-copy"],
-                input=value.encode(),
-                check=True,
-            )
-        except subprocess.CalledProcessError:
-            # Silently fail if wl-copy is not available
-            pass
+        # Copy to clipboard using configured method
+        if self.config.clipboard.auto_copy:
+            try:
+                # Split the clipboard command to handle arguments
+                # e.g., "xclip -selection clipboard" -> ["xclip", "-selection", "clipboard"]
+                clipboard_cmd = self.config.clipboard.method.split()
+                subprocess.run(
+                    clipboard_cmd,
+                    input=value.encode(),
+                    check=True,
+                )
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                # Silently fail if clipboard tool is not available
+                pass

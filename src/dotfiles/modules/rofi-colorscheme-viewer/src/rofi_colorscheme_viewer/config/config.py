@@ -36,6 +36,18 @@ class FormatsConfig(BaseModel):
     default: str = Field("hex", description="Default format")
 
 
+class ClipboardConfig(BaseModel):
+    """Clipboard configuration."""
+
+    method: str = Field(
+        "wl-copy",
+        description="Clipboard command (e.g., wl-copy, xclip -selection clipboard)",
+    )
+    auto_copy: bool = Field(
+        True, description="Automatically copy on selection"
+    )
+
+
 class LoggingConfig(BaseModel):
     """Logging configuration."""
 
@@ -48,6 +60,7 @@ class AppConfig(BaseModel):
     paths: PathsConfig
     rofi: RofiConfig
     formats: FormatsConfig
+    clipboard: ClipboardConfig
     logging: LoggingConfig
 
 
@@ -94,6 +107,10 @@ def load_config(config_file: Path | None = None) -> AppConfig:
         formats=FormatsConfig(
             available=list(settings.formats.available),
             default=settings.formats.default,
+        ),
+        clipboard=ClipboardConfig(
+            method=settings.clipboard.method,
+            auto_copy=settings.clipboard.auto_copy,
         ),
         logging=LoggingConfig(
             level=settings.logging.level,
