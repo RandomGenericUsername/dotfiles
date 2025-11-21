@@ -278,7 +278,7 @@ def install(
             run_makefile_install=True,
             timeout=60.0 * 5,
         ),
-        InstallModuleStep(module_name="manager"),
+        InstallModuleStep(module_name="manager", run_makefile_install=True),
         ConfigureDotfilesManagerStep(),
         StartDaemonServiceStep(),
     ]
