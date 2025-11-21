@@ -48,6 +48,7 @@ dotfiles_wlogout = "{dotfiles}/wlogout"
 dotfiles_cache = "{dotfiles}/.cache"
 dotfiles_config = "{dotfiles}/config"
 dotfiles_config_hypr = "{dotfiles_config}/hypr"
+dotfiles_config_rofi = "{dotfiles_config}/rofi"
 
 # Dotfiles assets
 dotfiles_assets = "{dotfiles}/assets"
@@ -105,6 +106,7 @@ dotfiles_installer = "dotfiles-installer"
 # Dotfiles subdirectories
 dotfiles_config_files = "{dotfiles}/config-files"
 dotfiles_config_files_hypr = "{dotfiles_config_files}/hypr"
+dotfiles_config_files_rofi = "{dotfiles_config_files}/rofi"
 dotfiles_config_files_starship = "{dotfiles_config_files}/starship"
 dotfiles_config_files_wlogout = "{dotfiles_config_files}/wlogout"
 dotfiles_config_files_wlogout_icons = "{dotfiles_config_files_wlogout}/icons"
@@ -141,6 +143,9 @@ common_modules_hyprpaper_manager = "{common_modules}/hyprpaper-manager"
 # Alias for manager module (used by install_component function)
 # Manager module is in dotfiles/modules, not common/modules
 common_modules_manager = "{dotfiles_modules}/manager"
+
+# Alias for rofi-wallpaper-selector module
+common_modules_rofi_wallpaper_selector = "{dotfiles_modules}/rofi-wallpaper-selector"
 
 # Tool source paths
 common_tools_colorscheme_orchestrator = "{common_tools}/colorscheme-orchestrator"

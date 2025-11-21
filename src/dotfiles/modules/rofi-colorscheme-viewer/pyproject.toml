@@ -1,0 +1,42 @@
+[project]
+name = "rofi-colorscheme-viewer"
+version = "0.1.0"
+description = "Rofi interface for viewing and copying colorscheme colors"
+requires-python = ">=3.11"
+dependencies = [
+    "dynaconf>=3.2.0",
+    "pydantic>=2.0.0",
+]
+
+[project.scripts]
+rofi-colorscheme-viewer = "rofi_colorscheme_viewer.cli:main"
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0",
+]
+
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+    "--verbose",
+    "--cov=rofi_colorscheme_viewer",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

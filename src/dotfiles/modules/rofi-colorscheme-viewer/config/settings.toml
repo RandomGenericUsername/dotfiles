@@ -1,0 +1,28 @@
+# ============================================================================
+# Rofi Colorscheme Viewer Configuration
+# ============================================================================
+
+[paths]
+# Colorscheme file path (overridden by installer)
+# This should point to the JSON output from colorscheme-generator
+colorscheme_file = "/tmp/test-colorscheme/colors.json"
+
+# Temporary directory for swatches and state
+temp_dir = "/tmp/rofi-colorscheme-viewer"
+
+[rofi]
+# Rofi display settings
+show_icons = true
+swatch_size = 100  # pixels
+
+[formats]
+# Available copy formats
+# hex: #1a1b26
+# rgb: rgb(26, 27, 38)
+# json: {"hex":"#1a1b26","rgb":[26,27,38]}
+available = ["hex", "rgb", "json"]
+default = "hex"
+
+[logging]
+# Logging configuration
+level = "INFO"
