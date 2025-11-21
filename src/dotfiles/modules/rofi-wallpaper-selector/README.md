@@ -1,0 +1,92 @@
+# Rofi Wallpaper Selector
+
+A rofi-based wallpaper and effect selector for the dotfiles system.
+
+## Overview
+
+This module provides a rofi interface for selecting wallpapers and wallpaper effects. It integrates with the dotfiles-manager to change wallpapers and generate colorschemes dynamically.
+
+## Features
+
+- **Wallpaper Selection**: Browse and select wallpapers with thumbnail previews
+- **Effect Selection**: Apply effects to the current wallpaper (blur, grayscale, pixelate, etc.)
+- **Dynamic Effects Discovery**: Automatically discovers available effects from the cache
+- **Colorscheme Generation**: Automatically generates colorschemes when changing wallpapers or effects
+- **Manager Integration**: Seamlessly integrates with dotfiles-manager for state management
+
+## Installation
+
+The module is automatically installed by the dotfiles installer. Manual installation:
+
+```bash
+cd src/dotfiles/modules/rofi-wallpaper-selector
+make install
+```
+
+## Usage
+
+### Wallpaper Selection
+
+```bash
+# List wallpapers (called by rofi)
+ROFI_RETV=0 rofi-wallpaper-selector wallpapers
+
+# Handle wallpaper selection (called by rofi)
+echo "mountain" | ROFI_RETV=1 rofi-wallpaper-selector wallpapers
+```
+
+### Effect Selection
+
+```bash
+# List effects for current wallpaper (called by rofi)
+ROFI_RETV=0 rofi-wallpaper-selector effects
+
+# Handle effect selection (called by rofi)
+echo "blur" | ROFI_RETV=1 rofi-wallpaper-selector effects
+```
+
+### Rofi Integration
+
+Use the provided rofi configuration:
+
+```bash
+rofi -show wallpapers -config ~/.local/share/dotfiles/dotfiles/config/rofi/wallpapers-and-effects-mode.rasi
+```
+
+## Configuration
+
+Configuration is located at `config/settings.toml`. Key settings:
+
+- `paths.wallpapers_dir`: Directory containing wallpapers
+- `paths.effects_cache_dir`: Directory containing wallpaper effects cache
+- `rofi.show_icons`: Enable/disable icon display
+- `wallpaper.auto_generate_effects`: Auto-generate effects on wallpaper selection
+- `wallpaper.auto_generate_colorscheme`: Auto-generate colorscheme on wallpaper change
+
+## Architecture
+
+See [docs/architecture.md](docs/architecture.md) for detailed architecture documentation.
+
+## API
+
+See [docs/api.md](docs/api.md) for API documentation.
+
+## Development
+
+```bash
+# Install dependencies
+make install
+
+# Run tests
+make test
+
+# Run linter
+make lint
+
+# Format code
+make format
+```
+
+## License
+
+Part of the dotfiles system.

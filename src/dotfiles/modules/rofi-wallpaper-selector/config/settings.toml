@@ -1,0 +1,36 @@
+# ============================================================================
+# Rofi Wallpaper Selector Configuration
+# ============================================================================
+
+[paths]
+# Wallpapers directory (overridden by installer)
+wallpapers_dir = "~/.tmp/inumaki-dotfiles/dotfiles/wallpapers"
+
+# Effects cache directory (overridden by installer)
+effects_cache_dir = "~/.tmp/inumaki-dotfiles/dotfiles/.cache/wallpaper-effects"
+
+# Dotfiles manager module path (overridden by installer)
+dotfiles_manager_path = "~/.tmp/inumaki-dotfiles/.dependencies/modules/manager"
+
+[rofi]
+# Rofi display settings
+show_icons = true
+icon_size = 100  # pixels
+
+# Window names for rofi modi
+wallpaper_mode_name = "wallpapers"
+effect_mode_name = "effects"
+
+[wallpaper]
+# Default monitor (can be overridden by CLI)
+default_monitor = "focused"
+
+# Whether to generate effects on wallpaper selection
+auto_generate_effects = true
+
+# Whether to generate colorscheme on wallpaper change
+auto_generate_colorscheme = true
+
+[logging]
+# Logging configuration
+level = "INFO"
