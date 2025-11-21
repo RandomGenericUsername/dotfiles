@@ -5,6 +5,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from dotfiles_daemon import DaemonPublisher
+from dotfiles_event_protocol import MessageBuilder
 from wallpaper_orchestrator import WallpaperOrchestrator
 
 from dotfiles_manager.hooks.registry import HookRegistry
@@ -63,8 +64,11 @@ class WallpaperService:
         Returns:
             Dict with results
         """
-        # Generate operation ID
+        import time
+
+        # Generate operation ID and track start time
         operation_id = str(uuid4())
+        start_time = time.time()
 
         # Connect to daemon (non-blocking)
         try:
@@ -74,17 +78,15 @@ class WallpaperService:
             pass
 
         # Publish operation started event
-        start_message = {
-            "message_id": str(uuid4()),
-            "timestamp": "",
-            "event_type": "wallpaper",
-            "payload": {
-                "type": "operation_started",
-                "operation_id": operation_id,
+        start_message = MessageBuilder.operation_started(
+            event_type="wallpaper",
+            operation_id=operation_id,
+            operation_name="change_wallpaper",
+            parameters={
                 "wallpaper_path": str(wallpaper_path),
                 "monitor": monitor,
             },
-        }
+        )
         self._publish_event_sync(start_message)
 
         try:
@@ -132,16 +134,13 @@ class WallpaperService:
             hook_results = self._hook_registry.execute_all(hook_context)
 
             # Publish operation completed event
-            complete_message = {
-                "message_id": str(uuid4()),
-                "timestamp": "",
-                "event_type": "wallpaper",
-                "payload": {
-                    "type": "operation_completed",
-                    "operation_id": operation_id,
-                    "success": result.success,
-                },
-            }
+            duration = time.time() - start_time
+            complete_message = MessageBuilder.operation_completed(
+                event_type="wallpaper",
+                operation_id=operation_id,
+                duration_seconds=duration,
+                result={"success": result.success},
+            )
             self._publish_event_sync(complete_message)
 
             return {
@@ -154,16 +153,12 @@ class WallpaperService:
 
         except Exception as e:
             # Publish operation failed event
-            failed_message = {
-                "message_id": str(uuid4()),
-                "timestamp": "",
-                "event_type": "wallpaper",
-                "payload": {
-                    "type": "operation_failed",
-                    "operation_id": operation_id,
-                    "error": str(e),
-                },
-            }
+            failed_message = MessageBuilder.operation_failed(
+                event_type="wallpaper",
+                operation_id=operation_id,
+                error_code="WALLPAPER_CHANGE_FAILED",
+                error_message=str(e),
+            )
             self._publish_event_sync(failed_message)
             raise
 
@@ -235,18 +230,13 @@ class WallpaperService:
                 progress: Overall progress percentage
             """
             # Create progress message
-            message = {
-                "message_id": str(uuid4()),
-                "timestamp": "",  # Will be set by MessageBuilder
-                "event_type": "wallpaper",
-                "payload": {
-                    "type": "operation_progress",
-                    "operation_id": operation_id,
-                    "step_id": step_name,
-                    "step_progress": (step_index + 1) / total_steps * 100,
-                    "overall_progress": progress,
-                },
-            }
+            message = MessageBuilder.operation_progress(
+                event_type="wallpaper",
+                operation_id=operation_id,
+                step_id=step_name,
+                step_progress=(step_index + 1) / total_steps * 100,
+                overall_progress=progress,
+            )
             self._publish_event_sync(message)
 
         return progress_callback
