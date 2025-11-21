@@ -173,8 +173,18 @@ class ParallelTaskExecutor:
                                 merged.results.get(key, original_value)
                                 + step_increment
                             )
+                    elif isinstance(value, dict):
+                        # For dict values, merge recursively
+                        if key in merged.results and isinstance(
+                            merged.results[key], dict
+                        ):
+                            # Merge the dicts
+                            merged.results[key].update(value)
+                        else:
+                            # No existing dict, just set the value
+                            merged.results[key] = value.copy()
                     else:
-                        # For all other values (booleans), update
+                        # For all other values (booleans, strings, etc.)
                         merged.results[key] = value
 
             # Merge errors if both contexts have errors attribute
