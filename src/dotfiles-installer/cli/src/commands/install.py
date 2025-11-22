@@ -229,6 +229,27 @@ def install(
                 / "manager"
             ),
         },
+        "rofi-config-manager": {
+            "paths.rofi_wallpaper_selector_cli": str(
+                context.app_config.project.paths.install[
+                    "dependencies_modules"
+                ]
+                / "rofi-wallpaper-selector"
+                / ".venv"
+                / "bin"
+                / "rofi-wallpaper-selector"
+            ),
+            "paths.dotfiles_manager_path": str(
+                context.app_config.project.paths.install[
+                    "dependencies_modules"
+                ]
+                / "manager"
+            ),
+            "paths.output_dir": str(
+                context.app_config.project.paths.install["dotfiles_config"]
+                / "rofi"
+            ),
+        },
     }
 
     steps: list[TaskStep] = [
@@ -300,6 +321,13 @@ def install(
             module_name="rofi-wallpaper-selector",
             settings_overrides=module_settings_overrides[
                 "rofi-wallpaper-selector"
+            ],
+            run_makefile_install=True,
+        ),
+        InstallModuleStep(
+            module_name="rofi-config-manager",
+            settings_overrides=module_settings_overrides[
+                "rofi-config-manager"
             ],
             run_makefile_install=True,
         ),

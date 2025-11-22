@@ -1705,6 +1705,10 @@ def configure_dotfiles_manager(
                     install_root
                     / ".dependencies/tools/colorscheme-orchestrator"
                 ),
+                "paths.rofi_config_manager_cli": str(
+                    install_root
+                    / ".dependencies/modules/rofi-config-manager/.venv/bin/rofi-config-manager"
+                ),
                 "paths.wlogout_icons_templates_dir": str(
                     install_root / "dotfiles/wlogout/templates"
                 ),
@@ -2214,112 +2218,9 @@ def install_eww_config(context: PipelineContext) -> PipelineContext:
     return context
 
 
-def render_rofi_config(context: PipelineContext) -> PipelineContext:
-    """Render Rofi configuration from template.
-
-    Args:
-        context: The pipeline context
-
-    Returns:
-        Updated pipeline context with rendering results
-
-    Raises:
-        TemplateRenderError: If template rendering fails
-    """
-    logger = context.logger_instance
-
-    # Get rofi package config
-    rofi_config = dict(
-        context.app_config.project.settings.system.packages.config
-    ).get("rofi")
-    if not rofi_config:
-        logger.warning("No Rofi configuration found, skipping")
-        return context
-
-    # Extract paths
-    template_path: Path = rofi_config.path
-    template_dir: Path = template_path.parent
-    template_name: str = template_path.name
-
-    # Output path
-    output_path: Path = (
-        context.app_config.project.paths.install["dotfiles_config_rofi"]
-        / "wallpapers-and-effects-mode.rasi"
-    )
-
-    # Get paths for template variables
-    cache_dir: Path = context.app_config.project.paths.install[
-        "dotfiles_cache"
-    ]
-    rofi_config_dir: Path = context.app_config.project.paths.install[
-        "dotfiles_config_rofi"
-    ]
-
-    # Get rofi-wallpaper-selector module settings
-    rofi_selector_config_path = (
-        context.app_config.project.paths.install["dependencies_modules"]
-        / "rofi-wallpaper-selector"
-        / "config"
-        / "settings.toml"
-    )
-
-    # Load rofi-wallpaper-selector settings to get mode names
-    from dynaconf import Dynaconf
-
-    rofi_selector_settings = Dynaconf(
-        settings_files=[str(rofi_selector_config_path)],
-        load_dotenv=False,
-    )
-
-    # Get rofi-wallpaper-selector CLI path
-    rofi_selector_cli = (
-        context.app_config.project.paths.install["dependencies_modules"]
-        / "rofi-wallpaper-selector"
-        / ".venv"
-        / "bin"
-        / "rofi-wallpaper-selector"
-    )
-
-    # Build template variables
-    variables = {
-        "ROFI_WALLPAPER_MODE_NAME": rofi_selector_settings.rofi.wallpaper_mode_name,
-        "ROFI_EFFECT_MODE_NAME": rofi_selector_settings.rofi.effect_mode_name,
-        "WALLPAPER_SELECTOR_SCRIPT": f"{rofi_selector_cli} wallpapers",
-        "EFFECT_SELECTOR_SCRIPT": f"{rofi_selector_cli} effects",
-        "ROFI_FONT_CONF": str(rofi_config_dir / "font.rasi"),
-        "WALLPAPER_SELECTOR_BORDER_CONF": str(rofi_config_dir / "border.rasi"),
-        "CACHE_DIR": str(cache_dir),
-        "ROFI_CONFIG_CURRENT_WALLPAPER": str(
-            rofi_config_dir / "current-wallpaper.rasi"
-        ),
-    }
-
-    try:
-        # Get template renderer configuration
-        strict_mode = (
-            context.app_config.project.settings.template_renderer.strict_mode
-        )
-        render_config = RenderConfig(strict_mode=strict_mode)
-
-        # Initialize renderer
-        logger.debug(f"Rendering Rofi config from template: {template_path}")
-        renderer = Jinja2Renderer(template_dir, config=render_config)
-
-        # Render template to file
-        renderer.render_to_file(
-            template_name, output_path, variables=variables
-        )
-
-        logger.debug(f"Successfully rendered Rofi config to {output_path}")
-        context.results["rofi_config_rendered"] = True
-
-    except Exception as e:
-        logger.error(f"Failed to render Rofi config: {e}")
-        context.errors.append(e)
-        context.results["rofi_config_rendered"] = False
-        raise
-
-    return context
+# NOTE: render_rofi_config() function has been removed.
+# Rofi configuration is now managed by the rofi-config-manager module
+# and generated via InstallRofiConfigStep in pipeline.py
 
 
 def set_default_wallpaper(

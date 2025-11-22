@@ -712,7 +712,7 @@ class ConfigureDotfilesManagerStep(PipelineStep):
 
 
 class InstallRofiConfigStep(PipelineStep):
-    """Pipeline step to install Rofi configuration."""
+    """Pipeline step to install Rofi configuration using rofi-config-manager."""
 
     @property
     def step_id(self) -> str:
@@ -727,10 +727,64 @@ class InstallRofiConfigStep(PipelineStep):
         return False
 
     def run(self, context: PipelineContext) -> PipelineContext:
-        """Install Rofi configuration"""
-        from src.pipeline_steps.utils import render_rofi_config
+        """Install Rofi configuration using rofi-config-manager.
 
-        return render_rofi_config(context)
+        This step generates all rofi configurations using the rofi-config-manager
+        module, which handles template rendering with inline colors and proper
+        modi configuration.
+        """
+        import subprocess
+
+        logger = context.logger_instance
+
+        # Get rofi-config-manager CLI path
+        rofi_config_manager_cli = (
+            context.app_config.project.paths.install["dependencies_modules"]
+            / "rofi-config-manager"
+            / ".venv"
+            / "bin"
+            / "rofi-config-manager"
+        )
+
+        if not rofi_config_manager_cli.exists():
+            logger.warning(
+                f"rofi-config-manager CLI not found at {rofi_config_manager_cli}, "
+                "skipping rofi config generation"
+            )
+            context.results["rofi_config_rendered"] = False
+            return context
+
+        try:
+            logger.debug(
+                "Generating rofi configurations using rofi-config-manager"
+            )
+
+            # Call rofi-config-manager to generate all configs
+            result = subprocess.run(
+                [str(rofi_config_manager_cli), "generate", "--all"],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+
+            logger.debug(
+                f"rofi-config-manager output: {result.stdout.strip()}"
+            )
+            logger.debug("Successfully generated rofi configurations")
+            context.results["rofi_config_rendered"] = True
+
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to generate rofi configs: {e.stderr}")
+            context.errors.append(e)
+            context.results["rofi_config_rendered"] = False
+            raise
+        except Exception as e:
+            logger.error(f"Failed to generate rofi configs: {e}")
+            context.errors.append(e)
+            context.results["rofi_config_rendered"] = False
+            raise
+
+        return context
 
 
 class SetDefaultWallpaperStep(PipelineStep):

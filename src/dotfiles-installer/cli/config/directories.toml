@@ -147,6 +147,9 @@ common_modules_manager = "{dotfiles_modules}/manager"
 # Alias for rofi-wallpaper-selector module
 common_modules_rofi_wallpaper_selector = "{dotfiles_modules}/rofi-wallpaper-selector"
 
+# Alias for rofi-config-manager module
+common_modules_rofi_config_manager = "{dotfiles_modules}/rofi-config-manager"
+
 # Tool source paths
 common_tools_colorscheme_orchestrator = "{common_tools}/colorscheme-orchestrator"
 common_tools_wallpaper_effects_orchestrator = "{common_tools}/wallpaper-effects-orchestrator"

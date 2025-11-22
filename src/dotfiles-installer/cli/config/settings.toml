@@ -42,9 +42,8 @@ path = "src/dotfiles/config-files/starship/starship.toml"
 type = "directory"
 path = "src/dotfiles/config-files/eww"
 
-[project.settings.system.packages.config.rofi]
-type = "template"
-path = "src/dotfiles/config-files/rofi/wallpapers-and-effects-mode.rasi.j2"
+# NOTE: Rofi configuration is now managed by rofi-config-manager module
+# and generated dynamically during installation via InstallRofiConfigStep
 
 # Default features with version specifications (can be overridden per distro)
 [project.settings.system.packages.features]
