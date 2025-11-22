@@ -51,20 +51,27 @@ class WallpaperService:
         force_rebuild: bool = False,
         generate_colorscheme: bool = True,
         generate_effects: bool = True,
+        effect: str = "off",
+        original_wallpaper_path: Path | None = None,
     ) -> dict:
         """Change wallpaper and execute hooks.
 
         Args:
-            wallpaper_path: Path to wallpaper
+            wallpaper_path: Path to wallpaper (could be original or effect variant)
             monitor: Monitor name
             force_rebuild: Force rebuild containers
             generate_colorscheme: Whether to generate colorscheme (default: True)
             generate_effects: Whether to generate effects (default: True)
+            effect: Name of effect applied (default: "off" for original)
+            original_wallpaper_path: Path to original wallpaper (defaults to wallpaper_path)
 
         Returns:
             Dict with results
         """
         import time
+
+        # Use provided original path or default to wallpaper_path
+        original_path = original_wallpaper_path or wallpaper_path
 
         # Generate operation ID and track start time
         operation_id = str(uuid4())
@@ -109,11 +116,80 @@ class WallpaperService:
             )
 
             # Update system state
-            self._wallpaper_state_repo.set_current_wallpaper(
-                wallpaper_path=wallpaper_path,
-                monitor=monitor,
-                from_cache=from_cache,
-            )
+            # Resolve monitor name to actual monitor(s)
+            if monitor == "all":
+                # Get actual monitors from hyprpaper
+                try:
+                    from hyprpaper_manager import HyprpaperManager
+
+                    hyprpaper = HyprpaperManager()
+                    status = hyprpaper.get_status()
+                    if status.monitors:
+                        # Set wallpaper state for each actual monitor
+                        for mon in status.monitors:
+                            self._wallpaper_state_repo.set_current_wallpaper(
+                                wallpaper_path=wallpaper_path,
+                                monitor=mon.name,
+                                from_cache=from_cache,
+                                original_wallpaper_path=original_path,
+                                current_effect=effect,
+                            )
+                    else:
+                        # Fallback: set for "default" monitor
+                        self._wallpaper_state_repo.set_current_wallpaper(
+                            wallpaper_path=wallpaper_path,
+                            monitor="default",
+                            from_cache=from_cache,
+                            original_wallpaper_path=original_path,
+                            current_effect=effect,
+                        )
+                except Exception:
+                    # Fallback: set for "default" monitor
+                    self._wallpaper_state_repo.set_current_wallpaper(
+                        wallpaper_path=wallpaper_path,
+                        monitor="default",
+                        from_cache=from_cache,
+                        original_wallpaper_path=original_path,
+                        current_effect=effect,
+                    )
+            elif monitor == "focused":
+                # Resolve "focused" to actual monitor name
+                try:
+                    from hyprpaper_manager import HyprpaperManager
+
+                    hyprpaper = HyprpaperManager()
+                    status = hyprpaper.get_status()
+                    resolved_monitor = "default"
+                    for mon in status.monitors:
+                        if mon.focused:
+                            resolved_monitor = mon.name
+                            break
+
+                    self._wallpaper_state_repo.set_current_wallpaper(
+                        wallpaper_path=wallpaper_path,
+                        monitor=resolved_monitor,
+                        from_cache=from_cache,
+                        original_wallpaper_path=original_path,
+                        current_effect=effect,
+                    )
+                except Exception:
+                    # Fallback: set for "default" monitor
+                    self._wallpaper_state_repo.set_current_wallpaper(
+                        wallpaper_path=wallpaper_path,
+                        monitor="default",
+                        from_cache=from_cache,
+                        original_wallpaper_path=original_path,
+                        current_effect=effect,
+                    )
+            else:
+                # Set wallpaper for specific monitor
+                self._wallpaper_state_repo.set_current_wallpaper(
+                    wallpaper_path=wallpaper_path,
+                    monitor=monitor,
+                    from_cache=from_cache,
+                    original_wallpaper_path=original_path,
+                    current_effect=effect,
+                )
 
             # Get system attributes for hooks
             system_attrs = self._system_attributes_repo.get_attributes()

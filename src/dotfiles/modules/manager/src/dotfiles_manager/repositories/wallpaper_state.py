@@ -46,6 +46,19 @@ class WallpaperStateRepository:
         if not wallpaper_path_str:
             return None
 
+        # Get original wallpaper path (fallback to current path for backward compatibility)
+        original_wallpaper_path_str = self._system_state.get(
+            f"system:wallpapers:original:{monitor}"
+        )
+        if not original_wallpaper_path_str:
+            original_wallpaper_path_str = wallpaper_path_str
+
+        # Get current effect (default to "off")
+        current_effect = (
+            self._system_state.get(f"system:wallpapers:effect:{monitor}")
+            or "off"
+        )
+
         last_changed_str = self._system_state.get(
             f"system:wallpapers:last_changed:{monitor}"
         )
@@ -63,22 +76,38 @@ class WallpaperStateRepository:
         return WallpaperState(
             monitor=monitor,
             wallpaper_path=Path(wallpaper_path_str),
+            original_wallpaper_path=Path(original_wallpaper_path_str),
+            current_effect=current_effect,
             last_changed=last_changed,
             from_cache=from_cache,
         )
 
     def set_current_wallpaper(
-        self, wallpaper_path: Path, monitor: str, from_cache: bool = False
+        self,
+        wallpaper_path: Path,
+        monitor: str,
+        from_cache: bool = False,
+        original_wallpaper_path: Path | None = None,
+        current_effect: str = "off",
     ) -> None:
         """Set current wallpaper for a monitor.
 
         Args:
-            wallpaper_path: Path to wallpaper
+            wallpaper_path: Path to wallpaper (could be original or effect variant)
             monitor: Monitor name
             from_cache: Whether wallpaper was loaded from cache
+            original_wallpaper_path: Path to original wallpaper (defaults to wallpaper_path)
+            current_effect: Name of current effect applied (default: "off")
         """
         self._system_state.set(
             f"system:wallpapers:{monitor}", str(wallpaper_path)
+        )
+        self._system_state.set(
+            f"system:wallpapers:original:{monitor}",
+            str(original_wallpaper_path or wallpaper_path),
+        )
+        self._system_state.set(
+            f"system:wallpapers:effect:{monitor}", current_effect
         )
         self._system_state.set(
             f"system:wallpapers:last_changed:{monitor}",
