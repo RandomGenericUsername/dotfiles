@@ -114,14 +114,17 @@ class ContainerBuilder:
         # This is set by the installer or defaults to src/common/modules for dev
         modules_dir = self.config.paths.modules_directory
 
-        # If relative path, resolve it relative to the project root
-        # (where the wallpaper-effects-orchestrator tool is located)
+        # If relative path, resolve it relative to the workspace root
         if not modules_dir.is_absolute():
             # __file__ is in: .../wallpaper-effects-orchestrator/src/
             #                 wallpaper_effects_orchestrator/containers/builder.py
-            # 5 parents up gets us to the tool root or workspace root
-            tool_root = Path(__file__).parent.parent.parent.parent.parent
-            modules_dir = (tool_root / modules_dir).resolve()
+            # 8 parents up gets us to the workspace root
+            # (builder.py -> containers -> wallpaper_effects_orchestrator -> src ->
+            #  wallpaper-effects-orchestrator -> tools -> common -> src -> workspace_root)
+            workspace_root = Path(
+                __file__
+            ).parent.parent.parent.parent.parent.parent.parent.parent
+            modules_dir = (workspace_root / modules_dir).resolve()
 
         # Add wallpaper-effects-processor module
         processor_src = (
