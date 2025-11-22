@@ -1,0 +1,65 @@
+# ============================================================================
+# Rofi Config Manager Settings
+# ============================================================================
+
+[paths]
+# Path to dotfiles-manager module (for querying state)
+dotfiles_manager_path = "~/.local/share/dotfiles/modules/manager"
+
+# Path to rofi-wallpaper-selector CLI (overridden by installer)
+rofi_wallpaper_selector_cli = "~/.local/share/dotfiles/.dependencies/modules/rofi-wallpaper-selector/.venv/bin/rofi-wallpaper-selector"
+
+# Directory containing rofi templates (relative to module root)
+# This will be resolved by the config loader
+templates_dir = "templates"
+
+# Output directory for generated rofi configs (overridden by installer)
+output_dir = "~/.local/share/dotfiles/dotfiles/config/rofi"
+
+[configs]
+# Which configs to generate
+enabled = [
+    "wallpaper-selector",
+    "colorscheme-viewer",
+    "colorscheme-viewer-minimal",
+]
+
+[styling]
+# Global default border width (pixels)
+default_border_width = 2
+
+# Per-config styling overrides
+[styling.overrides.wallpaper-selector]
+border_width = 3
+
+[styling.overrides.colorscheme-viewer]
+border_width = 2
+
+[styling.overrides.colorscheme-viewer-minimal]
+border_width = 0
+
+# ============================================================================
+# Modi Configuration (Per Config Type)
+# ============================================================================
+
+# Wallpaper Selector Modi
+[[modi.wallpaper-selector]]
+name = "wallpapers"
+script = "{rofi_wallpaper_selector_cli} wallpapers"
+
+[[modi.wallpaper-selector]]
+name = "effects"
+script = "{rofi_wallpaper_selector_cli} effects"
+
+# Colorscheme Viewer - No modi (empty list)
+# modi.colorscheme-viewer = []
+
+# Colorscheme Viewer Minimal - No modi (empty list)
+# modi.colorscheme-viewer-minimal = []
+
+# ============================================================================
+# Example: Adding more modi to wallpaper-selector
+# ============================================================================
+# [[modi.wallpaper-selector]]
+# name = "recent"
+# script = "rofi-wallpaper-selector recent --limit 10"
