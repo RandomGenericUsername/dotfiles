@@ -9,8 +9,8 @@ wallpapers_dir = "~/.tmp/inumaki-dotfiles/dotfiles/wallpapers"
 # Effects cache directory (overridden by installer)
 effects_cache_dir = "~/.tmp/inumaki-dotfiles/dotfiles/.cache/wallpaper-effects"
 
-# Dotfiles manager module path (overridden by installer)
-dotfiles_manager_path = "~/.tmp/inumaki-dotfiles/.dependencies/modules/manager"
+# Dotfiles manager CLI path (overridden by installer)
+dotfiles_manager_cli = "~/.tmp/inumaki-dotfiles/.dependencies/modules/manager/.venv/bin/dotfiles-manager"
 
 [rofi]
 # Rofi display settings

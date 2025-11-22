@@ -1,5 +1,6 @@
 """Client for interacting with dotfiles-manager."""
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -11,14 +12,13 @@ class ManagerClient:
     to avoid dependency conflicts between venvs.
     """
 
-    def __init__(self, manager_path: Path):
+    def __init__(self, manager_cli: Path):
         """Initialize manager client.
 
         Args:
-            manager_path: Path to dotfiles-manager module
+            manager_cli: Path to dotfiles-manager CLI executable
         """
-        self.manager_path = manager_path
-        self.manager_cli = manager_path / ".venv" / "bin" / "dotfiles-manager"
+        self.manager_cli = manager_cli
 
         if not self.manager_cli.exists():
             raise FileNotFoundError(
@@ -26,49 +26,118 @@ class ManagerClient:
                 "Make sure dotfiles-manager is installed."
             )
 
-    def get_current_wallpaper(self, monitor: str) -> Path | None:
-        """Get current wallpaper for monitor.
+    def get_current_wallpaper_state(self, monitor: str) -> dict | None:
+        """Get current wallpaper state for monitor.
 
         Args:
-            monitor: Monitor name
+            monitor: Monitor name (e.g., "default", "focused", "DP-1")
 
         Returns:
-            Path to current wallpaper, or None if not set
+            Dict with wallpaper state including:
+            - monitor: Monitor name
+            - wallpaper_path: Path to current wallpaper (could be effect variant)
+            - original_wallpaper_path: Path to original wallpaper
+            - current_effect: Name of current effect ("off" for original)
+            - last_changed: ISO timestamp
+            - from_cache: Boolean
+            Returns None if not set.
+
+        Note:
+            If the specified monitor has no wallpaper set, this will fall back
+            to returning the wallpaper from any monitor that has one set.
         """
-        # Call: dotfiles-manager status --monitor <monitor>
-        # Parse output to extract wallpaper path
+        # Try the get-wallpaper-state command (JSON output)
         try:
             result = subprocess.run(
-                [str(self.manager_cli), "status", "--monitor", monitor],
+                [str(self.manager_cli), "get-wallpaper-state", monitor],
                 capture_output=True,
                 text=True,
                 check=True,
             )
 
-            # Parse the output to find wallpaper path
-            # The status command outputs a table, we need to extract the wallpaper path
-            # Format: "│ Monitor │ Wallpaper │ Last Changed │"
-            # We'll look for lines containing the monitor name
-            for line in result.stdout.split("\n"):
-                if (
-                    monitor in line
-                    and "Not set" not in line
-                    and "Monitor" not in line
-                ):
-                    # Extract path from the line
-                    # Split by │ and get the wallpaper column (index 2)
-                    parts = [p.strip() for p in line.split("│")]
-                    if (
-                        len(parts) >= 4
-                    ):  # Should have: '', 'Monitor', 'Wallpaper', 'Last Changed', ''
-                        wallpaper_str = parts[2].strip()
-                        if wallpaper_str and wallpaper_str != "Wallpaper":
-                            return Path(wallpaper_str)
+            # The command outputs JSON
+            state_json = result.stdout.strip()
+            if state_json:
+                state = json.loads(state_json)
+                # Convert path strings to Path objects
+                state["wallpaper_path"] = Path(state["wallpaper_path"])
+                state["original_wallpaper_path"] = Path(
+                    state["original_wallpaper_path"]
+                )
+                return state
 
-            return None
+        except (subprocess.CalledProcessError, json.JSONDecodeError):
+            # Command failed, try fallback to default monitor
+            try:
+                result = subprocess.run(
+                    [str(self.manager_cli), "get-wallpaper-state", "default"],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
+
+                state_json = result.stdout.strip()
+                if state_json:
+                    state = json.loads(state_json)
+                    # Convert path strings to Path objects
+                    state["wallpaper_path"] = Path(state["wallpaper_path"])
+                    state["original_wallpaper_path"] = Path(
+                        state["original_wallpaper_path"]
+                    )
+                    return state
+
+            except (subprocess.CalledProcessError, json.JSONDecodeError):
+                pass
+
+        return None
+
+    def get_current_wallpaper(self, monitor: str) -> Path | None:
+        """Get current wallpaper for monitor.
+
+        Args:
+            monitor: Monitor name (e.g., "default", "focused", "DP-1")
+
+        Returns:
+            Path to current wallpaper, or None if not set
+
+        Note:
+            If the specified monitor has no wallpaper set, this will fall back
+            to returning the wallpaper from any monitor that has one set.
+            This handles cases where the monitor name doesn't match exactly
+            (e.g., "focused" vs "default").
+        """
+        # Try the new get-wallpaper command first (machine-readable output)
+        try:
+            result = subprocess.run(
+                [str(self.manager_cli), "get-wallpaper", monitor],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+
+            # The command outputs just the path
+            wallpaper_path = result.stdout.strip()
+            if wallpaper_path:
+                return Path(wallpaper_path)
 
         except subprocess.CalledProcessError:
-            return None
+            # Command failed, try fallback to default monitor
+            try:
+                result = subprocess.run(
+                    [str(self.manager_cli), "get-wallpaper", "default"],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
+
+                wallpaper_path = result.stdout.strip()
+                if wallpaper_path:
+                    return Path(wallpaper_path)
+
+            except subprocess.CalledProcessError:
+                pass
+
+        return None
 
     def change_wallpaper(
         self,

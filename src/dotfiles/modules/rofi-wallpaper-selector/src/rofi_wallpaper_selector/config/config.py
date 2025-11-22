@@ -11,13 +11,13 @@ class PathsConfig(BaseModel):
 
     wallpapers_dir: Path
     effects_cache_dir: Path
-    dotfiles_manager_path: Path
+    dotfiles_manager_cli: Path
 
     def model_post_init(self, __context) -> None:
         """Expand user paths after initialization."""
         self.wallpapers_dir = self.wallpapers_dir.expanduser()
         self.effects_cache_dir = self.effects_cache_dir.expanduser()
-        self.dotfiles_manager_path = self.dotfiles_manager_path.expanduser()
+        self.dotfiles_manager_cli = self.dotfiles_manager_cli.expanduser()
 
 
 class RofiConfig(BaseModel):
@@ -80,7 +80,7 @@ def load_config(config_path: Path | None = None) -> AppConfig:
         paths=PathsConfig(
             wallpapers_dir=Path(settings.paths.wallpapers_dir),
             effects_cache_dir=Path(settings.paths.effects_cache_dir),
-            dotfiles_manager_path=Path(settings.paths.dotfiles_manager_path),
+            dotfiles_manager_cli=Path(settings.paths.dotfiles_manager_cli),
         ),
         rofi=RofiConfig(
             wallpaper_mode_name=settings.rofi.wallpaper_mode_name,

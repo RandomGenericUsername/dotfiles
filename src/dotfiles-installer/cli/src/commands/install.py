@@ -222,11 +222,14 @@ def install(
                 context.app_config.project.paths.install["dotfiles_cache"]
                 / "wallpaper-effects"
             ),
-            "paths.dotfiles_manager_path": str(
+            "paths.dotfiles_manager_cli": str(
                 context.app_config.project.paths.install[
                     "dependencies_modules"
                 ]
                 / "manager"
+                / ".venv"
+                / "bin"
+                / "dotfiles-manager"
             ),
         },
         "rofi-config-manager": {

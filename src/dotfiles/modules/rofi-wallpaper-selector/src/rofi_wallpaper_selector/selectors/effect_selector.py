@@ -9,7 +9,7 @@ from rofi_wallpaper_selector.utils.rofi_formatter import format_rofi_item
 def list_effects(config: AppConfig, monitor: str) -> None:
     """List all available effects for current wallpaper.
 
-    This function queries the dotfiles-manager for the current wallpaper,
+    This function queries the dotfiles-manager for the current wallpaper state,
     then scans the effects cache directory for generated effects. It always
     includes an "off" option to revert to the original wallpaper.
 
@@ -22,15 +22,17 @@ def list_effects(config: AppConfig, monitor: str) -> None:
         - "off" option (always first)
         - Generated effects with thumbnails (if show_icons enabled)
     """
-    # Get current wallpaper from manager
-    manager = ManagerClient(config.paths.dotfiles_manager_path)
-    current_wallpaper = manager.get_current_wallpaper(monitor)
+    # Get current wallpaper state from manager
+    manager = ManagerClient(config.paths.dotfiles_manager_cli)
+    current_state = manager.get_current_wallpaper_state(monitor)
 
-    if not current_wallpaper:
+    if not current_state:
         print("No wallpaper set")
         return
 
-    wallpaper_name = current_wallpaper.stem
+    # Use original wallpaper path to find effects
+    original_wallpaper = current_state["original_wallpaper_path"]
+    wallpaper_name = original_wallpaper.stem
 
     # Get available effects from cache directory
     effects = get_available_effects(
@@ -43,8 +45,11 @@ def list_effects(config: AppConfig, monitor: str) -> None:
         )
         return
 
-    # Always include "off" option to revert to original
-    print(format_rofi_item("off", None) if config.rofi.show_icons else "off")
+    # Always include "off" option to revert to original (with original wallpaper as thumbnail)
+    if config.rofi.show_icons:
+        print(format_rofi_item("off", str(original_wallpaper)))
+    else:
+        print("off")
 
     # Output effects in rofi format
     for effect_name in effects:

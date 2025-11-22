@@ -14,15 +14,15 @@ class PathsConfig(BaseModel):
     effects_cache_dir: Path = Field(
         description="Directory containing wallpaper effects cache"
     )
-    dotfiles_manager_path: Path = Field(
-        description="Path to dotfiles-manager module"
+    dotfiles_manager_cli: Path = Field(
+        description="Path to dotfiles-manager CLI executable"
     )
 
     def model_post_init(self, __context):
         """Expand user paths after initialization."""
         self.wallpapers_dir = self.wallpapers_dir.expanduser()
         self.effects_cache_dir = self.effects_cache_dir.expanduser()
-        self.dotfiles_manager_path = self.dotfiles_manager_path.expanduser()
+        self.dotfiles_manager_cli = self.dotfiles_manager_cli.expanduser()
 
 
 class RofiConfig(BaseModel):
@@ -41,12 +41,16 @@ class RofiConfig(BaseModel):
 class WallpaperConfig(BaseModel):
     """Wallpaper configuration."""
 
-    default_monitor: str = Field(default="focused", description="Default monitor")
+    default_monitor: str = Field(
+        default="focused", description="Default monitor"
+    )
     auto_generate_effects: bool = Field(
-        default=True, description="Auto-generate effects on wallpaper selection"
+        default=True,
+        description="Auto-generate effects on wallpaper selection",
     )
     auto_generate_colorscheme: bool = Field(
-        default=True, description="Auto-generate colorscheme on wallpaper change"
+        default=True,
+        description="Auto-generate colorscheme on wallpaper change",
     )
 
 
