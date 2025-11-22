@@ -109,7 +109,9 @@ class ImageMagickGrayscale(WallpaperEffect):
 
             # Load result
             grayscale_image = Image.open(output_path)
-            result_image = grayscale_image.copy()
+            # Convert to RGB mode to maintain consistency with PIL backend
+            # and avoid colorspace issues when saving/displaying
+            result_image = grayscale_image.convert("RGB")
             grayscale_image.close()
 
             return result_image
