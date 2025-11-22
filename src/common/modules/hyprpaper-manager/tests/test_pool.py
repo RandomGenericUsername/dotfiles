@@ -309,4 +309,3 @@ class TestWallpaperPool:
 
         assert status["is_over_limit"] is True
         assert status["usage_percent"] == 115.0
-

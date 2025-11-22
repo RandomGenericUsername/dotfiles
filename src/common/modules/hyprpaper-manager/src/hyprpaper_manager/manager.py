@@ -159,23 +159,37 @@ class HyprpaperManager:
 
         # Resolve monitor(s)
         if monitor == MonitorSelector.ALL:
-            monitor_name = ""
+            # Get all actual monitors and set wallpaper on each
+            all_monitors = self.monitors.get_monitors()
+            if not all_monitors:
+                # Fallback: use empty string for "all monitors"
+                monitor_names = [""]
+                logger.warning(
+                    "No monitors detected, using empty monitor name"
+                )
+            else:
+                monitor_names = [m.name for m in all_monitors]
+                logger.debug(
+                    f"Setting wallpaper on all monitors: {monitor_names}"
+                )
         elif monitor == MonitorSelector.FOCUSED:
             monitor_name = self.monitors.get_focused_monitor().name
             logger.debug(f"Resolved focused monitor: {monitor_name}")
+            monitor_names = [monitor_name]
         else:
-            monitor_name = monitor
+            monitor_names = [monitor]
 
-        # Set wallpaper
+        # Set wallpaper on all resolved monitors
         mode_str = mode.value if mode != WallpaperMode.COVER else None
-        logger.debug(
-            f"Setting wallpaper on monitor '{monitor_name}' "
-            f"with mode={mode_str}"
-        )
-        self.ipc.wallpaper(monitor_name, wallpaper_path, mode_str)
+        for monitor_name in monitor_names:
+            logger.debug(
+                f"Setting wallpaper on monitor '{monitor_name}' "
+                f"with mode={mode_str}"
+            )
+            self.ipc.wallpaper(monitor_name, wallpaper_path, mode_str)
 
-        # Mark as displayed in pool
-        self.pool.mark_displayed(wallpaper_path, monitor_name or "all")
+            # Mark as displayed in pool
+            self.pool.mark_displayed(wallpaper_path, monitor_name or "all")
 
         # Cleanup pool if over limit
         removed = self.pool.cleanup()

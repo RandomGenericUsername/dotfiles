@@ -168,4 +168,3 @@ class TestHyprpaperStatus:
 
         with pytest.raises(ValidationError):
             HyprpaperStatus(loaded_wallpapers=[], active_wallpapers={})
-

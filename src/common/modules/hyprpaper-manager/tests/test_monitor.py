@@ -189,4 +189,3 @@ class TestMonitorManager:
         # Verify timeout was passed to subprocess.run
         call_args = mock_run.call_args
         assert call_args[1]["timeout"] == 5
-

@@ -78,7 +78,9 @@ class TestHyprpaperIPCError:
     def test_ipc_error_raise(self):
         """Test raising HyprpaperIPCError."""
         with pytest.raises(HyprpaperIPCError) as exc_info:
-            raise HyprpaperIPCError("IPC failed", command="preload", exit_code=1)
+            raise HyprpaperIPCError(
+                "IPC failed", command="preload", exit_code=1
+            )
         assert "IPC failed" in str(exc_info.value)
         assert exc_info.value.command == "preload"
         assert exc_info.value.exit_code == 1
@@ -179,4 +181,3 @@ class TestExceptionHierarchy:
 
         with pytest.raises(HyprpaperError):
             raise WallpaperTooLargeError("Test")
-
