@@ -84,6 +84,9 @@ def load_config() -> AppConfig:
         colorscheme_orchestrator_path=resolve_path(
             settings.get("paths.colorscheme_orchestrator_path")
         ),
+        rofi_config_manager_cli=resolve_path(
+            settings.get("paths.rofi_config_manager_cli")
+        ),
         status_bar_icons_base_dir=resolve_path(
             settings.get("paths.status_bar_icons_base_dir")
         ),

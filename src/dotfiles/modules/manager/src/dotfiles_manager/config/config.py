@@ -79,6 +79,7 @@ class PathsConfig(BaseModel):
         install_root: Installation root directory.
         wallpaper_orchestrator_path: Path to wallpaper orchestrator.
         colorscheme_orchestrator_path: Path to colorscheme orchestrator.
+        rofi_config_manager_cli: Path to rofi-config-manager CLI.
         status_bar_icons_base_dir: Base directory for status bar icon templates.
         status_bar_icons_output_dir: Directory for generated status bar icons.
         wlogout_icons_templates_dir: Directory for wlogout icon templates.
@@ -116,6 +117,19 @@ class PathsConfig(BaseModel):
         / "tools"
         / "colorscheme-orchestrator",
         description="Path to colorscheme orchestrator",
+    )
+    rofi_config_manager_cli: Path = Field(
+        default=Path.home()
+        / ".local"
+        / "share"
+        / "dotfiles"
+        / ".dependencies"
+        / "modules"
+        / "rofi-config-manager"
+        / ".venv"
+        / "bin"
+        / "rofi-config-manager",
+        description="Path to rofi-config-manager CLI",
     )
     status_bar_icons_base_dir: Path = Field(
         default=Path.home()

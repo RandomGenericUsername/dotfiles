@@ -45,6 +45,9 @@ install_root = "~/.local/share/dotfiles"
 wallpaper_orchestrator_path = "{install_root}/tools/wallpaper-orchestrator"
 colorscheme_orchestrator_path = "{install_root}/tools/colorscheme-orchestrator"
 
+# Module paths
+rofi_config_manager_cli = "{install_root}/.dependencies/modules/rofi-config-manager/.venv/bin/rofi-config-manager"
+
 # Icon paths
 status_bar_icons_base_dir = "{install_root}/assets/status-bar-icons"
 status_bar_icons_output_dir = "~/.config/eww/status-bar/icons"
@@ -75,7 +78,7 @@ ignore_cache_on_rebuild = false
 # ============================================================================
 [hooks]
 # Enabled hooks
-enabled = ["status_bar_icons", "wlogout_icons"]
+enabled = ["status_bar_icons", "wlogout_icons", "rofi_config"]
 
 # Fail fast: stop execution if a critical hook fails
 fail_fast = false
@@ -83,8 +86,8 @@ fail_fast = false
 # Execution groups define order and parallelism
 # Each group can be serial or parallel
 [[hooks.execution_groups]]
-# First: Generate all icons in parallel
-hooks = ["status_bar_icons", "wlogout_icons"]
+# First: Generate all icons and rofi configs in parallel
+hooks = ["status_bar_icons", "wlogout_icons", "rofi_config"]
 mode = "parallel"
 
 # Individual hook configurations
@@ -95,6 +98,9 @@ colorscheme_color_key = "color15"  # Which color from colorscheme to use
 [hooks.wlogout_icons]
 critical = false  # Don't stop if this fails
 colorscheme_color_key = "color15"  # Which color from colorscheme to use
+
+[hooks.rofi_config]
+critical = false  # Don't stop if this fails
 
 # ============================================================================
 # Validation Settings

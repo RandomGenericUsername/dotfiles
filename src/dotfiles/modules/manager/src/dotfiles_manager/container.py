@@ -7,6 +7,9 @@ from wallpaper_orchestrator import WallpaperOrchestrator, load_settings
 
 from dotfiles_manager.config.settings import load_config
 from dotfiles_manager.hooks.registry import HookRegistry
+from dotfiles_manager.hooks.rofi_config_hook import (
+    RofiConfigHook,  # noqa: F401
+)
 from dotfiles_manager.hooks.status_bar_icons_hook import (  # noqa: F401
     StatusBarIconsHook,
 )
@@ -135,6 +138,11 @@ class Container(containers.DeclarativeContainer):
         style_output_path=config.provided.paths.wlogout_style_output_path,
     )
 
+    rofi_config_hook = providers.Singleton(
+        RofiConfigHook,
+        rofi_config_manager_path=config.provided.paths.rofi_config_manager_cli,
+    )
+
     # Wallpaper service
     wallpaper_service = providers.Singleton(
         WallpaperService,
@@ -163,5 +171,10 @@ class Container(containers.DeclarativeContainer):
 
         wlogout_hook_instance: WlogoutIconsHook = container.wlogout_hook()
         registry.register(wlogout_hook_instance)
+
+        rofi_config_hook_instance: RofiConfigHook = (
+            container.rofi_config_hook()
+        )
+        registry.register(rofi_config_hook_instance)
 
         return container
